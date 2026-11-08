@@ -19,8 +19,8 @@ is in `template/.devcontainer/README.md.jinja`.
 What differs lies in `shared/`: the names of the volumes, the Jinja extension for the files in
 `template/`, and no `make setup` when the container is made, as the repository has no project
 of its own. The first `tests/check.sh` installs the Arduino core into the volume
-`embedded-cpp-template-arduino15`, where it stays; uv's cache, the Codex login and the gh login
-have volumes of their own as well.
+`embedded-cpp-template-arduino15`, where it stays; uv's cache, the Codex, Claude Code and gh logins
+and the shell history have volumes of their own as well.
 
 ## Site-specific variants
 
