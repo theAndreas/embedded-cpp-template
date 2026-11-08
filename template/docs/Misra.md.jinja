@@ -300,7 +300,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
-| Rule 23.11.1 | Advisory | No smart pointer made from a raw pointer | n/a: no standard library in `src/` (CodingStyle M-3) |  |
+| Rule 23.11.1 | Advisory | No smart pointer made from a raw pointer | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
 
 ### Rules of chapter 24
 
@@ -313,29 +313,29 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
-| Rule 25.5.1 | Required | No `setlocale` | n/a: no standard library in `src/` (CodingStyle M-3) |  |
-| Rule 25.5.2 | Mandatory | Pointers from the locale as `const` | n/a: no standard library in `src/` (CodingStyle M-3) |  |
-| Rule 25.5.3 | Mandatory | No pointer used after the next call | n/a: no standard library in `src/` (CodingStyle M-3) |  |
+| Rule 25.5.1 | Required | No `setlocale` | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
+| Rule 25.5.2 | Mandatory | Pointers from the locale as `const` | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
+| Rule 25.5.3 | Mandatory | No pointer used after the next call | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
 
 ### Rules of chapter 26
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
-| Rule 26.3.1 | Advisory | No `std::vector<bool>` | n/a: no standard library in `src/` (CodingStyle M-3) |  |
+| Rule 26.3.1 | Advisory | No `std::vector<bool>` | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
 
 ### Rules of chapter 28
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
 | Rule 28.3.1 | Required | Predicates without side effects | Review |  |
-| Rule 28.6.1 | Required | `std::move` of a non-const lvalue | n/a: no standard library in `src/` (CodingStyle M-3) |  |
-| Rule 28.6.2 | Required | Forwarding references with `std::forward` | n/a: no standard library in `src/` (CodingStyle M-3) |  |
-| Rule 28.6.3 | Required | No moved-from object used | n/a: no standard library in `src/` (CodingStyle M-3) |  |
-| Rule 28.6.4 | Required | Results of `remove`, `unique`, `empty` used | n/a: no standard library in `src/` (CodingStyle M-3) |  |
+| Rule 28.6.1 | Required | `std::move` of a non-const lvalue | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
+| Rule 28.6.2 | Required | Forwarding references with `std::forward` | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
+| Rule 28.6.3 | Required | No moved-from object used | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
+| Rule 28.6.4 | Required | Results of `remove`, `unique`, `empty` used | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |
 
 ### Rules of chapter 30
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
 | Rule 30.0.1 | Required | No C library I/O | Review |  |
-| Rule 30.0.2 | Required | Reads and writes on a stream separated | n/a: no standard library in `src/` (CodingStyle M-3) |  |
+| Rule 30.0.2 | Required | Reads and writes on a stream separated | Review where `src/` uses the standard library, which it may where every target has it (CodingStyle M-3); n/a otherwise |  |

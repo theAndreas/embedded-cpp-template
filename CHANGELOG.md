@@ -30,6 +30,9 @@ swaps the parentheses where it says so.
 - **Rules for every target, and a profile per target**: CodingStyle.md holds for any target from
   an 8-bit microcontroller to the host; `docs/targets/avr.md` holds what the AVR alone needs, as
   text in flash, its critical sections and its registers.
+- **Reuse before writing** (CodingStyle.md M-3): what the project has, then the standard library
+  where every target has it, then a library like it such as the ETL or Utl; only what none has
+  is written, once and for reuse.
 - **Files grouped in folders**, a folder per module with header and source side by side, and
   `test/` mirroring `src/`; a test of `RingBuffer.h` is `RingBufferTest.cpp`, which clang-format
   and cpplint now take for the header's test. CMake finds sources and tests in every folder.

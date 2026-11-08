@@ -46,9 +46,10 @@ make tests     # GoogleTest on the host
 
 ## Never
 
-- **No standard library in `src/`**: no `<vector>`, `<string>`, `<memory>`, `<algorithm>`,
-  `<iostream>`, nothing of `std::`; the smallest target has none. **And no container or
-  algorithm of your own** where the ETL has one: use `etl::` (M-3). The tests may use `std::`.
+- **Nothing written anew that exists already**: look in the project first, then the standard
+  library where every target has it, then the library like it that the project uses, as the
+  ETL or Utl (M-3). Only what none has is written, once and for reuse, in a module folder of its
+  own with its test; say in your answer what you wrote and why nothing existing would do.
 - **No heap, no exceptions, no RTTI**: no `new`, `malloc`, `throw`, `try`, `dynamic_cast`,
   `typeid` (M-1, M-2).
 - **No blocking and no `float` without its reason**: no busy wait in the library, no `double`

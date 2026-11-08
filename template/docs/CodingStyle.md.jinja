@@ -95,7 +95,7 @@ it:
 | T-14 | One side effect per statement: no `++` in a condition, no assignment inside an expression. | `bugprone-inc-dec-in-conditions`, `bugprone-assignment-in-if-condition`, Review |
 | T-15 | A `switch` over an `enum class` names every value and has no `default`, so that the compiler reports a value added later; any other `switch` has a `default`. | `-Wswitch`, `bugprone-switch-missing-default-case` |
 | T-16 | `using` for an alias, never `typedef`: `using Callback = void (*)(uint8_t);`. | `modernize-use-using` |
-| T-17 | Never Arduino's `byte`, which is an `unsigned char` that says nothing of what it holds. A byte that is a number, a level or a count, is `uint8_t`; a byte that is raw data, as of a buffer, a register or a frame on a bus, is `etl::byte`, which is `std::byte` for every standard from C++11 (M-3): no arithmetic, only bitwise operators, and a number only through `etl::to_integer<uint8_t>()`. | Review |
+| T-17 | Never Arduino's `byte`, which is an `unsigned char` that says nothing of what it holds. A byte that is a number, a level or a count, is `uint8_t`. A byte that is raw data, as of a buffer, a register or a frame on a bus, is a type that is no number, by M-3: `std::byte` where every target has C++17, else `etl::byte` or Utl's counterpart, else one of the project's own after the same pattern, an `enum class` of `unsigned char` with `to_integer()`. Raw data then takes only bitwise operators, and is a number only through `to_integer<uint8_t>()`. | Review |
 
 ## Classes
 
@@ -122,7 +122,7 @@ it:
 |---|---|---|
 | M-1 | No heap: no `new`, `delete`, `malloc` or `free`, not even in `setup()`. The size of everything is known when compiling, and the RAM a build takes is the RAM it needs. | `cppcoreguidelines-no-malloc`, `cppcoreguidelines-owning-memory` |
 | M-2 | No exceptions and no RTTI: no `throw`, `try`, `dynamic_cast` or `typeid`. Small targets have neither, and on the others they cost flash and time that cannot be bounded. | the target's build, Review |
-| M-3 | Not the standard library, which a small target may not have and which needs the heap and exceptions in large parts; but not written anew either: what the standard library has is taken from the [ETL](https://github.com/ETLCPP/etl), which gives it for every target without heap and exceptions (ROADMAP E-3), as `etl::array`, `etl::optional`, `etl::span`. Only what it has not is written in the project. The tests on the host may use the standard library. | the smallest target's build, Review |
+| M-3 | Reuse before writing, in this order: (1) what the project has already, a function or class that does it; (2) the standard library, where every target of the project has it, and only its parts that need neither heap nor exceptions (M-1, M-2), as `std::array`, `<algorithm>`, `<type_traits>`; where a target lacks it, `std::` stands only in the code of the targets that have it; (3) a library in the style of the standard library that the project uses, as the [ETL](https://github.com/ETLCPP/etl) or Utl; (4) only where none has it, it is written: once, for reuse, with the interface of the standard library's counterpart, so that it can give way to `std::` or `etl::` later, in a module folder of its own, as `src/{{ namespace }}/Utility/`, with its test. The tests on the host may use the standard library. | Review |
 | M-4 | Constant data, as text and tables, is `constexpr` or `const`, so that it can lie in flash. Where a target needs more to put it there and read it, its profile says how. | Review, the profile |
 | M-5 | No global object with a constructor that does work: the order of initialization across files is not defined. | `cppcoreguidelines-avoid-non-const-global-variables`, `cert-err58-cpp` |
 | M-7 | The cost of an entity in flash and RAM, where it matters, is stated in its Doxygen block. | Review |
@@ -189,7 +189,7 @@ does not fit a microcontroller, or MISRA asks for more, this file wins:
 | File names in lower case | Named as the class (F-3) | A file is found by the name of what it holds; Arduino names a library's header after the library anyway |
 | `int` is the integer to use | Fixed width (T-1) | The width of `int` differs between targets; MISRA 6.9.2 |
 | Braces around a one-line body are optional | Always braces | MISRA 9.3.1 |
-| The standard library, `std::unique_ptr` for ownership | The ETL instead (M-3), and no ownership by pointer (M-1) | A small target may have no standard library, and there is no heap |
+| The standard library, `std::unique_ptr` for ownership | Its parts without heap and exceptions where every target has it, else a library like it (M-3); no ownership by pointer (M-1) | A small target may have no standard library, and there is no heap |
 | Comments in `//`, any style | Doxygen blocks `/*! */` for the API | The reference is built from them (Documentation.md) |
 | `const int` or `int const`, consistently | `int const` (T-4) | Read from right to left, as the rest of a type |
 | Brace or `=` initialization | Braced (T-3) | It refuses a narrowing conversion |
