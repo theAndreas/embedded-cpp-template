@@ -24,6 +24,28 @@ clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports,
 | T-4 | `CPPCHECK=0` in Utl until cppcheck parses `src/utl/array.h:181` (2.19 cannot); report it upstream | open |
 | T-5 | `tools/docs.sh` failed silently on a log without a warning: fixed in the template, comes with T-1 | open |
 
+### M2b - Wordclock's workflow, v0.2.0
+
+What Wordclock (AndreasBur/Wordclock) grew on 2026-11-06 and 07, into the template, and from
+there into Utl with `copier update`: the first update a project takes, and so the proof that the
+mechanism carries.
+
+| Id | Item | Status |
+|---|---|---|
+| W-1 | One way in: a Makefile that names every build and check, `make` lists them, `make check` is what CI runs and `make lint` the checks of seconds; every step of every workflow is one of its targets | open |
+| W-2 | Warnings as errors in CI and under `make check`, not in a developer's build: `ci-` presets with `CMAKE_COMPILE_WARNING_AS_ERROR`, chosen by `STRICT`, which `CI=true` sets | open |
+| W-3 | One pinned Python environment, `pyproject.toml` and `uv.lock`, for clang-format, cpplint, clang-tidy, gcovr, shellcheck, actionlint and ruff, the same in the image and in CI, instead of a pin per `uvx` call | open |
+| W-4 | Composite actions: `apt-install`, the downloads cached and a stalled mirror retried; `uv-sync`, uv at the Dockerfile's version | open |
+| W-5 | Dependabot for the actions and `uv.lock`, weekly, a week's cooldown | open |
+| W-6 | `permissions: contents: read`; `ci.yml` callable (`workflow_call`), and `release.yml` on a tag: CI passes, the tag matches `version=` of `library.properties`, the release is published | open |
+| W-7 | `static-analysis.yml` of its own, beside `ci.yml`, for a badge of its own: clang-tidy, cppcheck, the Doxygen blocks | open |
+| W-8 | The host tests a second time with clang, as a preset | open |
+| W-9 | Every header compiled as the only include of an empty file (`self-contained-headers.py`), per target | open |
+| W-10 | The sizes the README states checked against the build (`documented-sizes.py`); Utl's table of flash and RAM | open |
+| W-11 | The AVR's deepest stack against the RAM it has (`avr-stack.py`), for an Arduino sketch | idea |
+| W-12 | ruff over the Python scripts, with the checks that answer "is this wrong" | open |
+| W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's | idea |
+
 ### M3 - The other projects
 
 | Id | Item | Status |
@@ -41,14 +63,15 @@ clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports,
 | C-2 | A clang-tidy module of our own, with the first check: braced initialization in a member initializer list, with a fix-it (Utl's `function_ref.h:106` slipped through) | open |
 | C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers | idea |
 | C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
+| C-5 | Fixed-width integer types (MISRA C:2012 Dir 4.6, AUTOSAR A3-9-1): no `int`, `unsigned` in `src/`, but `char` for text, `bool`, `size_t`, and what the Arduino core's signatures give, as the `int` of `analogRead()`. `google-runtime-int`, which is on, reports only `short` and `long`. Utl keeps to it already | idea |
 
 ### M5 - A generic embedded library on the ETL
 
 | Id | Item | Status |
 |---|---|---|
 | E-1 | A second flavor of the template, chosen by a copier question: CMake first, the library for any target, Arduino as one user of it | open |
-| E-2 | A CI matrix of C++11, 14, 17 and 20, GCC and Clang, on the host, plus avr-gcc through arduino-cli | open |
-| E-3 | The [ETL](https://github.com/ETLCPP/etl) (MIT) as a pinned dependency: CMake for the host, `etl-arduino` for Arduino. A library of our own on top for what it lacks or does otherwise: errors as `Result` with groups, text and tables in flash. Recommended over a fork, which would have to follow a very active upstream; a fix goes upstream | idea |
+| E-2 | A CI matrix of C++11, 14, 17 and 20, GCC and Clang, on the host, plus avr-gcc through arduino-cli; the ETL's own CI is the model: GCC and Clang from C++11 to C++26, cross builds, a build without the STL | open |
+| E-3 | The [ETL](https://github.com/ETLCPP/etl) (MIT) as a pinned dependency: CMake for the host, `etl-arduino` for Arduino; it ships CMake first, and Meson, Bazel (since 2026-04), PlatformIO and Arduino besides. A library of our own on top for what it lacks or does otherwise: errors as `Result` with groups, text and tables in flash. Recommended over a fork, which would have to follow a very active upstream; a fix goes upstream | idea |
 | E-4 | Decide what of Utl moves onto the ETL: it has `variant`, `optional`, `expected`, `span`, `string_view`, `vector`, `delegate`, `inplace_function`, `queue_spsc_isr` | idea |
 
 ## Ideas, not yet decided
