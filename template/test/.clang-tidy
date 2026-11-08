@@ -1,0 +1,10 @@
+---
+# What a test does that the library must not, each the same in every test:
+# cppcoreguidelines-pro-type-reinterpret-cast: a test makes chars in flash as
+#   F() of the core does, by a cast, to hand them to the library.
+# cppcoreguidelines-avoid-non-const-global-variables: a free function that a
+#   test binds reaches what it counts or changes only through a global.
+InheritParentConfig: true
+Checks: >
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-avoid-non-const-global-variables

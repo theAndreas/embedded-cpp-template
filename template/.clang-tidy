@@ -130,6 +130,9 @@ CheckOptions:
   misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
   # The do { ... } while (0) of a macro is how a macro becomes one statement.
   cppcoreguidelines-avoid-do-while.IgnoreMacros: true
+  # A class that deletes its copy has no move either, as the language has it;
+  # the rule of five does not ask to say so twice.
+  cppcoreguidelines-special-member-functions.AllowMissingMoveFunctionsWhenCopyIsDeleted: true
   # Google's "include what you use", with Arduino.h as what provides the
   # core and the board's pins: F(), __FlashStringHelper and A0 come through it,
   # from the core's folder and from the variant's.

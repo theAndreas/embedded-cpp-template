@@ -17,5 +17,7 @@ The template, out of Utl's checks, CI and dev container, made general:
 - The host build warns with `-Wconversion -Wsign-conversion -Wshadow` as well, from
   `cmake/checks.cmake`.
 - `.editorconfig`, from MaxMatrix.
+- `cppcoreguidelines-special-member-functions` accepts a class that deletes its copy without
+  declaring its moves; `test/.clang-tidy` lets a test cast as `F()` does and keep globals.
 - The starting point of a new library, `src/`, `test/` and the examples, comes only with
   `copier copy` and the answer `skeleton`; a project brought in answers no.
