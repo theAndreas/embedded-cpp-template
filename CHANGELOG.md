@@ -25,6 +25,8 @@ swaps the parentheses where it says so.
   files, functions, types, classes, memory on the microcontroller, errors, names, suppressions.
   The C++ Core Guidelines, MISRA C++:2023 and the Google style, in that order; where it departs
   from Google, and why. Template parameters are named for their role, not `T`.
+- **`docs/Testing.md`: how the code is tested**: which of the three kinds of test proves what,
+  how a test is named and written, what the mock of the core may do, and what SelfCheck checks.
 - **`docs/Misra.md`: MISRA C++:2023 rule by rule**, what covers each and where the project
   deviates; a draft, to be checked against the standard.
 - **The size of a function is limited**: 40 lines of body, 4 parameters, 3 levels of nesting, a
