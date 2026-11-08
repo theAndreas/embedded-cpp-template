@@ -129,14 +129,19 @@ RUN UV_TOOL_DIR=/opt/uv/tools UV_PYTHON_INSTALL_DIR=/opt/uv/python \
 RUN install -d -o vscode -g vscode -m 0755 /home/vscode/.arduino15 && \
     install -d -o vscode -g vscode -m 0755 /home/vscode/.cache /home/vscode/.cache/uv
 
-# The same arrangement for the two logins a rebuild would otherwise throw away: Codex, whose
-# extension the shared feature installs, and gh, which every push and every pull request
+# The same arrangement for the logins a rebuild would otherwise throw away: Codex and Claude
+# Code, whose extensions the shared feature installs, and gh, which every push and every pull request
 # goes through. Mode 0700 rather than 0755, because what these hold is a credential and not
 # a cache - and gh refuses to read a config directory others can enter. ~/.config is
 # named on its own, as ~/.cache above, so that it does not fall to root.
 RUN install -d -o vscode -g vscode -m 0700 /home/vscode/.codex && \
+    install -d -o vscode -g vscode -m 0700 /home/vscode/.claude && \
     install -d -o vscode -g vscode -m 0755 /home/vscode/.config && \
     install -d -o vscode -g vscode -m 0700 /home/vscode/.config/gh
+
+# The shell history, a volume as well, so that a rebuild keeps it. 0700 too: a command line
+# can carry a token.
+RUN install -d -o vscode -g vscode -m 0700 /home/vscode/.commandhistory
 
 # GitHub's SSH host key, so that the first git operation in a fresh container verifies
 # against something rather than failing with "Host key verification failed", because

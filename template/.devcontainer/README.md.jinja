@@ -58,9 +58,13 @@ home; `/usr/local/bin/clangd` links to the binary itself.
 
 The Arduino core and its toolchain, and the checkers uv fetches, are not part of the image. They live
 in the named volumes `{{ namespace }}-arduino15` and `{{ namespace }}-uv-cache`, so that a rebuild does not download them
-again. Two more carry a login across a rebuild: `{{ namespace }}-codex` at `/home/vscode/.codex` and
-`{{ namespace }}-gh` at `/home/vscode/.config/gh`, both at mode 0700, as `gh` refuses a config directory others can
-enter. Those two hold credentials: do not share, export or remove one unless the login should go.
+again. Three more carry a login across a rebuild: `{{ namespace }}-codex` at `/home/vscode/.codex`,
+`{{ namespace }}-claude` at `/home/vscode/.claude` (with `CLAUDE_CONFIG_DIR` pointing there, so that
+Claude Code's `.claude.json` lands in it too) and `{{ namespace }}-gh` at `/home/vscode/.config/gh`, all at
+mode 0700, as `gh` refuses a config directory others can enter. Those three hold credentials: do not share, export or remove one unless the login should go.
+The shell history lives in `{{ namespace }}-history` at `/home/vscode/.commandhistory`, written after every
+command (`HISTFILE` and `PROMPT_COMMAND` in `shared/devcontainer-feature.json`); remove the volume to
+forget it.
 
 The `Dockerfile` creates each path as the remote user first: an empty named volume takes its
 ownership from the path it covers, and one that does not exist in the image gives a volume owned by
