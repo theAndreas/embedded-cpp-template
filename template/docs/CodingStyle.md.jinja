@@ -64,6 +64,7 @@ it:
 | FN-12 | A default argument only where its value is self-evident, and never on a `virtual` function. | `google-default-arguments`, Review |
 | FN-13 | No code copied and changed a little: what two places do alike is one function. | Review |
 | FN-14 | A loop that only looks for something is a function of its own, named as a question, with early returns: `bool ContainsPin(...)`, not a flag set inside a loop. | Review |
+| FN-15 | A parameter that may be absent is a pointer, and its block says that it may be null; any other the function reads or writes is a reference. A member that refers to an object the class does not own is a pointer, so that the class stays assignable. | `cppcoreguidelines-avoid-const-or-ref-data-members`, Review |
 
 ## Types and values
 
@@ -84,6 +85,7 @@ it:
 | T-13 | A variable is declared where it is first needed, initialized, one per declaration, in the smallest scope; a new value that means something else is a new variable, not the old one reused. | `cppcoreguidelines-init-variables`, `readability-isolate-declaration`, Review |
 | T-14 | One side effect per statement: no `++` in a condition, no assignment inside an expression. | `bugprone-inc-dec-in-conditions`, `bugprone-assignment-in-if-condition`, Review |
 | T-15 | A `switch` over an `enum class` names every value and has no `default`, so that the compiler reports a value added later; any other `switch` has a `default`. | `-Wswitch`, `bugprone-switch-missing-default-case` |
+| T-16 | `using` for an alias, never `typedef`: `using Callback = void (*)(uint8_t);`. | `modernize-use-using` |
 
 ## Classes
 
@@ -113,8 +115,20 @@ it:
 | M-3 | Not the standard library, which avr-gcc has not, but not written anew either: what the standard library has is taken from a library that gives it for the target, the [ETL](https://github.com/ETLCPP/etl) (ROADMAP E-3), as `etl::array`, `etl::optional`, `etl::span`. Only what no such library has is written in the project. The tests on the host may use the standard library. | the board's build, Review |
 | M-4 | Constant text and tables lie in flash, `PROGMEM`, and are read with `pgm_read_*`. | Review |
 | M-5 | No global object with a constructor that does work: the order of initialization across files is not defined. | `cppcoreguidelines-avoid-non-const-global-variables`, `cert-err58-cpp` |
-| M-6 | A variable an interrupt writes is `volatile`, and is read with interrupts off where it is wider than 8 bits. An ISR does the least it can. | Review |
 | M-7 | The cost of an entity in flash and RAM, where it matters, is stated in its Doxygen block. | Review |
+
+## Time, hardware and interrupts
+
+| Id | Rule | Checked by |
+|---|---|---|
+| H-1 | The library does not block. Work that takes time is spread over an `Update()` that the sketch calls in every `loop()`; `delay()` only for the microseconds a datasheet asks between two steps of the hardware, with the datasheet's figure in a comment. | Review |
+| H-2 | Time is `uint32_t` from `millis()` or `micros()`, and a span is measured as the difference: `millis() - start >= interval`, never `millis() >= start + interval`. The difference is right across the overflow after 49 days, the sum is not. | Review, a test across the overflow |
+| H-3 | The hardware is handed in, not written into the library: pins, ports and peripherals as parameters of the constructor or of a template. The library is then tested on the host against the mock, and runs on another board. | Review |
+| H-4 | A register and its bits by their names in avr-libc, or by a named `constexpr`: `TIMSK1 \|= _BV(TOIE1)`, never a number. | `readability-magic-numbers`, Review |
+| H-5 | An ISR does the least it can: it copies a value or sets a flag, and returns. No `Serial`, no `delay()`, no `float`, no call that waits or takes long. | Review |
+| H-6 | What an ISR and the rest share is `volatile`. The rest reads or changes it with interrupts off, `ATOMIC_BLOCK(ATOMIC_RESTORESTATE)`, where it is wider than 8 bits or is read and written in one step, as `++count`. | Review |
+| H-7 | Fixed point before `float`: the AVR has no floating point unit, and the first `float` brings the soft-float routines, one to two KiB of flash. A `float` takes its reason in a comment; no `double`, which has 32 bits on the AVR and 64 on the host, so that a test on the host does not compute what the board does. | `-Wdouble-promotion`, Review |
+| H-8 | Bitwise operators on unsigned types only, the masks named: `constexpr uint8_t kReadyBit{0x04U};`. A shift is by less than the width of its type, after the promotion to `int` that a `uint8_t` takes. | `-Wshift-count-overflow`, Review |
 
 ## Errors
 
