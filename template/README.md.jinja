@@ -1,0 +1,54 @@
+# {{ project_name }}
+
+{{ description }}
+
+## Installing
+
+Clone it into the `libraries` folder of your sketchbook, under the name `{{ project_name }}`:
+
+```bash
+git clone {{ url }} ~/Arduino/libraries/{{ project_name }}
+```
+
+It is built and checked for `{{ fqbn }}`.
+
+## Using it
+
+```cpp
+#include <{{ project_name }}.h>
+
+void setup() { Serial.begin(115200); }
+
+void loop() {
+  Serial.println({{ namespace }}::Clamp(analogRead(A0), 100, 900));
+  delay(1000);
+}
+```
+
+The examples in [examples/](examples) show more; the reference is built from the Doxygen blocks
+of `src/`, see [docs/Documentation.md](docs/Documentation.md).
+
+## Developing
+
+The dev container in [.devcontainer/](.devcontainer/README.md) carries every tool. The checks,
+which CI runs on each pull request as well:
+
+```bash
+tools/lint.sh                       # clang-format, cpplint, shellcheck, actionlint; --fix formats
+tools/tidy.sh                       # clang-tidy, with the board's flags and on the tests
+tools/cppcheck.sh                   # cppcheck on the library
+cmake --workflow --preset default   # the tests on the host
+cmake --workflow --preset sanitize  # under ASan and UBSan
+tools/coverage.sh                   # the tests, and what they reach of src/
+tools/self_check.sh                 # examples/SelfCheck in simavr
+tools/compile_examples.sh           # every example in each variant, fails on a warning
+tools/docs.sh                       # the reference, fails on a gap
+```
+
+The checks, the CI and the dev container come from the
+[template](https://github.com/theAndreas/embedded-cpp-template); `uvx copier update`
+brings its newest version. What is the project's own for them lies in `tools/project.sh`.
+
+## Licence
+
+{{ license }}, see [LICENSE](LICENSE).

@@ -1,0 +1,16 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+//
+// How a sketch uses {{ project_name }}: a reading of a pin, limited to a range,
+// on Serial.
+
+#include <{{ project_name }}.h>
+
+void setup() { Serial.begin(115200); }
+
+void loop() {
+  // From a pin, so that the compiler cannot fold the call away.
+  int const reading{analogRead(A0)};
+  Serial.println({{ namespace }}::Clamp(reading, 100, 900));
+  delay(1000);
+}
