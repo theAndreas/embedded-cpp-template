@@ -30,24 +30,20 @@ of `src/`, see [docs/Documentation.md](docs/Documentation.md).
 
 ## Developing
 
-The dev container in [.devcontainer/](.devcontainer/README.md) carries every tool. The checks,
-which CI runs on each pull request as well:
+The dev container in [.devcontainer/](.devcontainer/README.md) carries every tool. `make` lists
+every build and check, the same CI runs:
 
 ```bash
-tools/lint.sh                       # clang-format, cpplint, shellcheck, actionlint; --fix formats
-tools/tidy.sh                       # clang-tidy, with the board's flags and on the tests
-tools/cppcheck.sh                   # cppcheck on the library
-cmake --workflow --preset default   # the tests on the host
-cmake --workflow --preset sanitize  # under ASan and UBSan
-tools/coverage.sh                   # the tests, and what they reach of src/
-tools/self_check.sh                 # examples/SelfCheck in simavr
-tools/compile_examples.sh           # every example in each variant, fails on a warning
-tools/docs.sh                       # the reference, fails on a gap
+make setup    # the pinned Arduino core, once
+make lint     # the checks of seconds; make fmt formats
+make tests    # the tests on the host
+make check    # all of it, warnings as errors, as CI
 ```
 
 The checks, the CI and the dev container come from the
-[template](https://github.com/theAndreas/embedded-cpp-template); `uvx copier update`
-brings its newest version. What is the project's own for them lies in `tools/project.sh`.
+[template](https://github.com/theAndreas/embedded-cpp-template); `uv run copier update` brings
+its newest version. What is the project's own for them lies in `tools/project.sh` and
+`tools/project.mk`.
 
 ## Licence
 

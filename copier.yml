@@ -1,5 +1,5 @@
-# The template of an Arduino library on the AVR: its checks, CI and dev container, as Utl
-# grew them. README.md says how a project is made from it and kept up to date with it.
+# The template of an embedded C++ library, usable from Arduino as well: its checks, CI and dev
+# container. README.md says how a project is made from it and kept up to date with it.
 #
 # Two kinds of file come out of template/:
 #
@@ -20,6 +20,7 @@ _skip_if_exists:
   - /CMakeLists.txt
   - /library.properties
   - /tools/project.sh
+  - /tools/project.mk
 
 # The starting point of a new library, src/, test/ and the examples Basics and SelfCheck: written
 # only by `copier copy`, and only with the answer skeleton. An update leaves them out on both of
@@ -56,7 +57,7 @@ skeleton:
 
 project_name:
   type: str
-  help: The library's name, as Arduino and GitHub know it (Utl, MaxMatrix)
+  help: The library's name, as Arduino and GitHub know it (LedMatrix, Scheduler)
   validator: >-
     {% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9]*$')) %}
     Letters and digits only, starting with a letter: it names the folder, the header in src/
