@@ -1,0 +1,350 @@
+# MISRA C++:2023
+
+How far the code of {{ project_name }} keeps to MISRA C++:2023, rule by rule, and where it
+deviates. The C++ Core Guidelines and MISRA C++ are the standards the code follows;
+[CodingStyle.md](CodingStyle.md) makes them concrete.
+
+## How to read the matrix
+
+The ids and categories of the 4 directives and 174 rules are those of
+MISRA C++:2023, as Cppcheck lists them (`lib/checkers.cpp`). The texts of the rules are
+MISRA's and licensed; the topic below is a short note of our own, not the rule. Read the rule
+in the standard.
+
+- **Covered by**: the check that enforces the rule, the compiler's warning, a test, a rule of
+  CodingStyle.md, or *Review*. Empty means not yet assessed; *n/a* means it cannot occur in this
+  code, with the reason.
+- **Deviation**: where the project departs from the rule, as a whole, with its reason. A
+  deviation at one place is a `NOLINT` that names the check and the rule
+  (`// NOLINT(cppcoreguidelines-pro-type-reinterpret-cast): MISRA 8.2.5, F() of the core`).
+- **Mandatory** rules allow no deviation, **Required** ones a documented deviation,
+  **Advisory** ones may be left out with a reason.
+
+No free tool checks MISRA C++ as a whole: clang-tidy has no MISRA module, Cppcheck's free addon
+knows MISRA C only. Where a project needs evidence of compliance, a checker such as Cppcheck
+Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
+
+> **Draft.** The topics and the checks filled in so far are taken from memory and are to be
+> checked against the standard, row by row; the rest is to be assessed.
+
+## Directives
+
+### Dir 0
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Dir 0.3.1 | Advisory |  |  | |
+| Dir 0.3.2 | Required |  |  | |
+
+### Dir 5
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Dir 5.7.2 | Advisory |  |  | |
+
+### Dir 15
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Dir 15.8.1 | Required |  |  | |
+
+## Rules
+
+### Rule 0
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 0.0.1 | Required |  |  | |
+| Rule 0.0.2 | Advisory |  |  | |
+| Rule 0.1.1 | Advisory |  |  | |
+| Rule 0.1.2 | Required | A returned value is used | `-Wunused-result`, `{{ macro_prefix }}_NODISCARD` (FN-10) | |
+| Rule 0.2.1 | Advisory |  |  | |
+| Rule 0.2.2 | Required |  |  | |
+| Rule 0.2.3 | Advisory |  |  | |
+| Rule 0.2.4 | Advisory |  |  | |
+
+### Rule 4
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 4.1.1 | Required |  |  | |
+| Rule 4.1.2 | Advisory |  |  | |
+| Rule 4.1.3 | Required | No undefined behaviour | `make sanitize`, `clang-analyzer-*` | |
+| Rule 4.6.1 | Required |  |  | |
+
+### Rule 5
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 5.0.1 | Advisory |  |  | |
+| Rule 5.7.1 | Required |  |  | |
+| Rule 5.7.3 | Required |  |  | |
+| Rule 5.10.1 | Required |  |  | |
+| Rule 5.13.1 | Required |  |  | |
+| Rule 5.13.2 | Required |  |  | |
+| Rule 5.13.3 | Required | No octal constant | Review | |
+| Rule 5.13.4 | Required |  |  | |
+| Rule 5.13.5 | Required |  |  | |
+| Rule 5.13.6 | Required |  |  | |
+| Rule 5.13.7 | Required |  |  | |
+
+### Rule 6
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 6.0.1 | Required |  |  | |
+| Rule 6.0.2 | Advisory |  |  | |
+| Rule 6.0.3 | Advisory |  |  | |
+| Rule 6.0.4 | Required |  |  | |
+| Rule 6.2.1 | Required |  |  | |
+| Rule 6.2.2 | Required |  |  | |
+| Rule 6.2.3 | Required |  |  | |
+| Rule 6.2.4 | Required |  |  | |
+| Rule 6.4.1 | Required | No name hides another | `-Wshadow` | |
+| Rule 6.4.2 | Required |  |  | |
+| Rule 6.4.3 | Required |  |  | |
+| Rule 6.5.1 | Advisory |  |  | |
+| Rule 6.5.2 | Advisory |  |  | |
+| Rule 6.7.1 | Required |  |  | |
+| Rule 6.7.2 | Required |  |  | |
+| Rule 6.8.1 | Required |  |  | |
+| Rule 6.8.2 | Mandatory |  |  | |
+| Rule 6.8.3 | Required |  |  | |
+| Rule 6.8.4 | Advisory |  |  | |
+| Rule 6.9.1 | Required |  |  | |
+| Rule 6.9.2 | Advisory | No standard integer type names | Review (T-1) | |
+
+### Rule 7
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 7.0.1 | Required |  |  | |
+| Rule 7.0.2 | Required |  |  | |
+| Rule 7.0.3 | Required |  |  | |
+| Rule 7.0.4 | Required |  |  | |
+| Rule 7.0.5 | Required |  |  | |
+| Rule 7.0.6 | Required |  |  | |
+| Rule 7.11.1 | Required |  |  | |
+| Rule 7.11.2 | Required |  |  | |
+| Rule 7.11.3 | Required |  |  | |
+
+### Rule 8
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 8.0.1 | Advisory |  |  | |
+| Rule 8.1.1 | Required |  |  | |
+| Rule 8.1.2 | Advisory |  |  | |
+| Rule 8.2.1 | Required |  |  | |
+| Rule 8.2.2 | Required | No C-style or functional cast | `google-readability-casting`, `cppcoreguidelines-pro-type-cstyle-cast` (T-9) | |
+| Rule 8.2.3 | Required |  |  | |
+| Rule 8.2.4 | Required |  |  | |
+| Rule 8.2.5 | Required | No `reinterpret_cast` | `cppcoreguidelines-pro-type-reinterpret-cast` (T-9) | |
+| Rule 8.2.6 | Required |  |  | |
+| Rule 8.2.7 | Advisory |  |  | |
+| Rule 8.2.8 | Required |  |  | |
+| Rule 8.2.9 | Required |  |  | |
+| Rule 8.2.10 | Required |  |  | |
+| Rule 8.2.11 | Required |  |  | |
+| Rule 8.3.1 | Advisory |  |  | |
+| Rule 8.3.2 | Advisory |  |  | |
+| Rule 8.7.1 | Required |  |  | |
+| Rule 8.7.2 | Required |  |  | |
+| Rule 8.9.1 | Required |  |  | |
+| Rule 8.14.1 | Advisory |  |  | |
+| Rule 8.18.1 | Mandatory |  |  | |
+| Rule 8.18.2 | Advisory |  |  | |
+| Rule 8.19.1 | Advisory |  |  | |
+| Rule 8.20.1 | Advisory |  |  | |
+
+### Rule 9
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 9.2.1 | Required |  |  | |
+| Rule 9.3.1 | Required | A body is a compound statement | `readability-braces-around-statements` | |
+| Rule 9.4.1 | Required | An `if … else if` ends with `else` | Review | |
+| Rule 9.4.2 | Required | The structure of a `switch` | `bugprone-switch-missing-default-case`, in part | |
+| Rule 9.5.2 | Advisory |  |  | |
+| Rule 9.5.3 | Required |  |  | |
+| Rule 9.6.1 | Advisory | No `goto` | `cppcoreguidelines-avoid-goto` | |
+| Rule 9.6.2 | Required |  |  | |
+| Rule 9.6.3 | Required |  |  | |
+| Rule 9.6.4 | Required |  |  | |
+| Rule 9.6.5 | Required |  |  | |
+
+### Rule 10
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 10.0.1 | Advisory |  |  | |
+| Rule 10.1.1 | Advisory |  |  | |
+| Rule 10.1.2 | Required |  |  | |
+| Rule 10.2.1 | Required |  |  | |
+| Rule 10.2.2 | Advisory |  |  | |
+| Rule 10.2.3 | Required |  |  | |
+| Rule 10.3.1 | Advisory |  |  | |
+| Rule 10.4.1 | Required |  |  | |
+
+### Rule 11
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 11.3.1 | Advisory |  |  | |
+| Rule 11.3.2 | Advisory |  |  | |
+| Rule 11.6.1 | Advisory |  |  | |
+| Rule 11.6.2 | Mandatory |  |  | |
+| Rule 11.6.3 | Required |  |  | |
+
+### Rule 12
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 12.2.1 | Advisory |  |  | |
+| Rule 12.2.2 | Required |  |  | |
+| Rule 12.2.3 | Required |  |  | |
+| Rule 12.3.1 | Required | No `union` | `cppcoreguidelines-pro-type-union-access`, in part | |
+
+### Rule 13
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 13.1.1 | Advisory |  |  | |
+| Rule 13.1.2 | Required |  |  | |
+| Rule 13.3.1 | Required |  |  | |
+| Rule 13.3.2 | Required |  |  | |
+| Rule 13.3.3 | Required |  |  | |
+| Rule 13.3.4 | Required |  |  | |
+
+### Rule 14
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 14.1.1 | Advisory |  |  | |
+
+### Rule 15
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 15.0.1 | Required | Special members as needed | `cppcoreguidelines-special-member-functions` (C-3) | |
+| Rule 15.0.2 | Advisory |  |  | |
+| Rule 15.1.1 | Required |  |  | |
+| Rule 15.1.2 | Advisory |  |  | |
+| Rule 15.1.3 | Required |  |  | |
+| Rule 15.1.4 | Advisory |  |  | |
+| Rule 15.1.5 | Required |  |  | |
+
+### Rule 16
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 16.5.2 | Required |  |  | |
+| Rule 16.6.1 | Advisory |  |  | |
+
+### Rule 17
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 17.8.1 | Required |  |  | |
+
+### Rule 18
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 18.1.1 | Required |  |  | |
+| Rule 18.1.2 | Required |  |  | |
+| Rule 18.3.1 | Advisory |  |  | |
+| Rule 18.3.2 | Required |  |  | |
+| Rule 18.3.3 | Required |  |  | |
+| Rule 18.4.1 | Required |  |  | |
+| Rule 18.5.1 | Advisory |  |  | |
+| Rule 18.5.2 | Advisory |  |  | |
+
+### Rule 19
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 19.0.1 | Required |  |  | |
+| Rule 19.0.2 | Required |  |  | |
+| Rule 19.0.3 | Advisory |  |  | |
+| Rule 19.0.4 | Advisory |  |  | |
+| Rule 19.1.1 | Required |  |  | |
+| Rule 19.1.2 | Required |  |  | |
+| Rule 19.1.3 | Required |  |  | |
+| Rule 19.2.1 | Required |  |  | |
+| Rule 19.2.2 | Required |  |  | |
+| Rule 19.2.3 | Required |  |  | |
+| Rule 19.3.1 | Advisory |  |  | |
+| Rule 19.3.2 | Required |  |  | |
+| Rule 19.3.3 | Required |  |  | |
+| Rule 19.3.4 | Required |  |  | |
+| Rule 19.3.5 | Required |  |  | |
+| Rule 19.6.1 | Advisory |  |  | |
+
+### Rule 21
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 21.2.1 | Required |  |  | |
+| Rule 21.2.2 | Required |  |  | |
+| Rule 21.2.3 | Required |  |  | |
+| Rule 21.2.4 | Required |  |  | |
+| Rule 21.6.1 | Advisory | No dynamic memory | `cppcoreguidelines-no-malloc` (M-1) | |
+| Rule 21.6.2 | Required |  |  | |
+| Rule 21.6.3 | Required |  |  | |
+| Rule 21.6.4 | Required |  |  | |
+| Rule 21.6.5 | Required |  |  | |
+| Rule 21.10.1 | Required |  |  | |
+| Rule 21.10.2 | Required |  |  | |
+| Rule 21.10.3 | Required |  |  | |
+
+### Rule 22
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 22.3.1 | Required |  |  | |
+| Rule 22.4.1 | Required |  |  | |
+
+### Rule 23
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 23.11.1 | Advisory |  |  | |
+
+### Rule 24
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 24.5.1 | Required |  |  | |
+| Rule 24.5.2 | Required |  |  | |
+
+### Rule 25
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 25.5.1 | Required |  |  | |
+| Rule 25.5.2 | Mandatory |  |  | |
+| Rule 25.5.3 | Mandatory |  |  | |
+
+### Rule 26
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 26.3.1 | Advisory |  |  | |
+
+### Rule 28
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 28.3.1 | Required |  |  | |
+| Rule 28.6.1 | Required |  |  | |
+| Rule 28.6.2 | Required |  |  | |
+| Rule 28.6.3 | Required |  |  | |
+| Rule 28.6.4 | Required |  |  | |
+
+### Rule 30
+
+| Id | Category | Topic | Covered by | Deviation |
+|---|---|---|---|---|
+| Rule 30.0.1 | Required |  |  | |
+| Rule 30.0.2 | Required |  |  | |

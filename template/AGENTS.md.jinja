@@ -1,0 +1,89 @@
+# {{ project_name }}: for a coding agent
+
+{{ description }} An embedded C++ library, C++11 (gnu++11) without the standard library, so
+that avr-gcc compiles it as well as any other compiler; built and checked on the host by GCC and
+clang, and on an AVR board through arduino-cli and simavr.
+
+## Before writing code, read
+
+- [docs/CodingStyle.md](docs/CodingStyle.md): how the code is written. Every rule has an id;
+  name it where you deviate, in the `NOLINT` or in the comment that gives the reason.
+- [docs/Documentation.md](docs/Documentation.md): how a comment and a Doxygen block are written.
+  Everything a sketch can use is documented.
+- [docs/Testing.md](docs/Testing.md): which kind of test proves what, and how a test is named
+  and written.
+
+All three hold without exception. Where they and your habits differ, they win.
+
+## How to work
+
+1. **A test first.** Write the test of the behaviour, see it fail, then write the code.
+2. **Small steps.** One concern per change; what you find on the way is a note in your answer,
+   not a change of its own.
+   A commit holds one concern, and its message says what changed and why.
+   A pull request's description says what changes for a user of the library, why, and how it
+   was checked; not the code: no function names, no walk through the files, no snippets. The
+   diff shows those.
+3. **Only what was asked.** No refactoring, renaming or reformatting of code you were not asked
+   to touch.
+
+After every step:
+
+```bash
+make lint      # clang-format, cpplint, shellcheck, actionlint, ruff: seconds
+make tidy      # clang-tidy, for the host and the board
+make tests     # GoogleTest on the host
+```
+
+`make fmt` formats the code and the Doxygen blocks in place.
+
+## Never
+
+- **No standard library in `src/`**: no `<vector>`, `<string>`, `<memory>`, `<algorithm>`,
+  `<iostream>`, nothing of `std::`; avr-gcc has none. **And no container or algorithm of your
+  own** where the ETL has one: use `etl::` (M-3). The tests may use `std::`.
+- **No heap, no exceptions, no RTTI**: no `new`, `malloc`, `throw`, `try`, `dynamic_cast`,
+  `typeid` (M-1, M-2).
+- **No blocking and no `float` without its reason**: no `delay()` in the library, no `double`
+  at all (H-1, H-7). An interrupt's shared data is read atomically (H-6).
+- **No invented API.** A function of the Arduino core or of a library is used only if you have
+  seen its declaration; `test/mock/` shows what the tests can call.
+- **No code for later**: no unused parameter, function, overload or option "in case", no
+  `TODO`, no commented-out code.
+- **No comment that repeats the code.** A comment says why, Documentation.md says how.
+- **No test weakened to pass**: a failing test is fixed in the code, unless the test is wrong,
+  and then you say why in your answer.
+- **No check silenced to pass**: no `NOLINT`, `#pragma` or change of `.clang-tidy`,
+  `.clang-format`, `CPPLINT.cfg`, the `Makefile` or the CMake files to make a finding go away.
+  Where a finding is wrong, suppress it for the one line, naming the check, the rule of
+  CodingStyle.md and the reason (S-1), and say so in your answer.
+- **No change to the template's files** (below) unless asked.
+
+## Done
+
+A change is done when all of these hold, not when it compiles:
+
+- `make check` passes: it is what CI runs, all of it.
+- Every line and branch the change adds is reached by a test: `make coverage` lists the lines
+  missed per file.
+- What a sketch can use is documented (Documentation.md), and `make docs` passes.
+- What a user of the library notices is in `CHANGELOG.md`, if the project keeps one.
+- Your answer names every rule you deviated from, and why.
+
+## Where things are
+
+| What | Where |
+|---|---|
+| The library | `src/`, the header a sketch includes is `src/{{ project_name }}.h` |
+| Tests | `test/`, GoogleTest against a mock of the Arduino core in `test/mock/` |
+| Examples | `examples/`; `SelfCheck` runs on the board in simavr |
+| The project's settings | `tools/project.sh` (board, variants, hooks), `tools/project.mk` (own targets) |
+
+`.clang-tidy`, `.clang-format`, `CPPLINT.cfg`, the `Makefile`, `tools/` and `.github/` come from
+the template and are updated by `copier update`. Change them only when asked; a project's own
+exception goes at the end of a list, with its reason.
+
+## The project's own notes
+
+<!-- What an agent has to know of this project beyond the template: its design, its terms, what
+     not to touch. The template wrote this section once; an update keeps what is added here. -->

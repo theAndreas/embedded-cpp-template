@@ -6,8 +6,12 @@
 #   F() of the core does, by a cast, to hand them to the library.
 # cppcoreguidelines-avoid-non-const-global-variables: a free function that a
 #   test binds reaches what it counts or changes only through a global.
+# readability-function-size.LineThreshold: a test of many cases is long but
+#   flat; its parameters, nesting and complexity keep the library's limits.
 InheritParentConfig: true
 Checks: >
   -readability-magic-numbers,
   -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-avoid-non-const-global-variables
+CheckOptions:
+  readability-function-size.LineThreshold: none

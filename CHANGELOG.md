@@ -19,6 +19,28 @@ On the update: rebuild the dev container, for the headers. A member initializer 
 parentheses now fails `make tidy`; `tools/tidy.sh` applies nothing, but clang-tidy's `--fix`
 swaps the parentheses where it says so.
 
+## Unreleased
+
+- **`docs/CodingStyle.md`: how the code is written**, each rule with an id and what checks it:
+  files, functions, types, classes, memory on the microcontroller, errors, names, suppressions.
+  The C++ Core Guidelines, MISRA C++:2023 and the Google style, in that order; where it departs
+  from Google, and why. Template parameters are named for their role, not `T`.
+- **`docs/Testing.md`: how the code is tested**: which of the three kinds of test proves what,
+  how a test is named and written, what the mock of the core may do, and what SelfCheck checks.
+- **`docs/Misra.md`: MISRA C++:2023 rule by rule**, what covers each and where the project
+  deviates; a draft, to be checked against the standard.
+- **The size of a function is limited**: 40 lines of body, 4 parameters, 3 levels of nesting, a
+  cognitive complexity of 15; a test has no limit of lines.
+- **`{namespace}/attributes.h` in the skeleton**: `PREFIX_NODISCARD`, `[[nodiscard]]` from C++17
+  and GCC's `warn_unused_result` before it; the skeleton's functions use it. A project made
+  before takes the file from a new copy.
+- **Integers of fixed width in `src/`**, a loop counter among them (CodingStyle.md T-1).
+- **`AGENTS.md` for a coding agent**, which any agent reads, and `CLAUDE.md`, which imports it for
+  Claude Code: what to read before writing code, and what to run after.
+
+On the update: `make tidy` may now report functions that are too large. Split them, or suppress
+one with its reason. Notes of the project's own for an agent go at the end of `AGENTS.md`.
+
 ## v0.2.1
 
 - `tools/coverage.sh` fails when the tests left no counts, rather than reporting 0 of 0 lines.

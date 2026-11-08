@@ -45,7 +45,7 @@ mechanism carries.
 | W-10 | The sizes the README states checked against the build (`documented-sizes.py`); Utl's table of flash and RAM | open |
 | W-11 | The AVR's deepest stack against the RAM it has (`avr-stack.py`), for an Arduino sketch | idea |
 | W-12 | ruff over the Python scripts, with the checks that answer "is this wrong" | done, v0.2.0 |
-| W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's | idea |
+| W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's: `AGENTS.md`, `docs/CodingStyle.md` | done, unreleased |
 
 ### M2c - A dev container that starts in seconds
 
@@ -73,7 +73,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 |---|---|---|
 | C-1 | Find out whether the clang-tidy pinned from PyPI loads a plugin (`-load`); if not, clang-tidy and the LLVM headers from apt, pinned in the Dockerfile | done: it loads one and exports the symbols a module needs; only the headers come from apt.llvm.org, at the major version |
 | C-2 | A clang-tidy module of our own, with the first check: braced initialization in a member initializer list, with a fix-it (Utl's `function_ref.h:106` slipped through) | done: `house-braced-member-init` |
-| C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers | idea |
+| C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers; an `if … else if` ends with `else` (MISRA 9.4.1, `hicpp-multiway-paths-covered` is gone in clang-tidy 23); a template parameter is not a single letter (CodingStyle.md) | idea |
 | C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
 | C-5 | Fixed-width integer types (MISRA C:2012 Dir 4.6, AUTOSAR A3-9-1): no `int`, `unsigned` in `src/`, but `char` for text, `bool`, `size_t`, and what the Arduino core's signatures give, as the `int` of `analogRead()`. `google-runtime-int`, which is on, reports only `short` and `long`. Utl keeps to it already | idea |
 
@@ -106,6 +106,12 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
   `cppcoreguidelines-prefer-member-initializer`; a default the same for every constructor goes
   into the class, C.48, by `modernize-use-default-member-init`. Both are on.
 
+- **No `-Weffc++`**: GCC 15 reports two of Scott Meyers' items with it, a member assigned in
+  the body instead of initialized, and a base with virtual functions but no virtual destructor;
+  clang-tidy reports both already (`cppcoreguidelines-prefer-member-initializer`,
+  `cppcoreguidelines-virtual-class-destructor`), together with the default member initializer
+  and `= default` that `-Weffc++` does not know. Clang ignores the flag. The items are those of
+  the 1998 edition, and the flag is known for warnings on correct code.
 - **copier, not a GitHub template**: a GitHub template is copied once and then drifts; copier
   updates a project as a three-way merge.
 - **The template's files under GPL-3.0-or-later**, as Utl's were; a project picks its own licence.
