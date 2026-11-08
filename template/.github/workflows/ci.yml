@@ -1,0 +1,165 @@
+# What a pull request is checked with. The jobs only call the scripts in tools/, so that a run
+# in the dev container answers the same; what is the project's, the board, the core and the
+# variants, they read from tools/project.sh.
+#
+#   lint           the Google style: clang-format, cpplint, shellcheck, actionlint
+#   clang-tidy     the library and the examples with the flags of the board, and the tests on
+#                  the host
+#   cppcheck       the library, as a second analyser
+#   host-tests     the tests on GoogleTest against a mock of the core, also under ASan and
+#                  UBSan; what they reach of src/ goes into the job summary
+#   examples       every example in every variant, without a warning; SelfCheck in simavr;
+#                  flash and RAM go into the job summary
+#   arduino-lint   the rules of the Arduino Library Manager
+#
+# Every job carries a timeout-minutes well above what it takes, for a job that has stopped
+# making progress. This file comes from the template; a job of the project's own goes into a
+# workflow of its own, so that `copier update` merges nothing into it.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A second push to the same branch makes the first answer worthless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    # -o pipefail, so that a script piped into tee still fails the step.
+    shell: bash
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      # cpplint derives the header guards from the path below the parent of the checkout,
+      # which GitHub names after the repository.
+      - uses: actions/checkout@v7
+
+      # setup-uv has no tag for a major version, only full ones.
+      - uses: astral-sh/setup-uv@v10.3.0
+
+      - name: Lint
+        run: tools/lint.sh
+
+  clang-tidy:
+    name: clang-tidy
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.0
+
+      # tools/tidy.sh takes its flags from arduino-cli's compilation database, so it needs the
+      # core the examples are compiled with.
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: 1.5.1
+
+      - name: Install the core
+        run: tools/setup.sh
+
+      # For the pass over the tests, whose database CMake writes.
+      - name: Install CMake, Ninja and GoogleTest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake ninja-build \
+            libgtest-dev
+
+      - name: clang-tidy
+        run: tools/tidy.sh
+
+  cppcheck:
+    name: cppcheck
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # From apt, as in the dev container.
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cppcheck
+
+      - name: cppcheck
+        run: tools/cppcheck.sh
+
+  host-tests:
+    name: Host tests
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.0
+
+      # From apt, as in the dev container, rather than the cmake the runner image carries.
+      - name: Install CMake, Ninja and GoogleTest
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake ninja-build \
+            libgtest-dev
+
+      - name: Tests
+        run: cmake --workflow --preset default
+
+      - name: Tests under ASan and UBSan
+        run: cmake --workflow --preset sanitize
+
+      - name: Coverage
+        run: |
+          tools/coverage.sh
+          {
+            echo '```text'
+            cat build/coverage/coverage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  examples:
+    name: Examples
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # arduino-cli as in the dev container. The core is pinned in tools/project.sh: a sketch's
+      # size depends on it, and so does what tools/project.sh prepares.
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: 1.5.1
+
+      - name: Install simavr
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends simavr
+
+      - name: Install the core
+        run: tools/setup.sh
+
+      - name: SelfCheck in simavr
+        run: tools/self_check.sh
+
+      - name: Compile
+        run: tools/compile_examples.sh | tee -a "$GITHUB_STEP_SUMMARY"
+
+  arduino-lint:
+    name: arduino-lint
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # "submit" while the library is not in the Library Manager; once it is, "update" adds
+      # the checks for a new release.
+      - uses: arduino/arduino-lint-action@v3
+        with:
+          project-type: library
+          library-manager: submit

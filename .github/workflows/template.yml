@@ -1,0 +1,59 @@
+# What a change to the template is checked with: a project is made from it, and the project's
+# own checks run on it, as tests/check.sh runs them in the dev container of any project made
+# from it. A template change passes only if a project made from it passes.
+name: Template
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+# A second push to the same branch makes the first answer worthless.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    name: A project made from the template
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # copier reads the template's history to name the version a project was made from.
+          fetch-depth: 0
+
+      # setup-uv has no tag for a major version, only full ones.
+      - uses: astral-sh/setup-uv@v10.3.0
+
+      - uses: arduino/setup-arduino-cli@v2
+        with:
+          version: 1.5.1
+
+      # As the Dockerfile of the template installs them.
+      - name: Install the tools from apt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake ninja-build \
+            libgtest-dev simavr jq doxygen cppcheck
+
+      - name: The template's own script
+        run: uvx --from shellcheck-py==0.11.0.1 shellcheck tests/check.sh
+
+      - name: Make a project and check it
+        run: |
+          tests/check.sh --keep lint tests sanitize coverage tidy cppcheck docs \
+            examples self-check
+
+      - name: arduino-lint
+        uses: arduino/arduino-lint-action@v3
+        with:
+          path: build/Demo
+          project-type: library
+          library-manager: submit
+          compliance: strict

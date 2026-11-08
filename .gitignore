@@ -1,18 +1,1 @@
-# Build artifacts
-/build/
-
-# Clangd cache
-build/.cache/
-build/.clangd-cache/
-
-# VS Code
-.vscode/
-
-# Devcontainer
-.devcontainer/
-
-# Other
-*.o
-*.obj
-*.exe
-*.log
+build/

@@ -1,0 +1,54 @@
+# Copyright {{ copyright_year }} {{ author }}
+# SPDX-License-Identifier: {{ license }}
+#
+# The tests on the host: the library against a mock of the Arduino core, on GoogleTest. The
+# library is built as gnu++11, as avr-gcc builds it for Arduino; only the tests are C++17,
+# which GoogleTest needs. The warnings and the presets' instrumentation come from
+# cmake/checks.cmake.
+#
+#   cmake --workflow --preset default    # the tests
+#   cmake --workflow --preset sanitize   # under ASan and UBSan
+#   tools/coverage.sh                    # the tests, and what they reach
+
+cmake_minimum_required(VERSION 3.25)
+project({{ project_name }} LANGUAGES CXX)
+enable_testing()
+# For clangd, which reads it through .clangd.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(cmake/checks.cmake)
+find_package(GTest REQUIRED)
+include(GoogleTest)
+
+file(GLOB library_sources CONFIGURE_DEPENDS src/{{ namespace }}/*.cpp)
+file(GLOB test_sources CONFIGURE_DEPENDS test/*_test.cpp)
+
+# One library and one test program per variant: a switch that changes what is compiled makes
+# a build of its own. A variant is added with its defines, as add_variant(checked
+# {{ macro_prefix }}_CHECK_ACCESS=1), and in tools/project.sh for the examples.
+function(add_variant name)
+  set(defines ${ARGN})
+
+  add_library({{ namespace }}_${name} STATIC ${library_sources} test/mock/Arduino.cpp)
+  target_include_directories({{ namespace }}_${name} PUBLIC src test/mock)
+  target_compile_definitions({{ namespace }}_${name} PUBLIC ${defines})
+  target_compile_options({{ namespace }}_${name} PRIVATE -std=gnu++11 ${CHECK_WARNINGS}
+                                                  ${CHECK_INSTRUMENT})
+  target_link_options({{ namespace }}_${name} PUBLIC ${CHECK_INSTRUMENT})
+
+  add_executable({{ namespace }}_test_${name} ${test_sources})
+  target_compile_features({{ namespace }}_test_${name} PRIVATE cxx_std_17)
+  # The root, so that a test includes its helpers as "test/...", as Google wants an include
+  # to name the directory.
+  target_include_directories({{ namespace }}_test_${name} PRIVATE ${CMAKE_SOURCE_DIR})
+  target_compile_options({{ namespace }}_test_${name} PRIVATE ${CHECK_WARNINGS}
+                                                       ${CHECK_INSTRUMENT})
+  target_link_libraries({{ namespace }}_test_${name} PRIVATE {{ namespace }}_${name}
+                                                      GTest::gtest_main)
+  gtest_discover_tests({{ namespace }}_test_${name} TEST_PREFIX ${name}/)
+endfunction()
+
+add_variant(default)
+
+add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARD gnu++11
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test/mock)

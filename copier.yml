@@ -1,0 +1,135 @@
+# The template of an Arduino library on the AVR: its checks, CI and dev container, as Utl
+# grew them. README.md says how a project is made from it and kept up to date with it.
+#
+# Two kinds of file come out of template/:
+#
+# - The template's own: configuration, tools/, cmake/checks.cmake, CI and the dev container.
+#   `copier update` brings every change to them into a project, as a three-way merge that
+#   keeps what the project changed itself.
+# - The project's own: written once as a starting point, then never touched again.
+#   tools/project.sh among them holds what the template's tools need to know of the project.
+
+_min_copier_version: "9.4.0"
+_subdirectory: template
+_answers_file: .copier-answers.yml
+
+# The project's own files, written where they do not exist yet. Anchored with /, as an
+# unanchored README.md would match .devcontainer/README.md too, which is the template's.
+_skip_if_exists:
+  - /README.md
+  - /CMakeLists.txt
+  - /library.properties
+  - /tools/project.sh
+
+# The starting point of a new library, src/, test/ and the examples Basics and SelfCheck: written
+# only by `copier copy`, and only with the answer skeleton. An update leaves them out on both of
+# its sides, so it neither brings back what a project deleted nor merges into what it changed;
+# switching skeleton off on an update would delete them instead. The first entries are copier's
+# defaults, which _exclude replaces.
+_exclude:
+  - copier.yml
+  - "~*"
+  - "*.py[co]"
+  - __pycache__
+  - .git
+  - .DS_Store
+  - "{% if _copier_operation == 'update' or not skeleton %}/src{% endif %}"
+  - "{% if _copier_operation == 'update' or not skeleton %}/test{% endif %}"
+  - "{% if _copier_operation == 'update' or not skeleton %}/examples/Basics{% endif %}"
+  - "{% if _copier_operation == 'update' or not skeleton %}/examples/SelfCheck{% endif %}"
+
+_message_after_copy: |
+  {{ project_name }} is ready. In the dev container, or with its tools installed:
+
+    git init && git add -A && git commit -m "{{ project_name }}: from the template"
+    tools/setup.sh                      # the Arduino core, and what tools/project.sh prepares
+    cmake --workflow --preset default   # the tests on the host
+    tools/lint.sh && tools/tidy.sh      # the style and clang-tidy
+    tools/self_check.sh                 # examples/SelfCheck in simavr
+
+  The folder has to be named {{ project_name }}: cpplint takes the header guards from it.
+
+skeleton:
+  type: bool
+  help: Write the starting point of a new library, src/, test/ and the examples; no for a project brought in
+  default: true
+
+project_name:
+  type: str
+  help: The library's name, as Arduino and GitHub know it (Utl, MaxMatrix)
+  validator: >-
+    {% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9]*$')) %}
+    Letters and digits only, starting with a letter: it names the folder, the header in src/
+    and the header guards.
+    {% endif %}
+
+namespace:
+  type: str
+  help: The C++ namespace, which also names the folder of the headers in src/
+  default: "{{ project_name | lower }}"
+  validator: >-
+    {% if not (namespace | regex_search('^[a-z][a-z0-9_]*$')) %}
+    Lower case, as Google names a namespace.
+    {% endif %}
+
+macro_prefix:
+  type: str
+  help: The prefix of the library's macros and CMake options
+  default: "{{ namespace | upper }}"
+  validator: >-
+    {% if not (macro_prefix | regex_search('^[A-Z][A-Z0-9_]*$')) %}
+    Upper case, as a macro.
+    {% endif %}
+
+description:
+  type: str
+  help: One sentence that says what the library is, for library.properties and the README
+  default: An Arduino library for the AVR.
+
+author:
+  type: str
+  help: The author, for the copyright lines and library.properties
+  default: Andreas Burnickl
+
+copyright_year:
+  type: int
+  help: The year of the copyright lines in the files made now
+  default: 2026
+
+license:
+  type: str
+  help: The licence, as an SPDX identifier
+  default: GPL-3.0-or-later
+  choices:
+    - GPL-3.0-or-later
+    - MIT
+
+github_owner:
+  type: str
+  help: The GitHub account the repository lies in
+  default: theAndreas
+
+url:
+  type: str
+  help: Where the library lies, for library.properties and the README
+  default: "https://github.com/{{ github_owner }}/{{ project_name }}"
+
+fqbn:
+  type: str
+  help: The board the examples are compiled for, as arduino-cli names it
+  default: arduino:avr:uno
+
+arduino_core:
+  type: str
+  help: The Arduino core, pinned, as arduino-cli installs it
+  default: arduino:avr@1.8.8
+
+simavr_mcu:
+  type: str
+  help: The MCU simavr runs examples/SelfCheck as; empty if simavr cannot run the board
+  default: atmega328p
+
+simavr_frequency:
+  type: int
+  help: The clock simavr runs it at, in Hz
+  default: 16000000
