@@ -57,7 +57,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
-| Rule 4.1.1 | Required | Conforms to C++17 | Review | C++11 with GNU extensions (`gnu++11`), as avr-gcc builds a sketch; the tests C++17 |
+| Rule 4.1.1 | Required | Conforms to C++17 | Review | C++11 as the least standard, and every standard to C++20; `gnu++11` on the AVR (targets/avr.md); the tests C++17 |
 | Rule 4.1.2 | Advisory | No deprecated features | `-Wdeprecated` |  |
 | Rule 4.1.3 | Required | No undefined or critical unspecified behaviour | `make sanitize`, `clang-analyzer-*` |  |
 | Rule 4.6.1 | Required | Memory operations sequenced | `-Wunsequenced`, `-Wsequence-point` |  |
@@ -115,7 +115,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 | Rule 7.0.5 | Required | Promotions keep signedness | `-Wconversion`, `-Wsign-conversion` |  |
 | Rule 7.0.6 | Required | Numeric assignments appropriate | `-Wconversion`, `bugprone-narrowing-conversions` |  |
 | Rule 7.11.1 | Required | `nullptr` the only null pointer | `modernize-use-nullptr`, `-Wzero-as-null-pointer-constant` |  |
-| Rule 7.11.2 | Required | No array decaying as an argument | Review | An array passed as a pointer and a size, as the AVR's APIs take it; `cppcoreguidelines-pro-bounds-array-to-pointer-decay` is off, see `.clang-tidy` |
+| Rule 7.11.2 | Required | No array decaying as an argument | Review | An array passed as a pointer and a size, as C APIs of the platforms take it; `cppcoreguidelines-pro-bounds-array-to-pointer-decay` is off, see `.clang-tidy` |
 | Rule 7.11.3 | Required | Function-to-pointer conversion limited | Review |  |
 
 ### Rules of chapter 8
@@ -174,13 +174,13 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 | Rule 10.2.2 | Advisory | No unscoped enumerations | `cppcoreguidelines-use-enum-class` |  |
 | Rule 10.2.3 | Required | No numeric use of an unscoped enumeration | `cppcoreguidelines-use-enum-class` |  |
 | Rule 10.3.1 | Advisory | No unnamed namespace in a header | `google-build-namespaces` |  |
-| Rule 10.4.1 | Required | No `asm` | Review | Where the AVR needs it, as for a cycle-exact delay, with its reason |
+| Rule 10.4.1 | Required | No `asm` | Review | Where a target needs it, with its reason (targets/avr.md AVR-7) |
 
 ### Rules of chapter 11
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
-| Rule 11.3.1 | Advisory | No variables of array type | `modernize-avoid-c-arrays` | A text in flash is a `char` array, as `F()` and `PROGMEM` need one (`modernize-avoid-c-arrays.AllowStringArrays`) |
+| Rule 11.3.1 | Advisory | No variables of array type | `modernize-avoid-c-arrays` | A text in flash is a `char` array, as a target may need one (targets/avr.md AVR-1) (`modernize-avoid-c-arrays.AllowStringArrays`) |
 | Rule 11.3.2 | Advisory | At most two levels of pointer indirection | Review |  |
 | Rule 11.6.1 | Advisory | Every variable initialized | `cppcoreguidelines-init-variables` |  |
 | Rule 11.6.2 | Mandatory | No read before an assignment | `-Wuninitialized`, `-Wconditional-uninitialized`, `clang-analyzer-core.uninitialized.*` |  |

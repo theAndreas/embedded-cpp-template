@@ -1,8 +1,8 @@
 # {{ project_name }}: for a coding agent
 
-{{ description }} An embedded C++ library, C++11 (gnu++11) without the standard library, so
-that avr-gcc compiles it as well as any other compiler; built and checked on the host by GCC and
-clang, and on an AVR board through arduino-cli and simavr.
+{{ description }} An embedded C++ library for targets from an 8-bit microcontroller to the host:
+C++11 as the least standard, without the standard library. This project builds and checks it on
+the host by GCC and clang, and on the AVR through arduino-cli and simavr.
 
 ## Before writing code, read
 
@@ -12,8 +12,10 @@ clang, and on an AVR board through arduino-cli and simavr.
   Everything a sketch can use is documented.
 - [docs/Testing.md](docs/Testing.md): which kind of test proves what, and how a test is named
   and written.
+- [docs/targets/avr.md](docs/targets/avr.md): what holds on the AVR only, beyond the rules
+  that hold for every target.
 
-All three hold without exception. Where they and your habits differ, they win.
+They hold without exception. Where they and your habits differ, they win.
 
 ## How to work
 
@@ -40,11 +42,11 @@ make tests     # GoogleTest on the host
 ## Never
 
 - **No standard library in `src/`**: no `<vector>`, `<string>`, `<memory>`, `<algorithm>`,
-  `<iostream>`, nothing of `std::`; avr-gcc has none. **And no container or algorithm of your
-  own** where the ETL has one: use `etl::` (M-3). The tests may use `std::`.
+  `<iostream>`, nothing of `std::`; the smallest target has none. **And no container or
+  algorithm of your own** where the ETL has one: use `etl::` (M-3). The tests may use `std::`.
 - **No heap, no exceptions, no RTTI**: no `new`, `malloc`, `throw`, `try`, `dynamic_cast`,
   `typeid` (M-1, M-2).
-- **No blocking and no `float` without its reason**: no `delay()` in the library, no `double`
+- **No blocking and no `float` without its reason**: no busy wait in the library, no `double`
   at all (H-1, H-7). An interrupt's shared data is read atomically (H-6).
 - **No invented API.** A function of the Arduino core or of a library is used only if you have
   seen its declaration; `test/mock/` shows what the tests can call.

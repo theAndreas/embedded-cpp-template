@@ -81,7 +81,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 
 | Id | Item | Status |
 |---|---|---|
-| E-1 | A second flavor of the template, chosen by a copier question: CMake first, the library for any target, Arduino as one user of it | open |
+| E-1 | A second flavor of the template, chosen by a copier question: CMake first, the library for any target, Arduino as one user of it ; `docs/targets/` holds a profile per target, `avr.md` the first, and a copier question picks it once there is a second | open |
 | E-2 | A CI matrix of C++11, 14, 17 and 20, GCC and Clang, on the host, plus avr-gcc through arduino-cli; the ETL's own CI is the model: GCC and Clang from C++11 to C++26, cross builds, a build without the STL | open |
 | E-3 | The [ETL](https://github.com/ETLCPP/etl) (MIT) as a pinned dependency: CMake for the host, `etl-arduino` for Arduino; it ships CMake first, and Meson, Bazel (since 2026-04), PlatformIO and Arduino besides. A library of our own on top for what it lacks or does otherwise: errors as `Result` with groups, text and tables in flash. Recommended over a fork, which would have to follow a very active upstream; a fix goes upstream | idea |
 | E-4 | Decide what of Utl moves onto the ETL: it has `variant`, `optional`, `expected`, `span`, `string_view`, `vector`, `delegate`, `inplace_function`, `queue_spsc_isr` | idea |

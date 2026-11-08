@@ -27,6 +27,9 @@ swaps the parentheses where it says so.
   from Google, and why. Template parameters are named for their role, not `T`.
 - **`docs/Testing.md`: how the code is tested**: which of the three kinds of test proves what,
   how a test is named and written, what the mock of the core may do, and what SelfCheck checks.
+- **Rules for every target, and a profile per target**: CodingStyle.md holds for any target from
+  an 8-bit microcontroller to the host; `docs/targets/avr.md` holds what the AVR alone needs, as
+  text in flash, its critical sections and its registers.
 - **`docs/Misra.md`: MISRA C++:2023 rule by rule**, what covers each and where the project
   deviates; a draft, to be checked against the standard.
 - **The size of a function is limited**: 40 lines of body, 4 parameters, 3 levels of nesting, a

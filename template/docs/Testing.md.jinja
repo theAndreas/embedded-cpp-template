@@ -11,11 +11,11 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 |---|---|---|---|
 | **On the host** | `test/*_test.cpp`, GoogleTest against the mock in `test/mock/` | What the library computes: every function, every branch, every edge | `make tests`, `make clang`, `make sanitize`, `make coverage` |
 | **What must not compile** | `test/compile_fail/*.cpp` | That a misuse is stopped by the compiler, with the message it names | `make tests` |
-| **On the board** | `examples/SelfCheck`, in simavr | What only the board shows: 16-bit `int`, text in flash read with `pgm_read_*`, the variants as avr-gcc builds them | `make self-check` |
+| **On the target** | `examples/SelfCheck`, in simavr for the AVR | What only the target shows: the width of its `int`, text in its flash, the variants as its compiler builds them | `make self-check` |
 
 | Id | Rule | Checked by |
 |---|---|---|
-| TS-1 | Every behaviour is tested on the host; the board checks only what the host cannot show. A check in SelfCheck that the host could make is a test on the host instead. | Review |
+| TS-1 | Every behaviour is tested on the host; the target checks only what the host cannot show. A check in SelfCheck that the host could make is a test on the host instead. | Review |
 | TS-2 | A misuse that a `static_assert` stops has a case in `test/compile_fail/`, whose line `// Expected: ...` names the message. | `add_compile_fail_tests()` |
 | TS-3 | A bug is fixed after a test that shows it fails, and the test stays. | Review |
 | TS-4 | Every line and every branch of `src/` is reached by a test on the host. A branch no test can reach is a question about the code, not about the test. | `make coverage` |
@@ -39,7 +39,7 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 | TS-12 | The value under test first, the expected second: `EXPECT_EQ(Clamp(42, 0, 10), 10)`. | Review |
 | TS-13 | The expected value is written down, not computed: a test that computes it as the code does repeats the code's mistake. | Review |
 | TS-14 | No logic in a test: no `if`, no loop over cases. A table of cases is a parameterized test, `TEST_P` with `INSTANTIATE_TEST_SUITE_P`, each case with a name. | Review |
-| TS-15 | The edges are tested, each on its own: the least and the greatest value, one beyond each, empty and full, and an overflow where one can happen, as of `millis()` (H-2). | Review, `make coverage` |
+| TS-15 | The edges are tested, each on its own: the least and the greatest value, one beyond each, empty and full, and an overflow where one can happen, as of the clock (H-2). | Review, `make coverage` |
 | TS-16 | A `constexpr` function is also tested where the compiler computes it, with a `static_assert` in a test. | Review |
 | TS-17 | A fixture only for what two tests or more set up alike. No state shared between tests: each test can run alone and in any order. | `gtest_discover_tests`, Review |
 | TS-18 | Deterministic: no real time, no random number, no `sleep`. Time comes from the mock, set by the test. | Review |
@@ -49,12 +49,12 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 | Id | Rule | Checked by |
 |---|---|---|
 | TS-19 | `test/mock/` gives what the library uses of the core, with the core's signatures and nothing more; it grows as the library comes to use more. | `make tests`, `make examples` |
-| TS-20 | The mock records what the library does, as `Serial` its output, and lets the test set what the library reads, as the time of `millis()` or the level of a pin. It has no behaviour of its own beyond the core's. | Review |
+| TS-20 | The mock records what the library does, as `Serial` its output, and lets the test set what the library reads, as the time of the clock or the level of a pin. It has no behaviour of its own beyond the core's. | Review |
 | TS-21 | A test resets what it set in the mock, or the fixture does: the next test starts from the core's state after reset. | Review |
 
-## On the board
+## On the target
 
 | Id | Rule | Checked by |
 |---|---|---|
 | TS-22 | A check of SelfCheck prints one line, `pass` or `FAIL` and what it checks, and the run ends with the number that failed; `SelfCheck.expected` is what a correct run prints. | `make self-check` |
-| TS-23 | The input of a check is `volatile`, so that the board computes it and not the compiler. | Review |
+| TS-23 | The input of a check is `volatile`, so that the target computes it and not the compiler. | Review |
