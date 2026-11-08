@@ -3,6 +3,14 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## v0.2.1
+
+- `tools/coverage.sh` fails when the tests left no counts, rather than reporting 0 of 0 lines.
+
+On the update from v0.1.0: remove `build/` once. The presets name the compiler now, and CMake
+makes a build directory configured with another one anew, dropping the preset's options with
+the old cache: `--coverage` and warnings as errors went missing without a word.
+
 ## v0.2.0
 
 The workflow as Wordclock grew it: one way in, warnings as errors in CI only, one pinned
