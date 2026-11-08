@@ -62,10 +62,10 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 
 | Id | Item | Status |
 |---|---|---|
-| R-1 | MaxMatrix: bring in; take into the template what it does better (`cross-clang-tidy.py`, the apt cache of `apt-install.sh`, the Wokwi simulation) | open |
+| R-1 | MaxMatrix: bring in; take into the template what it does better (`cross-clang-tidy.py`, the apt cache of `apt-install.sh`, the Wokwi simulation). On CodingStyle.md: clang-format once (Google, `const` already right), its classes from the prefix `MaxMatrix` into a namespace, as a library's are (F-9); its file names stay (F-3) | open |
 | R-2 | XmegaTimer: bring in; ATxmega E5 with a third-party core (`ARDUINO_BOARD_URLS`), no simavr (`SIMAVR_MCU=""`) | open |
 | R-3 | TimerTwo: bring in, or retire it if Utl or the ETL covers it | open |
-| R-4 | Wordclock: find where it lies, then as R-1 | open |
+| R-4 | Wordclock (AndreasBur/Wordclock): a firmware for ESP32-S3, RP2350 and AVR128DA48 with a simulator, `firmware/` portable and `platform/<target>/` per port, built by CMake and PlatformIO. The model of the template's firmware flavor (E-1) and of its tools (`avr-stack.py`, `documented-sizes.py`, the fuzzing); profiles for AVR-Dx, ESP32-S3 and RP2350 in `docs/targets/`. On CodingStyle.md: clang-format once, `const` right, `byte` to `uint8_t` or `etl::byte` (T-17), `firmware/inc/` and `firmware/src/` into a folder per module (F-12), its file names and the global namespace stay (F-3, F-9) | open |
 
 ### M4 - Checks of our own
 
@@ -73,7 +73,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 |---|---|---|
 | C-1 | Find out whether the clang-tidy pinned from PyPI loads a plugin (`-load`); if not, clang-tidy and the LLVM headers from apt, pinned in the Dockerfile | done: it loads one and exports the symbols a module needs; only the headers come from apt.llvm.org, at the major version |
 | C-2 | A clang-tidy module of our own, with the first check: braced initialization in a member initializer list, with a fix-it (Utl's `function_ref.h:106` slipped through) | done: `house-braced-member-init` |
-| C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers; an `if … else if` ends with `else` (MISRA 9.4.1, `hicpp-multiway-paths-covered` is gone in clang-tidy 23); a template parameter is not a single letter (CodingStyle.md) | idea |
+| C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers; an `if … else if` ends with `else` (MISRA 9.4.1, `hicpp-multiway-paths-covered` is gone in clang-tidy 23); a template parameter is not a single letter (CodingStyle.md); an expression of too many steps, to split (CodingStyle.md T-18) | idea |
 | C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
 | C-5 | Fixed-width integer types (MISRA C:2012 Dir 4.6, AUTOSAR A3-9-1): no `int`, `unsigned` in `src/`, but `char` for text, `bool`, `size_t`, and what the Arduino core's signatures give, as the `int` of `analogRead()`. `google-runtime-int`, which is on, reports only `short` and `long`. Utl keeps to it already | idea |
 
@@ -81,7 +81,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 
 | Id | Item | Status |
 |---|---|---|
-| E-1 | A second flavor of the template, chosen by a copier question: CMake first, the library for any target, Arduino as one user of it | open |
+| E-1 | A second flavor of the template, chosen by a copier question: CMake first, the library for any target, Arduino as one user of it ; `docs/targets/` holds a profile per target, `avr.md` the first, and a copier question picks it once there is a second | open |
 | E-2 | A CI matrix of C++11, 14, 17 and 20, GCC and Clang, on the host, plus avr-gcc through arduino-cli; the ETL's own CI is the model: GCC and Clang from C++11 to C++26, cross builds, a build without the STL | open |
 | E-3 | The [ETL](https://github.com/ETLCPP/etl) (MIT) as a pinned dependency: CMake for the host, `etl-arduino` for Arduino; it ships CMake first, and Meson, Bazel (since 2026-04), PlatformIO and Arduino besides. A library of our own on top for what it lacks or does otherwise: errors as `Result` with groups, text and tables in flash. Recommended over a fork, which would have to follow a very active upstream; a fix goes upstream | idea |
 | E-4 | Decide what of Utl moves onto the ETL: it has `variant`, `optional`, `expected`, `span`, `string_view`, `vector`, `delegate`, `inplace_function`, `queue_spsc_isr` | idea |

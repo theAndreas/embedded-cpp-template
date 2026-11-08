@@ -3,8 +3,12 @@
 How the code of {{ project_name }} is written: how a file is split, how large a function may be,
 which parts of C++ are used on a microcontroller and which are not. It holds for `src/`; the
 tests and the examples follow it where a rule does not say otherwise. How a comment and a
-Doxygen block are written is in [Documentation.md](Documentation.md). How the code is tested is in
+Doxygen block are written is in [Documentation.md](Documentation.md), how the code is tested in
 [Testing.md](Testing.md).
+
+The rules hold for every target. What holds for one target only, as its way to put text into
+flash or to turn interrupts off, is in its profile in [targets/](targets/): for this project
+[targets/avr.md](targets/avr.md).
 
 This file is for a person and for a coding agent alike. `AGENTS.md` points every agent here.
 
@@ -19,9 +23,11 @@ it:
 
 ## Principles
 
-- **P-1 The AVR is the measure.** An `int` has 16 bits, RAM is 2 KiB, a vtable lies in RAM, there
-  is no standard library and no exceptions. Code that is right on the host but costly or wrong
-  there is wrong.
+- **P-1 The smallest target is the measure.** The code runs on targets from an 8-bit
+  microcontroller with 2 KiB of RAM to a host with gigabytes: an `int` may have 16 bits, there
+  may be no floating point unit, no heap, no exceptions and no standard library. Code that is
+  right on the host but costly or wrong on the smallest target is wrong. Its profile in
+  `targets/` says what that target lacks.
 - **P-2 The compiler and the tools decide what they can.** A rule a tool can check is a setting
   of the tool, not a paragraph here. A rule here that a tool could check is a gap to close.
 - **P-3 Three standards, in this order:** the C++ Core Guidelines, MISRA C++:2023
@@ -36,16 +42,18 @@ it:
 | Id | Rule | Checked by |
 |---|---|---|
 | F-1 | A header holds the declarations a user needs, documented; a `.cpp` holds the definitions. | Review |
-| F-2 | In the header stay only what has to be there or costs nothing there: templates, `constexpr` functions, and inline functions of at most three statements, such as an accessor, which the compiler can inline on the AVR. | Review |
-| F-3 | One class, or one family of functions, per header, named after it in lower case: `ring_buffer.h` for `RingBuffer`, with `ring_buffer.cpp` beside it. | Review |
+| F-2 | A header includes what its declarations need, not what its bodies need. In the class body stay only a template, which every caller has to see, a `constexpr` function, and an accessor of one statement; anything more, a state machine, an `#if` ladder, a body that would pull in a header for itself, is defined in the `.cpp`. Inlining is no reason to keep a body in the header: with `-flto` the compiler inlines across sources as readily as within one, and what a header costs is every file that includes it. A header that one source alone includes may keep its bodies, until a second one includes it. | Review, `make headers` |
+| F-3 | One class, or one family of functions, per header and source. A file is named exactly as the class it holds: `RingBuffer.h` and `RingBuffer.cpp` for `RingBuffer`, `array.h` for a class that mimics the standard's `array`; a family of functions after the family, in lower case: `clamp.h`. | Review |
 | F-4 | Every header compiles as the only include of an empty file. | `make headers` |
 | F-5 | A file includes what it uses, and nothing it does not ("include what you use"). | `misc-include-cleaner` |
 | F-6 | Header guards as `PROJECT_PATH_FILE_H_`, from the path. | cpplint |
 | F-7 | Includes in Google's order, each group sorted. | clang-format |
 | F-8 | Every file starts with the copyright and the SPDX licence as `//` lines. | Review |
-| F-9 | What is not part of the API lies in `{{ namespace }}::internal`; no `static` or anonymous namespace in a header. | `google-build-namespaces`, Review |
-| F-10 | A source file is ASCII, with LF line ends: a display of the board shows no umlaut, and a byte that is not ASCII in a string is a byte more than its character. | `.editorconfig`, Review |
+| F-9 | A library lies in its own namespace, so that its names cannot meet those of its user; an application may stay in the global one. What is not part of a library's API lies in its namespace `internal`. No `static` and no anonymous namespace in a header. | `google-build-namespaces`, Review |
+| F-10 | A source file is ASCII, with LF line ends: a display on the device may show no umlaut, and a byte that is not ASCII in a string is a byte more than its character. | `.editorconfig`, Review |
 | F-11 | A `.cpp` defines its functions in the order the header declares them. | Review |
+| F-12 | A header and its source lie side by side in one folder, a folder per module: `src/Text/MaxMatrixText.h` beside `src/Text/MaxMatrixText.cpp`. No tree of headers apart from the tree of sources, as `inc/` and `src/`: what is not part of the API is told by the namespace `internal` (F-9), not by a folder, and an Arduino library has everything below `src/` anyway. | Review |
+| F-13 | Files are grouped in folders, not left to pile up in one: a folder holds what belongs together, and when it holds more than about a dozen files, or files of more than one module, it is split by module. The same for `test/`, which mirrors `src/`, for `tools/`, `docs/` and `examples/`. | Review |
 
 ## Functions
 
@@ -56,7 +64,7 @@ it:
 | FN-3 | At most 4 parameters; more are a struct. | `readability-function-size` |
 | FN-4 | At most 3 levels of nesting within the body; an early return over an `else`. | `readability-function-size`, `readability-else-after-return` |
 | FN-5 | A cognitive complexity of at most 15. | `readability-function-cognitive-complexity` |
-| FN-6 | No recursion: the stack of the AVR is what is left of 2 KiB. | `misc-no-recursion` |
+| FN-6 | No recursion: the depth of the stack cannot be known when compiling, and on a small target the stack is what is left of the RAM. | `misc-no-recursion` |
 | FN-7 | A parameter that is cheap to copy (up to two pointers in size) is passed by value, any other by `T const&`; one the function writes by pointer or by `T&` only where a return value cannot carry it (F.16, F.20). | `performance-unnecessary-value-param`, Review |
 | FN-8 | A result is returned, not written into a parameter (F.20). Several results are a struct. | Review |
 | FN-9 | A function that can be `constexpr` is. In C++11 it is one `return`. | Review |
@@ -71,22 +79,35 @@ it:
 
 | Id | Rule | Checked by |
 |---|---|---|
-| T-1 | Integers of fixed width, `uint8_t` to `int32_t`, in `src/`, a loop counter among them: an `int` has 16 bits on the AVR and 32 on the host, so a test on the host misses an overflow on the board. A counter takes the type of what it is compared with, `size_t` for a size, `uint8_t` for a small range. `bool`, `char` for text and `size_t` stay; so does `int` where the Arduino core's signature gives it, as of `analogRead()`. | Review, until a check of our own (ROADMAP C-5) |
+| T-1 | Integers of fixed width, `uint8_t` to `int32_t`, in `src/`, a loop counter among them: the width of `int` depends on the target, 16 bits on an 8-bit microcontroller and 32 on the host, so a test on the host misses an overflow on the device. A counter takes the type of what it is compared with, `size_t` for a size, `uint8_t` for a small range. `bool`, `char` for text and `size_t` stay; so does `int` where an API of the platform gives it. | Review, until a check of our own (ROADMAP C-5) |
 | T-2 | No implicit conversion that can change a value. | `-Wconversion`, `-Wsign-conversion` |
 | T-3 | Braced initialization: `int count{0};`, `Point p{1, 2};`, and in a member initializer list. | `house-braced-member-init` in the initializer list, Review elsewhere |
 | T-4 | `const` to the right of what it makes constant: `char const*`, `T const&`. | clang-format |
 | T-5 | Everything that does not change is `const`; a value known when compiling is `constexpr`. | `misc-const-correctness` |
-| T-6 | `constexpr` before `const` before a macro. A macro only where nothing else will do, as for `F()` or a conditional build. | `cppcoreguidelines-macro-usage` |
+| T-6 | `constexpr` before `const` before a macro. A macro only where nothing else will do, as for a conditional build or a macro the platform requires. | `cppcoreguidelines-macro-usage` |
 | T-7 | `enum class`, with its underlying type: `enum class Mode : uint8_t`. | `cppcoreguidelines-use-enum-class`,`performance-enum-size` |
 | T-8 | `auto` only where the type stands in the same line already, as in a cast, or cannot be written, as of a lambda. | `modernize-use-auto`, Review |
 | T-9 | No C-style cast. `static_cast`; `reinterpret_cast` and `const_cast` only with a `NOLINT` and its reason. | `cppcoreguidelines-pro-type-*`, `google-readability-casting` |
 | T-10 | `nullptr`, never `NULL` or `0`. | `modernize-use-nullptr` |
-| T-11 | No magic number: a value with a meaning has a name. Tests are exempt. | `readability-magic-numbers` |
+| T-11 | No magic number: a value with a meaning has a name. Without one pass only what `readability-magic-numbers` lets pass, 0 to 4 and the floating point values 1.0 and 100.0. Tests and examples are exempt: their numbers are their data. | `readability-magic-numbers` |
 | T-12 | A range-based `for` where the index is not needed, taking each element by `const&` unless a copy is meant: `for (uint8_t const pin : pins)`, `for (Led const& led : leds)`. | `modernize-loop-convert`, `performance-for-range-copy` |
 | T-13 | A variable is declared where it is first needed, initialized, one per declaration, in the smallest scope; a new value that means something else is a new variable, not the old one reused. | `cppcoreguidelines-init-variables`, `readability-isolate-declaration`, Review |
 | T-14 | One side effect per statement: no `++` in a condition, no assignment inside an expression. | `bugprone-inc-dec-in-conditions`, `bugprone-assignment-in-if-condition`, Review |
 | T-15 | A `switch` over an `enum class` names every value and has no `default`, so that the compiler reports a value added later; any other `switch` has a `default`. | `-Wswitch`, `bugprone-switch-missing-default-case` |
 | T-16 | `using` for an alias, never `typedef`: `using Callback = void (*)(uint8_t);`. | `modernize-use-using` |
+| T-17 | Never Arduino's `byte`, which is an `unsigned char` that says nothing of what it holds. A byte that is a number, a level or a count, is `uint8_t`. A byte that is raw data, as of a buffer, a register or a frame on a bus, is a type that is no number, by M-3: `std::byte` where every target has C++17, else `etl::byte` or Utl's counterpart, else one of the project's own after the same pattern, an `enum class` of `unsigned char` with `to_integer()`. Raw data then takes only bitwise operators, and is a number only through `to_integer<uint8_t>()`. | Review |
+| T-18 | An expression does one thing. A computation of several steps, or a condition of several parts, is split into named steps: a `const` local for each value with a meaning, a small function for a step that needs explaining or recurs, so that each line reads as what it computes. A step whose name explains it is worth a function even when called once. Named functions called one in the argument of the next read as a pipeline and stay, as long as they fit on a line: `ToLevel(GetWeightedIntensity(GetIntensity(pixel)))`. | Review (ROADMAP C-3) |
+
+T-18 in an example:
+
+```cpp
+// Not:
+if ((now - start_ >= kInterval) && (state_ == State::kOn) && !paused_) {
+// But:
+bool const elapsed{now - start_ >= kInterval};
+bool const running{state_ == State::kOn && !paused_};
+if (elapsed && running) {
+```
 
 ## Classes
 
@@ -97,7 +118,7 @@ it:
 | C-3 | The rule of zero first. Else the rule of six: a class that declares a special member declares all six, the default constructor among them; `= default` and `= delete` count. | `cppcoreguidelines-special-member-functions` for five; the default constructor by review, until a check of our own (ROADMAP C-4) |
 | C-4 | A constructor with one argument is `explicit`, unless the conversion is meant; then a `NOLINT` says why. | cpplint `runtime/explicit` |
 | C-5 | A default the same for every constructor is a member initializer (C.48); the rest is in the initializer list (C.49), never assigned in the body. | `modernize-use-default-member-init`, `cppcoreguidelines-prefer-member-initializer` |
-| C-6 | `virtual` only with its reason in a comment at the class: a vtable takes RAM on the AVR, per class, and a call through it cannot be inlined. A template, or a function reference, often does the same at no cost; the reason says why it does not here. | Review |
+| C-6 | `virtual` only with its reason in a comment at the class: each class with a `virtual` function has a table, which takes RAM on some targets (see the profile), and a call through it cannot be inlined. A template, or a function reference, often does the same at no cost; the reason says why it does not here. | Review |
 | C-7 | A base class with a `virtual` function has a public virtual or protected non-virtual destructor. | `cppcoreguidelines-virtual-class-destructor` |
 | C-8 | Inheritance is public and of an interface; a class is reused by holding it, not by deriving from it. | Review |
 | C-9 | Data members are `private` and end in `_`. | `readability-identifier-naming` |
@@ -112,9 +133,9 @@ it:
 | Id | Rule | Checked by |
 |---|---|---|
 | M-1 | No heap: no `new`, `delete`, `malloc` or `free`, not even in `setup()`. The size of everything is known when compiling, and the RAM a build takes is the RAM it needs. | `cppcoreguidelines-no-malloc`, `cppcoreguidelines-owning-memory` |
-| M-2 | No exceptions and no RTTI: no `throw`, `try`, `dynamic_cast` or `typeid`. | the board's build |
-| M-3 | Not the standard library, which avr-gcc has not, but not written anew either: what the standard library has is taken from a library that gives it for the target, the [ETL](https://github.com/ETLCPP/etl) (ROADMAP E-3), as `etl::array`, `etl::optional`, `etl::span`. Only what no such library has is written in the project. The tests on the host may use the standard library. | the board's build, Review |
-| M-4 | Constant text and tables lie in flash, `PROGMEM`, and are read with `pgm_read_*`. | Review |
+| M-2 | No exceptions and no RTTI: no `throw`, `try`, `dynamic_cast` or `typeid`. Small targets have neither, and on the others they cost flash and time that cannot be bounded. | the target's build, Review |
+| M-3 | Reuse before writing, in this order: (1) what the project has already, a function or class that does it; (2) the standard library, where every target of the project has it, and only its parts that need neither heap nor exceptions (M-1, M-2), as `std::array`, `<algorithm>`, `<type_traits>`; where a target lacks it, `std::` stands only in the code of the targets that have it; (3) a library in the style of the standard library that the project uses, as the [ETL](https://github.com/ETLCPP/etl) or Utl; (4) only where none has it, it is written: once, for reuse, with the interface of the standard library's counterpart, so that it can give way to `std::` or `etl::` later, in a module folder of its own, as `src/{{ namespace }}/Utility/`, with its test. The tests on the host may use the standard library. | Review |
+| M-4 | Constant data, as text and tables, is `constexpr` or `const`, so that it can lie in flash. Where a target needs more to put it there and read it, its profile says how. | Review, the profile |
 | M-5 | No global object with a constructor that does work: the order of initialization across files is not defined. | `cppcoreguidelines-avoid-non-const-global-variables`, `cert-err58-cpp` |
 | M-7 | The cost of an entity in flash and RAM, where it matters, is stated in its Doxygen block. | Review |
 
@@ -122,13 +143,13 @@ it:
 
 | Id | Rule | Checked by |
 |---|---|---|
-| H-1 | The library does not block. Work that takes time is spread over an `Update()` that the sketch calls in every `loop()`; `delay()` only for the microseconds a datasheet asks between two steps of the hardware, with the datasheet's figure in a comment. | Review |
-| H-2 | Time is `uint32_t` from `millis()` or `micros()`, and a span is measured as the difference: `millis() - start >= interval`, never `millis() >= start + interval`. The difference is right across the overflow after 49 days, the sum is not. | Review, a test across the overflow |
+| H-1 | The library does not block. Work that takes time is spread over an `Update()` that the application calls in its main loop; a busy wait only for the microseconds a datasheet asks between two steps of the hardware, with the datasheet's figure in a comment. | Review |
+| H-2 | Time is an unsigned count of a fixed width from a clock the library is given, as a millisecond counter, and a span is measured as the difference: `now - start >= interval`, never `now >= start + interval`. The difference is right across the overflow of the counter, the sum is not. | Review, a test across the overflow |
 | H-3 | The hardware is handed in, not written into the library: pins, ports and peripherals as parameters of the constructor or of a template. The library is then tested on the host against the mock, and runs on another board. | Review |
-| H-4 | A register and its bits by their names in avr-libc, or by a named `constexpr`: `TIMSK1 \|= _BV(TOIE1)`, never a number. | `readability-magic-numbers`, Review |
-| H-5 | An ISR does the least it can: it copies a value or sets a flag, and returns. No `Serial`, no `delay()`, no `float`, no call that waits or takes long. | Review |
-| H-6 | What an ISR and the rest share is `volatile`. The rest reads or changes it with interrupts off, `ATOMIC_BLOCK(ATOMIC_RESTORESTATE)`, where it is wider than 8 bits or is read and written in one step, as `++count`. | Review |
-| H-7 | Fixed point before `float`: the AVR has no floating point unit, and the first `float` brings the soft-float routines, one to two KiB of flash. A `float` takes its reason in a comment; no `double`, which has 32 bits on the AVR and 64 on the host, so that a test on the host does not compute what the board does. | `-Wdouble-promotion`, Review |
+| H-4 | A register and its bits by the names of the vendor's header, or by a named `constexpr`, never by a number. The profile names the header. | `readability-magic-numbers`, Review |
+| H-5 | An interrupt routine does the least it can: it copies a value or sets a flag, and returns. No output, no wait, no floating point, no call that takes long. | Review |
+| H-6 | What an interrupt routine and the rest share is `volatile`. The rest reads or changes it in a critical section, with the interrupts off, where it is wider than what the target reads in one access or is read and written in one step, as `++count`. The profile says how a critical section is written. | Review |
+| H-7 | Fixed point before `float` where the smallest target has no floating point unit, as the profile says: there the first `float` brings the soft-float routines and their flash. A `float` takes its reason in a comment. No `double`: its width differs between targets, 32 bits on some and 64 on the host, so that a test on the host does not compute what the device does. | `-Wdouble-promotion`, Review |
 | H-8 | Bitwise operators on unsigned types only, the masks named: `constexpr uint8_t kReadyBit{0x04U};`. A shift is by less than the width of its type, after the promotion to `int` that a `uint8_t` takes. | `-Wshift-count-overflow`, Review |
 
 ## Errors
@@ -157,7 +178,8 @@ As Google names, enforced by `readability-identifier-naming`; `.clang-tidy` is t
 
 | What | How | Example |
 |---|---|---|
-| Namespace, file | `lower_case` | `{{ namespace }}`, `ring_buffer.h` |
+| Namespace | `lower_case` | `{{ namespace }}` |
+| File | as the class it holds (F-3) | `RingBuffer.h`, `array.h`, `clamp.h` |
 | Type, function | `CamelCase` | `RingBuffer`, `PushBack()` |
 | Accessor | like the member it gives | `size()` |
 | Variable, parameter | `lower_case` | `byte_count` |
@@ -175,14 +197,15 @@ does not fit a microcontroller, or MISRA asks for more, this file wins:
 
 | Google says | Here | Why |
 |---|---|---|
-| `.cc` files | `.cpp` | Arduino compiles `.cpp` from `src/`, not `.cc` |
-| `int` is the integer to use | Fixed width (T-1) | An `int` has 16 bits on the AVR; MISRA 6.9.2 |
+| `.cc` files | `.cpp` | Arduino compiles only `.cpp` from `src/`, and most embedded toolchains expect it |
+| File names in lower case | Named as the class (F-3) | A file is found by the name of what it holds; Arduino names a library's header after the library anyway |
+| `int` is the integer to use | Fixed width (T-1) | The width of `int` differs between targets; MISRA 6.9.2 |
 | Braces around a one-line body are optional | Always braces | MISRA 9.3.1 |
-| The standard library, `std::unique_ptr` for ownership | The ETL instead (M-3), and no ownership by pointer (M-1) | avr-gcc has no standard library, and there is no heap |
+| The standard library, `std::unique_ptr` for ownership | Its parts without heap and exceptions where every target has it, else a library like it (M-3); no ownership by pointer (M-1) | A small target may have no standard library, and there is no heap |
 | Comments in `//`, any style | Doxygen blocks `/*! */` for the API | The reference is built from them (Documentation.md) |
 | `const int` or `int const`, consistently | `int const` (T-4) | Read from right to left, as the rest of a type |
 | Brace or `=` initialization | Braced (T-3) | It refuses a narrowing conversion |
-| No exceptions | No exceptions | The same, for another reason: the AVR has none |
+| No exceptions | No exceptions | The same, for another reason: a small target has none (M-2) |
 
 ## Suppressing a check
 
