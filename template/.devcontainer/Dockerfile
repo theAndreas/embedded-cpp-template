@@ -119,6 +119,16 @@ RUN UV_TOOL_DIR=/opt/uv/tools UV_PYTHON_INSTALL_DIR=/opt/uv/python \
         /usr/local/bin/clangd && \
     clangd --version
 
+# The headers of LLVM, clang and clang-tidy that tools/tidy_module.sh compiles the checks of
+# our own against, as a module that the clang-tidy of uv.lock loads. LLVM_MAJOR is that
+# clang-tidy's major version: tools/tidy_module.sh fails, saying so, when uv.lock moves on and
+# this does not. CI's action llvm-headers reads it from here, so there is one place that says
+# which LLVM. llvm-headers.sh says where they come from, and why not pinned closer.
+ARG LLVM_MAJOR=23
+COPY llvm-headers.sh /tmp/llvm-headers.sh
+RUN /tmp/llvm-headers.sh "${LLVM_MAJOR}" "/opt/llvm-${LLVM_MAJOR}/include" && \
+    rm /tmp/llvm-headers.sh
+
 # The Arduino data directory and uv's cache are named volumes: the AVR core and its
 # toolchain, and the checkers from PyPI, are downloaded on first use, and the volumes are
 # what keep a rebuild from fetching them again. An empty named volume takes its ownership

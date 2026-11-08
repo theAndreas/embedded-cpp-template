@@ -16,7 +16,7 @@ board through arduino-cli and simavr; other targets and standards are next, see
 |---|---|---|
 | One way in | A Makefile that names every build and check: `make` lists them, `make check` is what CI runs, `make lint` the checks of seconds | `Makefile`, `tools/project.mk` |
 | Style | The Google C++ style with `const` on the right, braced initialization, Doxygen blocks | `.clang-format`, `CPPLINT.cfg`, `docs/Documentation.md` |
-| Static analysis | clang-tidy with the C++ Core Guidelines, CERT, bugprone, the analyzer, Google's names and clang's warnings beyond `-Wall -Wextra`, every exception with its reason; cppcheck beside it; every header compiled on its own | `.clang-tidy`, `tools/` |
+| Static analysis | clang-tidy with the C++ Core Guidelines, CERT, bugprone, the analyzer, Google's names and clang's warnings beyond `-Wall -Wextra`, every exception with its reason, and checks of our own (`house-*`) for the rules no check of clang-tidy's holds; cppcheck beside it; every header compiled on its own | `.clang-tidy`, `tools/`, `tools/tidy_module/` |
 | Warnings | `-Wall -Wextra -Wconversion -Wsign-conversion -Wshadow`, errors in CI and under `make check` | `cmake/checks.cmake`, `CMakePresets.json` |
 | Tests | GoogleTest on the host, by GCC and by clang, against a mock of the Arduino core, also under ASan and UBSan, with coverage; tests of what must not compile; a self check on the board in simavr | `CMakeLists.txt`, `test/`, `examples/SelfCheck` |
 | Documentation | Doxygen, failing on a gap, published on GitHub Pages | `Doxyfile`, `tools/docs.sh` |

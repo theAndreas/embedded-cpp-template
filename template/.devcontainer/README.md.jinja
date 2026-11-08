@@ -20,6 +20,7 @@ another container is lost with that container.
 | `uv` | the Python tools that `uv.lock` pins, in `.venv`: clang-format, clang-tidy, cpplint, gcovr, shellcheck, actionlint, ruff, copier |
 | `clang` | the tests a second time, by another compiler: `make clang` |
 | `clangd` | IntelliSense, see below |
+| LLVM's headers, in `/opt/llvm-23/include` | the checks of our own, `house-*`, a module that `tools/tidy_module.sh` builds and `tools/tidy.sh` loads |
 | `jq` | the compilation database of `tools/tidy.sh` |
 | `cppcheck` | a second analyser beside clang-tidy: `tools/cppcheck.sh` |
 | `arduino-lint` | the rules of the Arduino Library Manager |
@@ -49,6 +50,10 @@ everything:
 Both are written when the container is created. After adding a file, run `cmake --preset default`
 or `tools/tidy.sh --database-only` again. clangd inserts no includes: a sketch includes
 `<{{ project_name }}.h>` first, which an include put in by the editor would not know.
+
+clangd does not load the module of the checks of our own, `house-*`: those findings come from
+`make tidy` alone. The module's own sources in `tools/tidy_module/` are read against LLVM's
+headers, without the checks of `.clang-tidy`, which are the library's rules and not LLVM's.
 
 clangd comes from PyPI at 22.1.1, the newest there, one behind the clang-tidy 23 of CI, which stays
 the measure. The package wraps the binary in a Python script whose interpreter would lie in root's
@@ -85,6 +90,12 @@ by GitHub, so the first SSH operation does not fail with `Host key verification 
 published SHA-256 in the `Dockerfile`; `clangd` is pinned on PyPI. Bumping a version means bumping
 its checksums as well. `gh auth login` has to run in a terminal, and `gh auth setup-git` afterwards
 lets `git push` over HTTPS use the same token.
+
+LLVM's headers are not pinned closer than their major version, `ARG LLVM_MAJOR`: `llvm-headers.sh`
+takes them from apt.llvm.org, which keeps only the newest build of a release branch, and checks the
+archive's signature against the fingerprint in the script. Within a major version LLVM keeps its
+ABI. When `uv.lock` moves clang-tidy to the next major version, `make tidy` says so, and
+`LLVM_MAJOR` follows it, as does the path in `.clangd`.
 
 `gh` is pointed at `github.com` by the shared feature's `containerEnv`. A base image that sets
 `GH_HOST` to a company GitHub needs `"remoteEnv": {"GH_HOST": "github.com"}` in its
