@@ -23,7 +23,7 @@ clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports,
 | T-3 | Answer the new Core Guidelines findings in Utl: `reinterpret_cast`, union access, special members, macros; each fixed or NOLINT with its reason | done, Utl #52 |
 | T-4 | `CPPCHECK=0` in Utl until cppcheck parses `src/utl/array.h:181` (2.19 cannot); report it upstream | report open |
 | T-5 | `tools/docs.sh` failed silently on a log without a warning: fixed in the template, comes with T-1 | done |
-| T-6 | Utl on v0.2.0 with `copier update`: the first update a project takes; the Keypad check into `tools/project.mk` | open |
+| T-6 | Utl on v0.2.0 with `copier update`: the first update a project takes; the Keypad check into `tools/project.mk` | done, no conflict |
 
 ### M2b - Wordclock's workflow, v0.2.0 (done but W-10, W-11, W-13)
 
