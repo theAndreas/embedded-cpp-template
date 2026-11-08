@@ -93,6 +93,7 @@ it:
 | T-14 | One side effect per statement: no `++` in a condition, no assignment inside an expression. | `bugprone-inc-dec-in-conditions`, `bugprone-assignment-in-if-condition`, Review |
 | T-15 | A `switch` over an `enum class` names every value and has no `default`, so that the compiler reports a value added later; any other `switch` has a `default`. | `-Wswitch`, `bugprone-switch-missing-default-case` |
 | T-16 | `using` for an alias, never `typedef`: `using Callback = void (*)(uint8_t);`. | `modernize-use-using` |
+| T-17 | Never Arduino's `byte`, which is an `unsigned char` that says nothing of what it holds. A byte that is a number, a level or a count, is `uint8_t`; a byte that is raw data, as of a buffer, a register or a frame on a bus, is `etl::byte`, which is `std::byte` for every standard from C++11 (M-3): no arithmetic, only bitwise operators, and a number only through `etl::to_integer<uint8_t>()`. | Review |
 
 ## Classes
 
