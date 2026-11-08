@@ -7,24 +7,25 @@ each version of the template brings.
 
 ## Milestones
 
-### M1 - The template, v0.1.0 (done)
+### M1 - The template, v0.1.0 (done, 2026-11-08)
 
 Utl's checks, CI and dev container, made general, with copier to make and update a project.
 See `CHANGELOG.md` for what it brings beyond Utl: the C++ Core Guidelines and CERT in
 clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports, and
 `tools/project.sh` for what is the project's.
 
-### M2 - Utl on the template (next)
+### M2 - Utl on the template (done but T-4, T-6)
 
 | Id | Item | Status |
 |---|---|---|
-| T-1 | Bring Utl in with `copier copy --overwrite`; its variants `ram`, `flash`, `checked`, the plugin `avr-flash-vtbl` and the Keypad workflow into `tools/project.sh` and hooks | open |
-| T-2 | Fix what the new warnings find in Utl: `-Wconversion`, `-Wsign-conversion`, `-Wshadow`, about ten places | open |
-| T-3 | Answer the new Core Guidelines findings in Utl: `reinterpret_cast`, union access, special members, macros; each fixed or NOLINT with its reason | open |
-| T-4 | `CPPCHECK=0` in Utl until cppcheck parses `src/utl/array.h:181` (2.19 cannot); report it upstream | open |
-| T-5 | `tools/docs.sh` failed silently on a log without a warning: fixed in the template, comes with T-1 | open |
+| T-1 | Bring Utl in with `copier copy --overwrite`; its variants `ram`, `flash`, `checked`, the plugin `avr-flash-vtbl` and the Keypad workflow into `tools/project.sh` and hooks | done, Utl #52 |
+| T-2 | Fix what the new warnings find in Utl: `-Wconversion`, `-Wsign-conversion`, `-Wshadow`, about ten places | done, Utl #52 |
+| T-3 | Answer the new Core Guidelines findings in Utl: `reinterpret_cast`, union access, special members, macros; each fixed or NOLINT with its reason | done, Utl #52 |
+| T-4 | `CPPCHECK=0` in Utl until cppcheck parses `src/utl/array.h:181` (2.19 cannot); report it upstream | report open |
+| T-5 | `tools/docs.sh` failed silently on a log without a warning: fixed in the template, comes with T-1 | done |
+| T-6 | Utl on v0.2.0 with `copier update`: the first update a project takes; the Keypad check into `tools/project.mk` | open |
 
-### M2b - Wordclock's workflow, v0.2.0
+### M2b - Wordclock's workflow, v0.2.0 (done but W-10, W-11, W-13)
 
 What Wordclock (AndreasBur/Wordclock) grew on 2026-11-06 and 07, into the template, and from
 there into Utl with `copier update`: the first update a project takes, and so the proof that the
@@ -32,18 +33,18 @@ mechanism carries.
 
 | Id | Item | Status |
 |---|---|---|
-| W-1 | One way in: a Makefile that names every build and check, `make` lists them, `make check` is what CI runs and `make lint` the checks of seconds; every step of every workflow is one of its targets | open |
-| W-2 | Warnings as errors in CI and under `make check`, not in a developer's build: `ci-` presets with `CMAKE_COMPILE_WARNING_AS_ERROR`, chosen by `STRICT`, which `CI=true` sets | open |
-| W-3 | One pinned Python environment, `pyproject.toml` and `uv.lock`, for clang-format, cpplint, clang-tidy, gcovr, shellcheck, actionlint and ruff, the same in the image and in CI, instead of a pin per `uvx` call | open |
-| W-4 | Composite actions: `apt-install`, the downloads cached and a stalled mirror retried; `uv-sync`, uv at the Dockerfile's version | open |
-| W-5 | Dependabot for the actions and `uv.lock`, weekly, a week's cooldown | open |
-| W-6 | `permissions: contents: read`; `ci.yml` callable (`workflow_call`), and `release.yml` on a tag: CI passes, the tag matches `version=` of `library.properties`, the release is published | open |
-| W-7 | `static-analysis.yml` of its own, beside `ci.yml`, for a badge of its own: clang-tidy, cppcheck, the Doxygen blocks | open |
-| W-8 | The host tests a second time with clang, as a preset | open |
-| W-9 | Every header compiled as the only include of an empty file (`self-contained-headers.py`), per target | open |
+| W-1 | One way in: a Makefile that names every build and check, `make` lists them, `make check` is what CI runs and `make lint` the checks of seconds; every step of every workflow is one of its targets | done, v0.2.0 |
+| W-2 | Warnings as errors in CI and under `make check`, not in a developer's build: `ci-` presets with `CMAKE_COMPILE_WARNING_AS_ERROR`, chosen by `STRICT`, which `CI=true` sets | done, v0.2.0 |
+| W-3 | One pinned Python environment, `pyproject.toml` and `uv.lock`, for clang-format, cpplint, clang-tidy, gcovr, shellcheck, actionlint and ruff, the same in the image and in CI, instead of a pin per `uvx` call | done, v0.2.0 |
+| W-4 | Composite actions: `apt-install`, the downloads cached and a stalled mirror retried; `uv-sync`, uv at the Dockerfile's version | done, v0.2.0 |
+| W-5 | Dependabot for the actions and `uv.lock`, weekly, a week's cooldown | done, v0.2.0 |
+| W-6 | `permissions: contents: read`; `ci.yml` callable (`workflow_call`), and `release.yml` on a tag: CI passes, the tag matches `version=` of `library.properties`, the release is published | done, v0.2.0 |
+| W-7 | `static-analysis.yml` of its own, beside `ci.yml`, for a badge of its own: clang-tidy, cppcheck, the Doxygen blocks | done, v0.2.0 |
+| W-8 | The host tests a second time with clang, as a preset | done, v0.2.0 |
+| W-9 | Every header compiled as the only include of an empty file (`self-contained-headers.py`), per target | done, v0.2.0 |
 | W-10 | The sizes the README states checked against the build (`documented-sizes.py`); Utl's table of flash and RAM | open |
 | W-11 | The AVR's deepest stack against the RAM it has (`avr-stack.py`), for an Arduino sketch | idea |
-| W-12 | ruff over the Python scripts, with the checks that answer "is this wrong" | open |
+| W-12 | ruff over the Python scripts, with the checks that answer "is this wrong" | done, v0.2.0 |
 | W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's | idea |
 
 ### M2c - A dev container that starts in seconds

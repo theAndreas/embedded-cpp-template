@@ -40,20 +40,27 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends cmake ninja-build \
-            libgtest-dev simavr jq doxygen cppcheck
+            libgtest-dev clang simavr jq doxygen cppcheck
 
       - name: The template's own script
         run: uvx --from shellcheck-py==0.11.0.1 shellcheck tests/check.sh
 
+      # Every target of `make check` but arduino-lint, which the runner has not installed, with
+      # warnings as errors.
       - name: Make a project and check it
         run: |
-          tests/check.sh --keep lint tests sanitize coverage tidy cppcheck docs \
-            examples self-check
+          tests/check.sh --keep lint tests clang sanitize coverage tidy cppcheck headers \
+            docs examples self-check
+
+      # What git has of the project, without the .venv the checks made beside it, whose links
+      # arduino-lint would report.
+      - name: Copy the library as git has it
+        run: build/Demo/tools/arduino_lint.sh --copy-only
 
       - name: arduino-lint
         uses: arduino/arduino-lint-action@v3
         with:
-          path: build/Demo
+          path: build/Demo/build/arduino-lint/Demo
           project-type: library
           library-manager: submit
           compliance: strict

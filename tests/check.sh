@@ -10,8 +10,8 @@
 # Usage:
 #   tests/check.sh [--keep] [CHECK...]
 #
-# CHECK is one or more of lint, tests, sanitize, coverage, tidy, cppcheck, docs, examples,
-# self-check, arduino-lint; all of them if none is given. With --keep the project is left in
+# CHECK is a target of the project's Makefile, as lint, tests, clang, tidy, headers or
+# self-check; all of what `make check` runs if none is given. With --keep the project is left in
 # build/Demo for a look, else it is removed. The folder is named after the project, as cpplint
 # takes the header guards from it. The url is the template's, as arduino-lint checks that it
 # answers.
@@ -20,8 +20,8 @@ set -euo pipefail
 
 TEMPLATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly TEMPLATE_DIR
-readonly ALL_CHECKS=(lint tests sanitize coverage tidy cppcheck docs examples self-check
-  arduino-lint)
+readonly ALL_CHECKS=(lint arduino-lint tests clang sanitize coverage tidy cppcheck headers docs
+  examples self-check)
 # copier from PyPI through uvx, at a fixed version, like the tools of a project.
 readonly COPIER="copier==9.19.1"
 # Global, as the trap that removes it runs after main() has returned.
@@ -31,25 +31,10 @@ err() {
   echo "$*" >&2
 }
 
-# Runs one check in the project's folder.
+# Runs one check in the project's folder: a target of its Makefile, with warnings as errors, as
+# CI runs it.
 run_check() {
-  local check="$1"
-  case "${check}" in
-    lint) tools/lint.sh ;;
-    tests) cmake --workflow --preset default ;;
-    sanitize) cmake --workflow --preset sanitize ;;
-    coverage) tools/coverage.sh ;;
-    tidy) tools/tidy.sh ;;
-    cppcheck) tools/cppcheck.sh ;;
-    docs) tools/docs.sh ;;
-    examples) tools/compile_examples.sh ;;
-    self-check) tools/self_check.sh ;;
-    arduino-lint) arduino-lint --library-manager submit --compliance strict ;;
-    *)
-      err "Unknown check: ${check}"
-      return 2
-      ;;
-  esac
+  STRICT=1 make "$1"
 }
 
 main() {
@@ -83,8 +68,8 @@ main() {
 
   local failed=()
   local check
-  if [[ " ${checks[*]} " =~ \ (tidy|examples|self-check)\  ]]; then
-    tools/setup.sh >/dev/null
+  if [[ " ${checks[*]} " =~ \ (tidy|headers|examples|self-check)\  ]]; then
+    make setup >/dev/null
   fi
   for check in "${checks[@]}"; do
     echo "=== ${check}"

@@ -3,6 +3,36 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## v0.2.0
+
+The workflow as Wordclock grew it: one way in, warnings as errors in CI only, one pinned
+environment for the Python tools.
+
+- **A Makefile names every build and check.** `make` lists them, `make check` is what CI runs,
+  `make lint` the checks of seconds. Every step of every workflow is one of its targets. A
+  project's own targets go into `tools/project.mk`; one added to `PROJECT_CHECKS` is part of
+  `make check`.
+- **Warnings are errors in CI and under `make check`, not in a developer's build:** the `ci-`
+  presets turn on `CMAKE_COMPILE_WARNING_AS_ERROR`, chosen by `STRICT`, which `CI=true` sets.
+  `cmake/checks.cmake` no longer adds `-Werror`.
+- **The tests a second time by clang:** the preset and target `clang`, and a CI job.
+- **Every header of `src/` compiled on its own**, for the host and for the board:
+  `make headers`, `tools/self_contained_headers.py`.
+- **The Python tools pinned in `pyproject.toml` and `uv.lock`**, run with `uv run --frozen`:
+  clang-format, clang-tidy, cpplint, gcovr, shellcheck, actionlint, ruff and copier. The
+  template's Dependabot keeps them and the actions current. ruff reads the Python scripts.
+- **CI:** `static-analysis.yml` beside `ci.yml`, each with its badge; `release.yml` publishes a
+  tag whose checks pass and whose version is that of `library.properties`, with the library as a
+  `.zip`; `permissions: contents: read`; composite actions `apt-install` (cached, a stalled
+  mirror retried), `uv-sync` and `arduino-setup` (arduino-cli at the Dockerfile's version, the
+  core cached).
+- `make arduino-lint` checks what git has, not the working tree with its `.venv`.
+- The dev container installs clang, and syncs the Python tools when it is created.
+
+On the update: move a project's own steps of `ci.yml` into a workflow of its own, and its own
+commands into `tools/project.mk`. `.venv/` is ignored now; a `uvx` call of a project's own
+script becomes `uv run --frozen`.
+
 ## v0.1.0
 
 The template, out of Utl's checks, CI and dev container, made general:

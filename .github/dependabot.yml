@@ -1,0 +1,44 @@
+# Dependabot: a pull request whenever a pin of the template falls behind, which the workflow
+# Template then checks by making a project and running its checks. Everything is pinned so that
+# nothing changes under a project without anybody asking, and a pin left alone is drift of
+# another kind.
+#
+# The pins live in template/, in what every project gets: the actions of its workflows and
+# composite actions, and pyproject.toml with uv.lock. A project takes the update with `copier
+# update`, not with a Dependabot of its own, so that the two never touch the same line.
+#
+# Weekly, and a week's cooldown before a new release is proposed at all: a release that is
+# withdrawn or followed by a quick fix is usually so within days. Security updates are not held
+# back by it.
+#
+# What this cannot read stays a pin somebody bumps by hand: the dev container's ARGs in
+# template/.devcontainer/Dockerfile, arduino-cli, arduino-lint, gh and uv with their checksums,
+# and the Arduino core in a project's tools/project.sh.
+version: 2
+updates:
+  # The template's own workflow, and those of a project with the composite actions they call.
+  # One pull request for all: an action update is a version number and rarely more.
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /template
+      - /template/.github/actions/*
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # pyproject.toml and uv.lock. The C++ tools each on their own, as a new clang-format or
+  # clang-tidy reports or formats otherwise and a failure should name which; the rest together.
+  - package-ecosystem: uv
+    directory: /template
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      linters:
+        patterns: ["cpplint", "shellcheck-py", "actionlint-py", "ruff", "gcovr", "copier"]
