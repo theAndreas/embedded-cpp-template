@@ -89,6 +89,9 @@ restore what the project needs to keep, move what is the project's into `tools/p
 
 ## Changing the template
 
+The repository has a dev container of its own, built from the template's Dockerfile, so that it
+carries exactly what a project's does: see [.devcontainer/README.md](.devcontainer/README.md).
+
 1. Change the files in `template/`. A file ending in `.jinja` is rendered with the answers of
    `copier.yml`; any other is copied as it is.
 2. `tests/check.sh` makes a project from the working tree and runs all of its checks. A single

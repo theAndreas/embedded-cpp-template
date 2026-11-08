@@ -1,2 +1,4 @@
 build/
 .venv/
+# A dev container variant of the site, see .devcontainer/README.md.
+/.devcontainer/vector/

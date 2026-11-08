@@ -1,0 +1,74 @@
+{
+    "id": "shared",
+    "version": "1.0.0",
+    "name": "embedded-cpp-template shared editor configuration",
+    "description": "Extensions, settings and the volumes for the Arduino data directory, uv's cache and logins shared by every devcontainer.json variant of the template repository.",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-vscode.cpptools",
+                "eamodio.gitlens",
+                "samuelcolvin.jinjahtml",
+                "cschlosser.doxdocgen",
+                "openai.chatgpt"
+            ],
+            // clangd for IntelliSense, with the databases .clangd names; cpptools only
+            // for debugging, its IntelliSense off so that the two do not answer twice.
+            // doxdocgen writes the skeleton of a Doxygen block, see the settings below.
+            // No header insertion: a sketch includes the library's header first, and an
+            // include put in by the editor would not know that. An .ino is C++, a .jinja file
+            // a template, which the Jinja extension colours.
+            "settings": {
+                "C_Cpp.intelliSenseEngine": "disabled",
+                "clangd.path": "/usr/local/bin/clangd",
+                "clangd.arguments": ["--header-insertion=never"],
+                "files.associations": { "*.ino": "cpp", "*.jinja": "jinja" },
+                // The skeleton of a Doxygen block in the style of docs/Documentation.md:
+                // /*! and Enter above a declaration.
+                "doxdocgen.c.triggerSequence": "/*!",
+                "doxdocgen.c.firstLine": "/*!",
+                "doxdocgen.c.commentPrefix": " * ",
+                "doxdocgen.c.lastLine": " */",
+                "doxdocgen.generic.briefTemplate": "\\brief {text}",
+                "doxdocgen.generic.paramTemplate": "\\param[in] {param} ",
+                "doxdocgen.cpp.tparamTemplate": "\\tparam {param} ",
+                "doxdocgen.generic.returnTemplate": "\\return ",
+                "doxdocgen.generic.includeTypeAtReturn": false,
+                "doxdocgen.generic.order": ["brief", "empty", "tparam", "param", "return"]
+            }
+        }
+    },
+    // uv's cache is a volume of its own, another file system than the workspace's .venv, so it
+    // copies rather than failing to link and saying so on every sync.
+    "containerEnv": {
+        "GH_HOST": "github.com",
+        "UV_LINK_MODE": "copy"
+    },
+    // Nothing to build here: tests/check.sh makes a project in build/Demo and that project's
+    // `make setup` installs the core, into the volume below, where it stays. The versions, so
+    // that a broken tool shows when the container is made.
+    "postCreateCommand": "arduino-cli version && arduino-lint --version && gh --version && uv --version && clangd --version && command -v simavr && doxygen --version && cppcheck --version && clang++ --version && cmake --version",
+    "mounts": [
+        {
+            "source": "embedded-cpp-template-arduino15",
+            "target": "/home/vscode/.arduino15",
+            "type": "volume"
+        },
+        {
+            "source": "embedded-cpp-template-uv-cache",
+            "target": "/home/vscode/.cache/uv",
+            "type": "volume"
+        },
+        {
+            "source": "embedded-cpp-template-codex",
+            "target": "/home/vscode/.codex",
+            "type": "volume"
+        },
+        {
+            "source": "embedded-cpp-template-gh",
+            "target": "/home/vscode/.config/gh",
+            "type": "volume"
+        }
+    ]
+}
