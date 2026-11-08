@@ -1,0 +1,13 @@
+{
+    "name": "embedded-cpp-template (WSL2)",
+    // The image every project made from the template gets: its Dockerfile, so that this
+    // container never differs from theirs. Extensions, settings and volumes live in ../shared.
+    "build": {
+        "dockerfile": "../../template/.devcontainer/Dockerfile",
+        "context": "../../template/.devcontainer"
+    },
+    // Nothing is mounted: this variant relies on VS Code's own SSH-agent forwarding.
+    "features": {
+        "./../shared": {}
+    }
+}
