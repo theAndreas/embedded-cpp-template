@@ -51,9 +51,11 @@ one. Commit before an update, review the diff after it, and run the checks.
   change to them. A project may still change one: add its own exceptions at the end of a list in
   `.clang-tidy`, with the reason, and the merge keeps them. A job of its own goes into a workflow
   of its own.
-- **The project's**, written once and never touched by an update: `README.md`,
-  `CMakeLists.txt`, `library.properties`, `tools/project.sh`, `src/`, `test/` and the examples
-  `Basics` and `SelfCheck`. `copier.yml` lists them in `_skip_if_exists`.
+- **The project's**, never touched by an update: `README.md`, `CMakeLists.txt`,
+  `library.properties` and `tools/project.sh`, written where they do not exist yet; and the
+  starting point of a new library, `src/`, `test/` and the examples `Basics` and `SelfCheck`,
+  written only by `copier copy` with the answer `skeleton`. An update neither brings back what a
+  project deleted of it nor merges into what it changed.
 
 `tools/project.sh` is how the template's tools learn about the project: the board, the core, the
 build variants and their flags, and hooks such as `prepare()`, which builds what compiling needs
@@ -65,11 +67,13 @@ A project that was not made from the template has no `.copier-answers.yml` yet. 
 its own:
 
 ```bash
-uvx copier copy --overwrite --data project_name=Utl gh:theAndreas/embedded-cpp-template .
+uvx copier copy --overwrite --data project_name=Utl --data skeleton=false \
+  gh:theAndreas/embedded-cpp-template .
 git diff                     # what the template would change
 ```
 
-`--overwrite` replaces the template's files; the project's are left alone where they exist. Take
+`--overwrite` replaces the template's files; the project's are left alone where they exist, and
+`skeleton=false` leaves out the starting point of a new library. Take
 over what is better, restore what the project needs to keep, move what is the project's into
 `tools/project.sh`, and commit with `.copier-answers.yml`. From then on `copier update` works.
 

@@ -57,7 +57,7 @@ clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports,
 | I-1 | `utl::variant`, without exceptions, `visit` without a table of function pointers in RAM; or `etl::variant` after E-4 |
 | I-2 | The host warnings of `cmake/checks.cmake` for GCC as well: `-Wold-style-cast`, `-Wzero-as-null-pointer-constant`, `-Wundef`, `-Wnull-dereference`, which only clang-tidy passes now |
 | I-3 | A flavor for host programs, such as FontCreator |
-| I-4 | MISRA C++:2023: evaluate a checker for open source (PVS-Studio, Cppcheck Premium), only if a project needs the evidence |
+| I-4 | MISRA C++:2023 and AUTOSAR C++14: evaluate PC-lint Plus first, which Vector's own projects use, then PVS-Studio and Cppcheck Premium; only if a project needs the evidence |
 | I-5 | Utl's names: the API mimics the standard in part and Google in part; decide one scheme for a library that mimics the standard |
 | I-6 | A test of what must not compile in the skeleton, as an example of `add_compile_fail_tests()` |
 | I-7 | clangd from PyPI is one major version behind clang-tidy (22 against 23); follow when 23 is there |

@@ -6,23 +6,37 @@
 # - The template's own: configuration, tools/, cmake/checks.cmake, CI and the dev container.
 #   `copier update` brings every change to them into a project, as a three-way merge that
 #   keeps what the project changed itself.
-# - The project's own, listed in _skip_if_exists: written once as a starting point, then
-#   never touched again. tools/project.sh among them holds what the template's tools need
-#   to know of the project.
+# - The project's own: written once as a starting point, then never touched again.
+#   tools/project.sh among them holds what the template's tools need to know of the project.
 
 _min_copier_version: "9.4.0"
 _subdirectory: template
 _answers_file: .copier-answers.yml
 
+# The project's own files, written where they do not exist yet. Anchored with /, as an
+# unanchored README.md would match .devcontainer/README.md too, which is the template's.
 _skip_if_exists:
-  - README.md
-  - CMakeLists.txt
-  - library.properties
-  - tools/project.sh
-  - src/
-  - test/
-  - examples/Basics/
-  - examples/SelfCheck/
+  - /README.md
+  - /CMakeLists.txt
+  - /library.properties
+  - /tools/project.sh
+
+# The starting point of a new library, src/, test/ and the examples Basics and SelfCheck: written
+# only by `copier copy`, and only with the answer skeleton. An update leaves them out on both of
+# its sides, so it neither brings back what a project deleted nor merges into what it changed;
+# switching skeleton off on an update would delete them instead. The first entries are copier's
+# defaults, which _exclude replaces.
+_exclude:
+  - copier.yml
+  - "~*"
+  - "*.py[co]"
+  - __pycache__
+  - .git
+  - .DS_Store
+  - "{% if _copier_operation == 'update' or not skeleton %}/src{% endif %}"
+  - "{% if _copier_operation == 'update' or not skeleton %}/test{% endif %}"
+  - "{% if _copier_operation == 'update' or not skeleton %}/examples/Basics{% endif %}"
+  - "{% if _copier_operation == 'update' or not skeleton %}/examples/SelfCheck{% endif %}"
 
 _message_after_copy: |
   {{ project_name }} is ready. In the dev container, or with its tools installed:
@@ -34,6 +48,11 @@ _message_after_copy: |
     tools/self_check.sh                 # examples/SelfCheck in simavr
 
   The folder has to be named {{ project_name }}: cpplint takes the header guards from it.
+
+skeleton:
+  type: bool
+  help: Write the starting point of a new library, src/, test/ and the examples; no for a project brought in
+  default: true
 
 project_name:
   type: str

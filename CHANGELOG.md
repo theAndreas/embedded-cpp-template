@@ -17,3 +17,5 @@ The template, out of Utl's checks, CI and dev container, made general:
 - The host build warns with `-Wconversion -Wsign-conversion -Wshadow` as well, from
   `cmake/checks.cmake`.
 - `.editorconfig`, from MaxMatrix.
+- The starting point of a new library, `src/`, `test/` and the examples, comes only with
+  `copier copy` and the answer `skeleton`; a project brought in answers no.
