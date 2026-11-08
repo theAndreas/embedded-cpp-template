@@ -53,6 +53,7 @@ it:
 | F-10 | A source file is ASCII, with LF line ends: a display on the device may show no umlaut, and a byte that is not ASCII in a string is a byte more than its character. | `.editorconfig`, Review |
 | F-11 | A `.cpp` defines its functions in the order the header declares them. | Review |
 | F-12 | A header and its source lie side by side in one folder, a folder per module: `src/Text/MaxMatrixText.h` beside `src/Text/MaxMatrixText.cpp`. No tree of headers apart from the tree of sources, as `inc/` and `src/`: what is not part of the API is told by the namespace `internal` (F-9), not by a folder, and an Arduino library has everything below `src/` anyway. | Review |
+| F-13 | Files are grouped in folders, not left to pile up in one: a folder holds what belongs together, and when it holds more than about a dozen files, or files of more than one module, it is split by module. The same for `test/`, which mirrors `src/`, for `tools/`, `docs/` and `examples/`. | Review |
 
 ## Functions
 

@@ -30,6 +30,9 @@ swaps the parentheses where it says so.
 - **Rules for every target, and a profile per target**: CodingStyle.md holds for any target from
   an 8-bit microcontroller to the host; `docs/targets/avr.md` holds what the AVR alone needs, as
   text in flash, its critical sections and its registers.
+- **Files grouped in folders**, a folder per module with header and source side by side, and
+  `test/` mirroring `src/`; a test of `RingBuffer.h` is `RingBufferTest.cpp`, which clang-format
+  and cpplint now take for the header's test. CMake finds sources and tests in every folder.
 - **`docs/Misra.md`: MISRA C++:2023 rule by rule**, what covers each and where the project
   deviates; a draft, to be checked against the standard.
 - **The size of a function is limited**: 40 lines of body, 4 parameters, 3 levels of nesting, a
@@ -41,7 +44,9 @@ swaps the parentheses where it says so.
 - **`AGENTS.md` for a coding agent**, which any agent reads, and `CLAUDE.md`, which imports it for
   Claude Code: what to read before writing code, and what to run after.
 
-On the update: `make tidy` may now report functions that are too large. Split them, or suppress
+On the update: `make tidy` may now report functions that are too large.
+`CMakeLists.txt` is the project's and is not updated: to build a module in a folder of its own,
+take its two `file(GLOB_RECURSE ...)` lines and the `list(FILTER ...)` from a new copy. Split them, or suppress
 one with its reason. Notes of the project's own for an agent go at the end of `AGENTS.md`.
 
 ## v0.2.1

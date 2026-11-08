@@ -24,7 +24,7 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 
 | Id | Rule | Checked by |
 |---|---|---|
-| TS-5 | One test file per header, named after it: `ring_buffer.h` is tested in `test/ring_buffer_test.cpp`. CMake takes every `test/*_test.cpp`. | Review |
+| TS-5 | One test file per header, in the folder of `test/` that mirrors the header's in `src/`, named as the class it tests and `Test`: `src/Text/MaxMatrixText.h` is tested in `test/Text/MaxMatrixTextTest.cpp`, as its suite is `MaxMatrixTextTest`. A family of functions in lower case takes `_test`: `clamp.h` in `clamp_test.cpp`. CMake takes every such file below `test/`. | Review |
 | TS-6 | A test lies in the library's namespace and an anonymous one inside it, as the skeleton's does. | Review |
 | TS-7 | The suite is the entity and `Test`, the test is what it does, as a sentence in the third person: `TEST(ClampTest, LimitsAValueBelow)` reads "Clamp limits a value below". No underscore, which GoogleTest reserves; no "Test", "Works" or "Correct" in the name of a test. | Review |
 | TS-8 | A test reaches the library through its API only, as a sketch does: no `friend`, no `#define private public`, no header of `internal` unless the test is of `internal`. | Review |
