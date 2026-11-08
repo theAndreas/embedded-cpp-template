@@ -29,16 +29,21 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
   CPPCHECK=1
 }
 
-variant_flags() {
-  :
-}
+# The hooks, which do nothing unless tools/project.sh defines them again, and
+# then are never called: SC2329.
+# shellcheck disable=SC2329
+{
+  variant_flags() {
+    :
+  }
 
-prepare() {
-  :
-}
+  prepare() {
+    :
+  }
 
-check_elf() {
-  :
+  check_elf() {
+    :
+  }
 }
 
 # shellcheck source=tools/project.sh

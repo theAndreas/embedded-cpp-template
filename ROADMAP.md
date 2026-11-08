@@ -40,6 +40,7 @@ clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports,
 | C-1 | Find out whether the clang-tidy pinned from PyPI loads a plugin (`-load`); if not, clang-tidy and the LLVM headers from apt, pinned in the Dockerfile | open |
 | C-2 | A clang-tidy module of our own, with the first check: braced initialization in a member initializer list, with a fix-it (Utl's `function_ref.h:106` slipped through) | open |
 | C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers | idea |
+| C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
 
 ### M5 - A generic embedded library on the ETL
 
@@ -63,6 +64,10 @@ clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports,
 | I-7 | clangd from PyPI is one major version behind clang-tidy (22 against 23); follow when 23 is there |
 
 ## Decisions
+
+- **Initialization in the member initializer list**, C.49, is checked by
+  `cppcoreguidelines-prefer-member-initializer`; a default the same for every constructor goes
+  into the class, C.48, by `modernize-use-default-member-init`. Both are on.
 
 - **copier, not a GitHub template**: a GitHub template is copied once and then drifts; copier
   updates a project as a three-way merge.
