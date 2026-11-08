@@ -30,6 +30,8 @@ swaps the parentheses where it says so.
 - **Rules for every target, and a profile per target**: CodingStyle.md holds for any target from
   an 8-bit microcontroller to the host; `docs/targets/avr.md` holds what the AVR alone needs, as
   text in flash, its critical sections and its registers.
+- **An expression does one thing** (CodingStyle.md T-18): a computation or condition of several
+  steps is split into named steps.
 - **Reuse before writing** (CodingStyle.md M-3): what the project has, then the standard library
   where every target has it, then a library like it such as the ETL or Utl; only what none has
   is written, once and for reuse.

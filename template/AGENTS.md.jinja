@@ -54,6 +54,7 @@ make tests     # GoogleTest on the host
   `typeid` (M-1, M-2).
 - **No blocking and no `float` without its reason**: no busy wait in the library, no `double`
   at all (H-1, H-7). An interrupt's shared data is read atomically (H-6).
+- **No long expressions**: split a computation or a condition into named steps (T-18).
 - **No invented API.** A function of the Arduino core or of a library is used only if you have
   seen its declaration; `test/mock/` shows what the tests can call.
 - **No code for later**: no unused parameter, function, overload or option "in case", no

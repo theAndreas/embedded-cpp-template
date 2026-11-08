@@ -89,13 +89,25 @@ it:
 | T-8 | `auto` only where the type stands in the same line already, as in a cast, or cannot be written, as of a lambda. | `modernize-use-auto`, Review |
 | T-9 | No C-style cast. `static_cast`; `reinterpret_cast` and `const_cast` only with a `NOLINT` and its reason. | `cppcoreguidelines-pro-type-*`, `google-readability-casting` |
 | T-10 | `nullptr`, never `NULL` or `0`. | `modernize-use-nullptr` |
-| T-11 | No magic number: a value with a meaning has a name. Tests are exempt. | `readability-magic-numbers` |
+| T-11 | No magic number: a value with a meaning has a name. Without one pass only what `readability-magic-numbers` lets pass, 0 to 4 and the floating point values 1.0 and 100.0. Tests and examples are exempt: their numbers are their data. | `readability-magic-numbers` |
 | T-12 | A range-based `for` where the index is not needed, taking each element by `const&` unless a copy is meant: `for (uint8_t const pin : pins)`, `for (Led const& led : leds)`. | `modernize-loop-convert`, `performance-for-range-copy` |
 | T-13 | A variable is declared where it is first needed, initialized, one per declaration, in the smallest scope; a new value that means something else is a new variable, not the old one reused. | `cppcoreguidelines-init-variables`, `readability-isolate-declaration`, Review |
 | T-14 | One side effect per statement: no `++` in a condition, no assignment inside an expression. | `bugprone-inc-dec-in-conditions`, `bugprone-assignment-in-if-condition`, Review |
 | T-15 | A `switch` over an `enum class` names every value and has no `default`, so that the compiler reports a value added later; any other `switch` has a `default`. | `-Wswitch`, `bugprone-switch-missing-default-case` |
 | T-16 | `using` for an alias, never `typedef`: `using Callback = void (*)(uint8_t);`. | `modernize-use-using` |
 | T-17 | Never Arduino's `byte`, which is an `unsigned char` that says nothing of what it holds. A byte that is a number, a level or a count, is `uint8_t`. A byte that is raw data, as of a buffer, a register or a frame on a bus, is a type that is no number, by M-3: `std::byte` where every target has C++17, else `etl::byte` or Utl's counterpart, else one of the project's own after the same pattern, an `enum class` of `unsigned char` with `to_integer()`. Raw data then takes only bitwise operators, and is a number only through `to_integer<uint8_t>()`. | Review |
+| T-18 | An expression does one thing. A computation of several steps, or a condition of several parts, is split into named steps: a `const` local for each value with a meaning, a small function for a step that needs explaining or recurs, so that each line reads as what it computes. A step whose name explains it is worth a function even when called once. Named functions called one in the argument of the next read as a pipeline and stay, as long as they fit on a line: `ToLevel(GetWeightedIntensity(GetIntensity(pixel)))`. | Review (ROADMAP C-3) |
+
+T-18 in an example:
+
+```cpp
+// Not:
+if ((now - start_ >= kInterval) && (state_ == State::kOn) && !paused_) {
+// But:
+bool const elapsed{now - start_ >= kInterval};
+bool const running{state_ == State::kOn && !paused_};
+if (elapsed && running) {
+```
 
 ## Classes
 
