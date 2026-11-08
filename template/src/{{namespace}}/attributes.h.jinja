@@ -1,0 +1,38 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+
+/*!
+ * \file
+ * \brief Attributes of a later standard, as macros for every standard.
+ *
+ * The library is written for C++11 and later. Where a later standard has an
+ * attribute, the macro is that attribute; before it, the compiler's own
+ * where GCC and clang have one, else nothing.
+ */
+
+#ifndef {{ project_name|upper }}_SRC_{{ namespace|upper }}_ATTRIBUTES_H_
+#define {{ project_name|upper }}_SRC_{{ namespace|upper }}_ATTRIBUTES_H_
+
+/*!
+ * \def {{ macro_prefix }}_NODISCARD
+ * \brief Marks a function whose result must not be ignored.
+ *
+ * Stands in front of the declaration: `{{ macro_prefix }}_NODISCARD int Read();`. A call
+ * that drops the result is a warning, and an error in CI.
+ *
+ * \note For a function only. On a type, as a class whose every result must be
+ *       used, `[[nodiscard]]` of C++17 works, GCC's attribute before it does
+ *       not.
+ */
+// By __cplusplus, not by __has_cpp_attribute: GCC and clang have
+// [[nodiscard]] in C++11 as well, as an extension that -Wpedantic reports.
+#if __cplusplus >= 201703L
+#define {{ macro_prefix }}_NODISCARD [[nodiscard]]
+#elif defined(__GNUC__)
+// GCC, avr-gcc and clang, which defines __GNUC__ as well.
+#define {{ macro_prefix }}_NODISCARD __attribute__((warn_unused_result))
+#else
+#define {{ macro_prefix }}_NODISCARD
+#endif
+
+#endif  // {{ project_name|upper }}_SRC_{{ namespace|upper }}_ATTRIBUTES_H_
