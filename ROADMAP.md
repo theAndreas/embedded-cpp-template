@@ -85,6 +85,8 @@ mechanism carries.
 | I-5 | Utl's names: the API mimics the standard in part and Google in part; decide one scheme for a library that mimics the standard |
 | I-6 | A test of what must not compile in the skeleton, as an example of `add_compile_fail_tests()` |
 | I-7 | clangd from PyPI is one major version behind clang-tidy (22 against 23); follow when 23 is there |
+| I-8 | A Nix flake as a second way to the same tools, beside the dev container: `nix develop` on a host without Docker, every tool pinned by `flake.lock`, the apt packages too, which the Dockerfile leaves to the distribution. The Makefile of W-1 is the contract both fulfil; one source of the versions, or the two drift |
+| I-9 | A `MODULE.bazel` for a project that consumes the library with Bazel, as the ETL ships one beside CMake; the build of our own stays CMake and arduino-cli |
 
 ## Decisions
 
