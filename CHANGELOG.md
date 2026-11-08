@@ -3,6 +3,22 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **Checks of our own, as a clang-tidy module:** `tools/tidy_module/`, the module `house`, which
+  `tools/tidy_module.sh` builds and `tools/tidy.sh` loads; `.clang-tidy` turns on `house-*`. The
+  first check, `house-braced-member-init`, holds a constructor's member initializer list to braced
+  initialization, with a fix-it where braces keep the meaning: reported without one where an
+  argument narrows or the type is a template's parameter, and not at all where braces would choose
+  a `std::initializer_list` constructor. The template's own cases are in `tests/tidy_module/`.
+- **LLVM's headers in the dev container and in CI**, which the module is compiled against:
+  `.devcontainer/llvm-headers.sh` from apt.llvm.org, at the major version `ARG LLVM_MAJOR` of the
+  Dockerfile names; the action `llvm-headers` in `static-analysis.yml`.
+
+On the update: rebuild the dev container, for the headers. A member initializer written in
+parentheses now fails `make tidy`; `tools/tidy.sh` applies nothing, but clang-tidy's `--fix`
+swaps the parentheses where it says so.
+
 ## v0.2.1
 
 - `tools/coverage.sh` fails when the tests left no counts, rather than reporting 0 of 0 lines.
