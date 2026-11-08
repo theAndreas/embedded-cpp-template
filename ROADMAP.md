@@ -46,6 +46,17 @@ mechanism carries.
 | W-12 | ruff over the Python scripts, with the checks that answer "is this wrong" | open |
 | W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's | idea |
 
+### M2c - A dev container that starts in seconds
+
+A rebuild builds the whole image on the developer's machine: the base image, apt, arduino-cli,
+gh, uv, clangd. Every project builds the same image again, and every machine does.
+
+| Id | Item | Status |
+|---|---|---|
+| D-1 | One image for every project made from the template, built by the template's CI on each tag and pushed to ghcr.io; `devcontainer.json` names it by the template's version, so a rebuild pulls it, and `copier update` moves it on | open |
+| D-2 | What differs per project stays out of the image: the Arduino core in its volume, the project's hooks in `postCreateCommand`; a site variant (the internal base image) builds on top of the shared image | open |
+| D-3 | Measure first: a rebuild now, cold and warm, and with the pulled image, so that the gain is a number | open |
+
 ### M3 - The other projects
 
 | Id | Item | Status |
