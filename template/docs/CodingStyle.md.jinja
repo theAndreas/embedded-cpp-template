@@ -42,14 +42,14 @@ it:
 | Id | Rule | Checked by |
 |---|---|---|
 | F-1 | A header holds the declarations a user needs, documented; a `.cpp` holds the definitions. | Review |
-| F-2 | In the header stay only what has to be there or costs nothing there: templates, `constexpr` functions, and inline functions of at most three statements, such as an accessor, which the compiler can then inline. | Review |
-| F-3 | One class, or one family of functions, per header, named after it in lower case: `ring_buffer.h` for `RingBuffer`, with `ring_buffer.cpp` beside it. | Review |
+| F-2 | A header includes what its declarations need, not what its bodies need. In the class body stay only a template, which every caller has to see, a `constexpr` function, and an accessor of one statement; anything more, a state machine, an `#if` ladder, a body that would pull in a header for itself, is defined in the `.cpp`. Inlining is no reason to keep a body in the header: with `-flto` the compiler inlines across sources as readily as within one, and what a header costs is every file that includes it. A header that one source alone includes may keep its bodies, until a second one includes it. | Review, `make headers` |
+| F-3 | One class, or one family of functions, per header and source. A file is named exactly as the class it holds: `RingBuffer.h` and `RingBuffer.cpp` for `RingBuffer`, `array.h` for a class that mimics the standard's `array`; a family of functions after the family, in lower case: `clamp.h`. | Review |
 | F-4 | Every header compiles as the only include of an empty file. | `make headers` |
 | F-5 | A file includes what it uses, and nothing it does not ("include what you use"). | `misc-include-cleaner` |
 | F-6 | Header guards as `PROJECT_PATH_FILE_H_`, from the path. | cpplint |
 | F-7 | Includes in Google's order, each group sorted. | clang-format |
 | F-8 | Every file starts with the copyright and the SPDX licence as `//` lines. | Review |
-| F-9 | What is not part of the API lies in `{{ namespace }}::internal`; no `static` or anonymous namespace in a header. | `google-build-namespaces`, Review |
+| F-9 | A library lies in its own namespace, so that its names cannot meet those of its user; an application may stay in the global one. What is not part of a library's API lies in its namespace `internal`. No `static` and no anonymous namespace in a header. | `google-build-namespaces`, Review |
 | F-10 | A source file is ASCII, with LF line ends: a display on the device may show no umlaut, and a byte that is not ASCII in a string is a byte more than its character. | `.editorconfig`, Review |
 | F-11 | A `.cpp` defines its functions in the order the header declares them. | Review |
 
@@ -163,7 +163,8 @@ As Google names, enforced by `readability-identifier-naming`; `.clang-tidy` is t
 
 | What | How | Example |
 |---|---|---|
-| Namespace, file | `lower_case` | `{{ namespace }}`, `ring_buffer.h` |
+| Namespace | `lower_case` | `{{ namespace }}` |
+| File | as the class it holds (F-3) | `RingBuffer.h`, `array.h`, `clamp.h` |
 | Type, function | `CamelCase` | `RingBuffer`, `PushBack()` |
 | Accessor | like the member it gives | `size()` |
 | Variable, parameter | `lower_case` | `byte_count` |
@@ -182,6 +183,7 @@ does not fit a microcontroller, or MISRA asks for more, this file wins:
 | Google says | Here | Why |
 |---|---|---|
 | `.cc` files | `.cpp` | Arduino compiles only `.cpp` from `src/`, and most embedded toolchains expect it |
+| File names in lower case | Named as the class (F-3) | A file is found by the name of what it holds; Arduino names a library's header after the library anyway |
 | `int` is the integer to use | Fixed width (T-1) | The width of `int` differs between targets; MISRA 6.9.2 |
 | Braces around a one-line body are optional | Always braces | MISRA 9.3.1 |
 | The standard library, `std::unique_ptr` for ownership | The ETL instead (M-3), and no ownership by pointer (M-1) | A small target may have no standard library, and there is no heap |

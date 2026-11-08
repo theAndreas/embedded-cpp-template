@@ -62,10 +62,10 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 
 | Id | Item | Status |
 |---|---|---|
-| R-1 | MaxMatrix: bring in; take into the template what it does better (`cross-clang-tidy.py`, the apt cache of `apt-install.sh`, the Wokwi simulation) | open |
+| R-1 | MaxMatrix: bring in; take into the template what it does better (`cross-clang-tidy.py`, the apt cache of `apt-install.sh`, the Wokwi simulation). On CodingStyle.md: clang-format once (Google, `const` already right), its classes from the prefix `MaxMatrix` into a namespace, as a library's are (F-9); its file names stay (F-3) | open |
 | R-2 | XmegaTimer: bring in; ATxmega E5 with a third-party core (`ARDUINO_BOARD_URLS`), no simavr (`SIMAVR_MCU=""`) | open |
 | R-3 | TimerTwo: bring in, or retire it if Utl or the ETL covers it | open |
-| R-4 | Wordclock: find where it lies, then as R-1 | open |
+| R-4 | Wordclock (AndreasBur/Wordclock): a firmware for ESP32-S3, RP2350 and AVR128DA48 with a simulator, `firmware/` portable and `platform/<target>/` per port, built by CMake and PlatformIO. The model of the template's firmware flavor (E-1) and of its tools (`avr-stack.py`, `documented-sizes.py`, the fuzzing); profiles for AVR-Dx, ESP32-S3 and RP2350 in `docs/targets/`. On CodingStyle.md: clang-format once, `const` right, `byte` to fixed widths (T-1), its file names and the global namespace stay (F-3, F-9) | open |
 
 ### M4 - Checks of our own
 
