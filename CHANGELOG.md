@@ -8,6 +8,12 @@ brings it.
 The scripts in `tools/`: in order, one language fewer, the indenter of the Doxygen blocks
 tested, and a failure no longer hidden in a list of files.
 
+- **clang-tidy reads a variant with the libraries it includes:** `tools/tidy.sh` has arduino-cli
+  write the board's compilation database once for each variant, with its defines, rather than
+  once for all with the defines added after. arduino-cli finds the libraries a sketch needs by
+  its includes, and one that only a variant includes, as MaxMatrix's SPI under
+  `MAXMATRIX_USE_SPI`, had no include folder in the database: clang-tidy stopped at
+  `'SPI.h' file not found`.
 - **`tools/` holds what `make` calls, `tools/lib/` what those scripts call:** `doc_indent.py`,
   which `lint.sh` runs, and `tidy_module.sh` with the module's sources in `tidy_module/`, which
   `tidy.sh` builds. `tools/README.md` says what each file is, and when a script is shell or
