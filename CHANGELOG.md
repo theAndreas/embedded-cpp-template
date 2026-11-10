@@ -8,6 +8,12 @@ brings it.
 The scripts in `tools/`: in order, one language fewer, the indenter of the Doxygen blocks
 tested, and a failure no longer hidden in a list of files.
 
+- **clang-tidy reads a variant with the libraries it includes:** `tools/tidy.sh` has arduino-cli
+  write the board's compilation database once for each variant, with its defines, rather than
+  once for all with the defines added after. arduino-cli finds the libraries a sketch needs by
+  its includes, and one that only a variant includes, as MaxMatrix's SPI under
+  `MAXMATRIX_USE_SPI`, had no include folder in the database: clang-tidy stopped at
+  `'SPI.h' file not found`.
 - **Code of the project's own on the host:** `HOST_CODE` in `tools/project.sh`, the folders of
   code that runs on the host beside the library, as a simulator or a tool, built by
   `CMakeLists.txt`. `make lint` formats and checks them as `src/`, and `make tidy` reads them
