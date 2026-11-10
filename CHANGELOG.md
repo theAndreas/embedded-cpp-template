@@ -3,6 +3,22 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## v0.3.1
+
+What the first update to v0.3.0, Utl's, found in the limits of a function's size.
+
+- **The cognitive complexity of a test leaves GoogleTest's macros out:** `EXPECT_` and `ASSERT_`
+  expand to an `if` and an `else` each, so a test without a branch of its own counted 20 and
+  failed the limit of 15. `test/.clang-tidy` sets `IgnoreMacros`; a test's own branches still
+  count.
+- **SelfCheck has no limit of lines, as a test has none:** `examples/SelfCheck/.clang-tidy`. It is
+  the test on the target, and a check of many cases is long but flat; its parameters, nesting and
+  complexity keep the library's limits.
+
+On the update: `test/` and `examples/SelfCheck/` are the project's, and an update leaves them
+out. Take `test/.clang-tidy` and `examples/SelfCheck/.clang-tidy` from a new copy; this holds for
+the update to v0.3.0 as well, whose `LineThreshold: none` for tests is in that `test/.clang-tidy`.
+
 ## v0.3.0
 
 How the code is written and tested, for a person and for a coding agent; checks of our own as a
