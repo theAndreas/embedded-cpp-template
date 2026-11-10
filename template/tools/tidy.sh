@@ -127,10 +127,12 @@ main() {
   # Arduino core and follows it, not the Google style. Nor what lies in test/compile_fail/,
   # which must not compile and is in no database. And the code of HOST_CODE, which CMake builds
   # beside the tests, and its headers.
+  local host_code
+  host_code_dirs host_code
   local paths=('test/*' ':!test/mock/*' ':!test/compile_fail/*')
   local filter='test'
   local dir
-  for dir in "${HOST_CODE[@]}"; do
+  for dir in "${host_code[@]}"; do
     paths+=("${dir}/*")
     filter+="|${dir}"
   done

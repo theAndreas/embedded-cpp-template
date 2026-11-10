@@ -92,6 +92,24 @@ list_files() {
   mapfile -t list_files_into <<< "${listed}"
 }
 
+# Fills the array named first with the folders of HOST_CODE, each without the / at its end. Fails
+# where one is no folder, as a misspelt one would be checked by nothing, without a word.
+# Arguments:
+#   array: the name of the array to fill
+host_code_dirs() {
+  local -n host_code_dirs_into="$1"
+  host_code_dirs_into=()
+  local dir
+  for dir in "${HOST_CODE[@]}"; do
+    dir="${dir%/}"
+    if [[ ! -d "${ROOT_DIR}/${dir}" ]]; then
+      err "HOST_CODE in tools/project.sh names ${dir}, which is no folder of the project."
+      return 1
+    fi
+    host_code_dirs_into+=("${dir}")
+  done
+}
+
 # Compiles an example in a variant into BUILD_DIR/<variant>/<example> and prints what
 # arduino-cli prints. The flags of the variant go into compiler.cpp.extra_flags, which reaches
 # every C++ file of the build, the core's as well. Its callers test its status, which turns off
