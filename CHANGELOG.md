@@ -3,10 +3,12 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.5.0
 
 The scripts in `tools/`: in order, one language fewer, the indenter of the Doxygen blocks
-tested, and a failure no longer hidden in a list of files.
+tested, and a failure no longer hidden in a list of files. And what MaxMatrix, the second project
+to come onto the template, needs of it: code of its own on the host checked as the library is,
+and clang-tidy reading each variant with the libraries it includes.
 
 - **clang-tidy reads a variant with the libraries it includes:** `tools/tidy.sh` has arduino-cli
   write the board's compilation database once for each variant, with its defines, rather than
@@ -50,7 +52,9 @@ On the update: a file of the project's own that names `tools/tidy_module.sh`,
 `tools/tidy_module/` or the indenter by its old path names `tools/lib/` now; the template's files
 move with the update. A hook in `tools/project.sh` that reads a command's output through
 `< <(...)` or `$(...)` as an argument is reported by `make lint` now; give the output a variable
-first, as the template's scripts do.
+first, as the template's scripts do. A project that added exceptions of its own at the end of the
+`Checks` of `.clang-tidy` gets a conflict there, as the note on `house-*` below them names the new
+path: keep the project's lines and the template's note.
 
 ## v0.4.0
 
