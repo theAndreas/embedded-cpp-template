@@ -20,6 +20,8 @@ _skip_if_exists:
   - /CMakeLists.txt
   - /library.properties
   - /tools/project.sh
+  - /.devcontainer/apt-packages.txt
+  - /Doxyfile.project
   - /tools/project.mk
 
 # The starting point of a new library, src/, test/ and the examples Basics and SelfCheck: written

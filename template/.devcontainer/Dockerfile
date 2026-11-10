@@ -172,6 +172,18 @@ RUN printf '# SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU\n%s %s\n%s %s\n
         >> /etc/ssh/ssh_known_hosts && \
     chmod 0644 /etc/ssh/ssh_known_hosts
 
+# The project's own packages, from apt-packages.txt beside this file, which the project's
+# workflows install as well. Last, so that a change to the list builds this layer alone and none
+# of the downloads above. Nothing to do for an empty list.
+COPY apt-packages.txt /tmp/apt-packages.txt
+RUN packages="$(sed -e 's/#.*//' /tmp/apt-packages.txt | xargs)" && \
+    if [ -n "${packages}" ]; then \
+        apt-get update && \
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ${packages} && \
+        rm -rf /var/lib/apt/lists/*; \
+    fi && \
+    rm /tmp/apt-packages.txt
+
 ENV TZ=Europe/Berlin
 
 # Extensions, editor settings and lifecycle commands live in the local feature
