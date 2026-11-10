@@ -14,14 +14,14 @@ See `CHANGELOG.md` for what it brings beyond Utl: the C++ Core Guidelines and CE
 clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports, and
 `tools/project.sh` for what is the project's.
 
-### M2 - Utl on the template (done but T-4)
+### M2 - Utl on the template (done)
 
 | Id | Item | Status |
 |---|---|---|
 | T-1 | Bring Utl in with `copier copy --overwrite`; its variants `ram`, `flash`, `checked`, the plugin `avr-flash-vtbl` and the Keypad workflow into `tools/project.sh` and hooks | done, Utl #52 |
 | T-2 | Fix what the new warnings find in Utl: `-Wconversion`, `-Wsign-conversion`, `-Wshadow`, about ten places | done, Utl #52 |
 | T-3 | Answer the new Core Guidelines findings in Utl: `reinterpret_cast`, union access, special members, macros; each fixed or NOLINT with its reason | done, Utl #52 |
-| T-4 | `CPPCHECK=0` in Utl until cppcheck parses `src/utl/array.h:181`, which 2.19 and 2.22 cannot: a pack expansion of `decltype` in a qualified default template argument before `>>`. An alias of its own for it, `internal::BracedFrom<T, Ts...>`, lets cppcheck pass; behind it wait `__has_include` in `internal/initializer_list.h`, which cppcheck knows from C++17 only, and `duplInheritedMember` on `Result<void>::Ok()` | [reported](https://sourceforge.net/p/cppcheck/discussion/general/thread/2b84ff7b0e/), 2026-11-10; Utl's workaround open |
+| T-4 | `CPPCHECK=0` in Utl until cppcheck parses `src/utl/array.h:181`, which 2.19 and 2.22 cannot: a pack expansion of `decltype` in a qualified default template argument before `>>`. Utl gives it an alias of its own, `internal::BracedFrom<T, Ts...>`; `tools/cppcheck.sh` defines `__has_include`, which cppcheck knows from C++17 only | done: [reported](https://sourceforge.net/p/cppcheck/discussion/general/thread/2b84ff7b0e/) 2026-11-10, cppcheck on in Utl #54 |
 | T-5 | `tools/docs.sh` failed silently on a log without a warning: fixed in the template, comes with T-1 | done |
 | T-6 | Utl on v0.2.0 with `copier update`: the first update a project takes; the Keypad check into `tools/project.mk` | done, no conflict |
 
