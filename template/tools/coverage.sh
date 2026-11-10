@@ -22,15 +22,17 @@ readonly COVERAGE_DIR="${BUILD_DIR}/coverage"
 # header that only such a file reached stood as missed. A note lies at
 # CMakeFiles/<target>.dir/<source>.gcno, which gives its source.
 remove_stale_notes() {
+  local notes
+  notes="$(find "${COVERAGE_DIR}" -name '*.gcno')"
   local note
   local source
-  while IFS= read -r -d '' note; do
+  while IFS= read -r note; do
     source="${note#*.dir/}"
     source="${ROOT_DIR}/${source%.gcno}"
-    if [[ ! -f "${source}" ]]; then
+    if [[ -n "${note}" && ! -f "${source}" ]]; then
       rm -f "${note}"
     fi
-  done < <(find "${COVERAGE_DIR}" -name '*.gcno' -print0 2>/dev/null)
+  done <<< "${notes}"
 }
 
 # Fails on a line of src/ excluded from coverage without its reason (Testing.md TS-4): a marker

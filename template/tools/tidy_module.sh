@@ -50,11 +50,16 @@ main() {
   fi
 
   local module="${output_dir}/house.so"
+  local listed
+  listed="$(find "${SOURCE_DIR}" -name '*.cpp' | sort)"
   local sources
-  mapfile -t sources < <(find "${SOURCE_DIR}" -name '*.cpp' | sort)
+  mapfile -t sources <<< "${listed}"
   # Again when a source, a header of ours or the headers of LLVM are newer than the module.
-  if [[ ! -f "${module}" ]] \
-    || [[ -n "$(find "${SOURCE_DIR}" "${config}" -newer "${module}" -print -quit)" ]]; then
+  local newer=""
+  if [[ -f "${module}" ]]; then
+    newer="$(find "${SOURCE_DIR}" "${config}" -newer "${module}" -print -quit)"
+  fi
+  if [[ ! -f "${module}" || -n "${newer}" ]]; then
     mkdir -p "${output_dir}"
     "${CXX:-c++}" -std=c++17 -O2 -fPIC -shared -fno-rtti \
       -Wall -Wextra -Werror \

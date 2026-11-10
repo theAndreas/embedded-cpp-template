@@ -93,8 +93,7 @@ main() {
   cd "${ROOT_DIR}"
   mkdir -p "${TIDY_DIR}"
   local sources
-  mapfile -t sources < <(git ls-files --cached --others --exclude-standard \
-    'src/*' 'examples/*' | grep -E '\.(cpp|ino)$')
+  list_files sources '\.(cpp|ino)$' 'src/*' 'examples/*'
   local flags
   flags="$(arduino_flags)"
   local clang_tidy=("${CLANG_TIDY[@]}")
@@ -107,9 +106,10 @@ main() {
   # Each variant takes other branches of #if. The first is the one clangd reads, see .clangd.
   local failed=0
   local variant
+  local defines
   for variant in "${TIDY_VARIANTS[@]}"; do
-    write_database "${TIDY_DIR}/${variant}" "${flags}" \
-      "$(variant_defines "${variant}")" "${sources[@]}"
+    defines="$(variant_defines "${variant}")"
+    write_database "${TIDY_DIR}/${variant}" "${flags}" "${defines}" "${sources[@]}"
     if ((database_only)); then
       echo "Wrote ${TIDY_DIR}/${variant}/compile_commands.json"
       exit 0
@@ -125,8 +125,7 @@ main() {
   # Arduino core and follows it, not the Google style. Nor what lies in test/compile_fail/,
   # which must not compile and is in no database.
   local tests
-  mapfile -t tests < <(git ls-files --cached --others --exclude-standard \
-    'test/*' ':!test/mock/*' ':!test/compile_fail/*' | grep -E '\.cpp$')
+  list_files tests '\.cpp$' 'test/*' ':!test/mock/*' ':!test/compile_fail/*'
   cmake --preset default >/dev/null
   echo "clang-tidy, the tests on the host:"
   "${clang_tidy[@]}" -p "${BUILD_DIR}/host" --quiet \
