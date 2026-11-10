@@ -21,7 +21,7 @@ set -euo pipefail
 TEMPLATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly TEMPLATE_DIR
 readonly ALL_CHECKS=(lint arduino-lint tests clang sanitize coverage tidy cppcheck headers docs
-  examples self-check)
+  examples sizes self-check)
 # copier from PyPI through uvx, at a fixed version, like the tools of a project.
 readonly COPIER="copier==9.19.1"
 # Global, as the trap that removes it runs after main() has returned.

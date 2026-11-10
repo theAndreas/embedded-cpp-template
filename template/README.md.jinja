@@ -40,6 +40,10 @@ make tests    # the tests on the host
 make check    # all of it, warnings as errors, as CI
 ```
 
+A table of the examples' flash and RAM in this README, between the lines `<!-- sizes -->` and
+`<!-- /sizes -->`, is checked against the build: `make check` fails where it differs from what
+`make examples` measures, and `make sizes FIX=1` writes the measured table in.
+
 The checks, the CI and the dev container come from the
 [template](https://github.com/theAndreas/embedded-cpp-template); `uv run copier update` brings
 its newest version. What is the project's own for them lies in `tools/project.sh` and
