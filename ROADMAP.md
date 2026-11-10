@@ -25,7 +25,7 @@ clang-tidy, cppcheck, `-Wconversion`, the warnings an IDE such as CLion reports,
 | T-5 | `tools/docs.sh` failed silently on a log without a warning: fixed in the template, comes with T-1 | done |
 | T-6 | Utl on v0.2.0 with `copier update`: the first update a project takes; the Keypad check into `tools/project.mk` | done, no conflict |
 
-### M2b - Wordclock's workflow, v0.2.0 (done but W-11, W-13)
+### M2b - Wordclock's workflow, v0.2.0 (done but W-11)
 
 What Wordclock (AndreasBur/Wordclock) grew on 2026-11-06 and 07, into the template, and from
 there into Utl with `copier update`: the first update a project takes, and so the proof that the
@@ -42,10 +42,10 @@ mechanism carries.
 | W-7 | `static-analysis.yml` of its own, beside `ci.yml`, for a badge of its own: clang-tidy, cppcheck, the Doxygen blocks | done, v0.2.0 |
 | W-8 | The host tests a second time with clang, as a preset | done, v0.2.0 |
 | W-9 | Every header compiled as the only include of an empty file (`self-contained-headers.py`), per target | done, v0.2.0 |
-| W-10 | The sizes the README states checked against the build (`documented-sizes.py`); Utl's table of flash and RAM | done, unreleased: `make sizes`, the table between `<!-- sizes -->` markers, exact; Utl's table gets the markers with its next `copier update` |
+| W-10 | The sizes the README states checked against the build (`documented-sizes.py`); Utl's table of flash and RAM | done, v0.3.0: `make sizes`, the table between `<!-- sizes -->` markers, exact; Utl's table gets the markers with its next `copier update` |
 | W-11 | The AVR's deepest stack against the RAM it has (`avr-stack.py`), for an Arduino sketch | idea |
 | W-12 | ruff over the Python scripts, with the checks that answer "is this wrong" | done, v0.2.0 |
-| W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's: `AGENTS.md`, `docs/CodingStyle.md` | done, unreleased |
+| W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's: `AGENTS.md`, `docs/CodingStyle.md` | done, v0.3.0 |
 
 ### M2c - A dev container that starts in seconds
 

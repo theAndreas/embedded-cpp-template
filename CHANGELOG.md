@@ -3,7 +3,10 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.3.0
+
+How the code is written and tested, for a person and for a coding agent; checks of our own as a
+clang-tidy module; the README's sizes checked against the build.
 
 - **The README's table of flash and RAM checked against the build:** `make sizes`, part of
   `make check` and of CI, compares the table between `<!-- sizes -->` and `<!-- /sizes -->` in
@@ -27,13 +30,6 @@ brings it.
   `gh auth setup-git` on every attach, so that `git push` takes gh's token, whose login stays in
   its volume, instead of VS Code's helper, which opens a window on the host. Without a login it
   does nothing.
-
-On the update: rebuild the dev container, for the headers. A member initializer written in
-parentheses now fails `make tidy`; `tools/tidy.sh` applies nothing, but clang-tidy's `--fix`
-swaps the parentheses where it says so.
-
-## Unreleased
-
 - **`docs/CodingStyle.md`: how the code is written**, each rule with an id and what checks it:
   files, functions, types, classes, memory on the microcontroller, errors, names, suppressions.
   The C++ Core Guidelines, MISRA C++:2023 and the Google style, in that order; where it departs
@@ -80,10 +76,17 @@ swaps the parentheses where it says so.
 - **`AGENTS.md` for a coding agent**, which any agent reads, and `CLAUDE.md`, which imports it for
   Claude Code: what to read before writing code, and what to run after.
 
-On the update: `make tidy` may now report functions that are too large.
-`CMakeLists.txt` is the project's and is not updated: to build a module in a folder of its own,
-take its two `file(GLOB_RECURSE ...)` lines and the `list(FILTER ...)` from a new copy. Split them, or suppress
-one with its reason. Notes of the project's own for an agent go at the end of `AGENTS.md`.
+On the update from v0.2.1:
+
+- Rebuild the dev container, for LLVM's headers and for gh's sign-in.
+- `make tidy` may now report what passed before. A member initializer written in parentheses:
+  `tools/tidy.sh` applies nothing, but clang-tidy's `--fix` swaps the parentheses where it says
+  so. A function that is too large: split it, or suppress the finding with its reason.
+- `CMakeLists.txt` is the project's and is not updated: to build a module in a folder of its own,
+  take its two `file(GLOB_RECURSE ...)` lines and the `list(FILTER ...)` from a new copy.
+- Notes of the project's own for an agent go at the end of `AGENTS.md`.
+- A table of flash and RAM in the README is checked once it stands between `<!-- sizes -->` and
+  `<!-- /sizes -->`; `make examples` and `make sizes FIX=1` write the measured one in.
 
 ## v0.2.1
 
