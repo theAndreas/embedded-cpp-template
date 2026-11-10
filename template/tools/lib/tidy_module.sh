@@ -3,12 +3,12 @@
 # Copyright 2026 Andreas Burnickl
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Builds the clang-tidy module in tools/tidy_module/, the checks of our own, and prints the path
+# Builds the clang-tidy module in tools/lib/tidy_module/, the checks of our own, and prints the path
 # of the shared library that clang-tidy loads with --load. Built again only when a source has
 # changed; tools/tidy.sh calls this before it runs clang-tidy.
 #
 # Usage:
-#   tools/tidy_module.sh [OUTPUT_DIR]
+#   tools/lib/tidy_module.sh [OUTPUT_DIR]
 #
 # OUTPUT_DIR is build/tidy/module if not given.
 #
@@ -20,9 +20,9 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 readonly ROOT_DIR
-readonly SOURCE_DIR="${ROOT_DIR}/tools/tidy_module"
+readonly SOURCE_DIR="${ROOT_DIR}/tools/lib/tidy_module"
 
 err() {
   echo "$*" >&2

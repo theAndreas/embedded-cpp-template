@@ -5,14 +5,18 @@ brings it.
 
 ## Unreleased
 
-The scripts in `tools/`: one language fewer, the indenter of the Doxygen blocks tested, and a
-failure no longer hidden in a list of files.
+The scripts in `tools/`: in order, one language fewer, the indenter of the Doxygen blocks
+tested, and a failure no longer hidden in a list of files.
 
-- **`tools/doc_indent.py` instead of `tools/doc_indent.pl`:** the scripts are shell, which drives
-  the tools, and Python, which reads and writes data; the Perl script was the one that nothing
-  checked. ruff reads it now, and the template needs Perl no more. It indents what the Perl
-  script indented, compared on every source and on 3000 generated blocks, with four exceptions,
-  each a fix:
+- **`tools/` holds what `make` calls, `tools/lib/` what those scripts call:** `doc_indent.py`,
+  which `lint.sh` runs, and `tidy_module.sh` with the module's sources in `tidy_module/`, which
+  `tidy.sh` builds. `tools/README.md` says what each file is, and when a script is shell or
+  Python. `common.sh` stays where it is, as a project's own scripts source it.
+- **`tools/lib/doc_indent.py` instead of `tools/doc_indent.pl`:** the scripts are shell, which
+  drives the tools, and Python, which reads and writes data; the Perl script was the one that
+  nothing checked. ruff reads it now, and the template needs Perl no more. It indents what the
+  Perl script indented, compared on every source and on 3000 generated blocks, with four
+  exceptions, each a fix:
   - the width is counted in characters, as clang-format counts it, not in bytes: a line with
     umlauts that fits 80 columns is no longer broken;
   - a block ends where `*/` stands, also after the text of a line; before, the block went on to
@@ -32,7 +36,9 @@ failure no longer hidden in a list of files.
 - **The template's own Python scripts are read by ruff** in its CI, with the rules of
   `pyproject.toml`.
 
-On the update: nothing to do. A hook in `tools/project.sh` that reads a command's output through
+On the update: a file of the project's own that names `tools/tidy_module.sh`,
+`tools/tidy_module/` or the indenter by its old path names `tools/lib/` now; the template's files
+move with the update. A hook in `tools/project.sh` that reads a command's output through
 `< <(...)` or `$(...)` as an argument is reported by `make lint` now; give the output a variable
 first, as the template's scripts do.
 

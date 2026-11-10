@@ -18,8 +18,8 @@
 # 16 bits on the AVR and 32 on the host, and a check that only saw the host would never meet the
 # code as the board does.
 #
-# The checks of our own, house-*, are a module of clang-tidy's that tools/tidy_module.sh builds
-# from tools/tidy_module/ and clang-tidy loads; the database alone does not need it.
+# The checks of our own, house-*, are a module of clang-tidy's that tools/lib/tidy_module.sh builds
+# from tools/lib/tidy_module/ and clang-tidy loads; the database alone does not need it.
 
 set -euo pipefail
 
@@ -99,7 +99,7 @@ main() {
   local clang_tidy=("${CLANG_TIDY[@]}")
   if ((!database_only)); then
     local module
-    module="$(tools/tidy_module.sh)"
+    module="$(tools/lib/tidy_module.sh)"
     clang_tidy+=("--load=${module}")
   fi
 
