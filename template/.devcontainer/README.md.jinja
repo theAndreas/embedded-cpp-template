@@ -25,6 +25,12 @@ another container is lost with that container.
 | `cppcheck` | a second analyser beside clang-tidy: `tools/cppcheck.sh` |
 | `arduino-lint` | the rules of the Arduino Library Manager |
 | `gh` | branches and pull requests from the container |
+| what `apt-packages.txt` lists | the project's own, as a simulator's libraries |
+
+`apt-packages.txt` is the project's: the Dockerfile installs what it lists, last, so that a
+change to it rebuilds that layer alone, and a workflow of the project's installs the same with
+the action `apt-install` and `file: .devcontainer/apt-packages.txt`, as the jobs of `ci.yml` and
+`static-analysis.yml` that build with CMake do. `copier update` leaves it alone.
 
 The `postCreateCommand` runs `tools/setup.sh`, which installs the core and builds what
 `tools/project.sh` prepares, configures CMake and writes the compilation databases, so that a new container can build, check and complete code at once.

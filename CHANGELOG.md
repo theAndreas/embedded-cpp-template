@@ -3,6 +3,24 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## v0.4.0
+
+- **Ubuntu packages of the project's own:** `.devcontainer/apt-packages.txt`, one or more per
+  line, which the Dockerfile installs into the dev container. The action `apt-install` takes it
+  as `file:`, beside `packages:`, and the jobs of `ci.yml` and `static-analysis.yml` that build
+  with CMake install it as well, so that CI has what the container has. The template writes the
+  file once, empty; it is the project's, and an update leaves it alone.
+- **Settings of the reference of the project's own:** `Doxyfile.project`, which `Doxyfile`
+  includes at its end, so that `INPUT +=` adds a page or `PREDEFINED +=` the switch under which
+  more of the API is compiled. The template writes it once; it is the project's.
+- **Coverage of a target in a subdirectory:** `tools/coverage.sh` took the notes of a target that
+  `add_subdirectory()` adds, as MaxMatrix's control program, for those of a deleted source, as it
+  looked for the source in the root; it removed them, and gcovr failed on the counts left
+  without. It finds the source in its subdirectory now.
+
+On the update: rebuild the dev container. A project that installed packages of its own in a
+workflow of its own can list them in `apt-packages.txt` and pass `file:` instead.
+
 ## v0.3.1
 
 What the first update to v0.3.0, Utl's, found in the limits of a function's size.
