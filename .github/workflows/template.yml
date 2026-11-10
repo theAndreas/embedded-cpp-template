@@ -6,7 +6,7 @@ name: Template
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [main]
 
 # A second push to the same branch makes the first answer worthless.
 concurrency:
