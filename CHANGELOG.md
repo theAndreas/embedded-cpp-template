@@ -43,6 +43,10 @@ swaps the parentheses where it says so.
 - **`Discard()`** in `attributes.h`, for a result dropped on purpose (CodingStyle.md FN-10): before
   C++17 GCC warns through a cast to `void`, clang does not, so the cast passed on the host and
   failed for the target.
+- **More rules in Testing.md**: the tests follow the documentation, and an exclusion from coverage
+  says why, which `tools/coverage.sh` checks (TS-4); every test passes under the sanitizers
+  (TS-24); arguments outside the contract (TS-25); calls in the wrong order and every transition
+  of a state machine (TS-26); a table of what differs between host and target.
 - **Logical constness** (CodingStyle.md FN-11): a function is `const` when it leaves unchanged
   what a user sees, the pin, register or buffer it controls through a pointer included; one that
   writes a register through a member pointer is not `const`, though it compiles as one.

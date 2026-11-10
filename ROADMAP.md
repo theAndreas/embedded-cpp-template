@@ -99,6 +99,9 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | I-7 | clangd from PyPI is one major version behind clang-tidy (22 against 23); follow when 23 is there |
 | I-8 | A Nix flake as a second way to the same tools, beside the dev container: `nix develop` on a host without Docker, every tool pinned by `flake.lock`, the apt packages too, which the Dockerfile leaves to the distribution. The Makefile of W-1 is the contract both fulfil; one source of the versions, or the two drift |
 | I-9 | A `MODULE.bazel` for a project that consumes the library with Bazel, as the ETL ships one beside CMake; the build of our own stays CMake and arduino-cli |
+| I-10 | Fuzzing of what reads bytes or text, as a parser or a protocol: libFuzzer with the sanitizers on the host, a `make fuzz` with a limit of time, the corpus of inputs in the repository; Wordclock's fuzzing (R-4) is the model |
+| I-11 | A build per variant of the configuration: each switch of the library on in one tested build and off in another, all on and all off, so that one configuration cannot hide a break in another |
+| I-12 | Condition coverage for a decision of three conditions or more, each shown to change the outcome alone: GCC's `-fcondition-coverage` from GCC 14, as gcovr reads it |
 | I-13 | clang's `-Wglobal-constructors` and `-Wexit-time-destructors` for CodingStyle M-5, an object of static storage made when compiling and without a destructor; GCC has neither |
 
 ## Decisions

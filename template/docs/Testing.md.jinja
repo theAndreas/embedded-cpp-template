@@ -13,12 +13,24 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 | **What must not compile** | `test/compile_fail/*.cpp` | That a misuse is stopped by the compiler, with the message it names | `make tests` |
 | **On the target** | `examples/SelfCheck`, in simavr for the AVR | What only the target shows: the width of its `int`, text in its flash, the variants as its compiler builds them | `make self-check` |
 
+Where host and target differ, a test on the host passes and the device fails. What differs, and
+what catches it:
+
+| Difference | Host | Smallest target | Caught by |
+|---|---|---|---|
+| Width of `int` | 32 bits | 16 bits | CodingStyle T-1 and T-19, a check in SelfCheck where it matters |
+| Width of a pointer | 64 bits | 16 bits | CodingStyle T-9 |
+| Width of `double` | 64 bits | 32 bits | CodingStyle H-7 |
+| Constant data | in RAM | in flash, read by its own functions | the profile, SelfCheck |
+| Compiler and standard | a recent GCC and clang | the target's, as avr-gcc 7 in C++11 | `make examples`, which alone sees what that compiler reports, as `warn_unused_result` through a cast (CodingStyle FN-10) |
+
 | Id | Rule | Checked by |
 |---|---|---|
 | TS-1 | Every behaviour is tested on the host; the target checks only what the host cannot show. A check in SelfCheck that the host could make is a test on the host instead. | Review |
 | TS-2 | A misuse that a `static_assert` stops has a case in `test/compile_fail/`, whose line `// Expected: ...` names the message. | `add_compile_fail_tests()` |
 | TS-3 | A bug is fixed after a test that shows it fails, and the test stays. | Review |
-| TS-4 | Every line and every branch of `src/` is reached by a test on the host. A branch no test can reach is a question about the code, not about the test. | `make coverage` |
+| TS-4 | Every line and every branch of `src/` is reached by a test on the host. The tests follow what the documentation promises, not what the code does; a line they miss is first a question whether the promise is complete, then one for a test. A branch no test can reach is a question about the code, not about the test; where the code keeps it, as a way out the hardware may take, it is excluded with `GCOVR_EXCL_LINE: ` and the reason, and an exclusion without one fails. | `make coverage` |
+| TS-24 | Every test on the host passes under AddressSanitizer and UBSan as well, which find what a test passes by chance: a read beyond an array, an overflow of a signed type. | `make sanitize` |
 
 ## Files and names
 
@@ -43,6 +55,8 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 | TS-16 | A `constexpr` function is also tested where the compiler computes it, with a `static_assert` in a test. | Review |
 | TS-17 | A fixture only for what two tests or more set up alike. No state shared between tests: each test can run alone and in any order. | `gtest_discover_tests`, Review |
 | TS-18 | Deterministic: no real time, no random number, no `sleep`. Time comes from the mock, set by the test. | Review |
+| TS-25 | Each function of the API has a test with an argument outside its contract as well as one inside, where the contract says what happens then: the error it returns, the value it clamps to, the call it ignores. | Review |
+| TS-26 | Calls with an order, as `Begin()` before `Update()`, are tested in the wrong one too: no `Begin()`, `Begin()` twice, `Update()` after `End()`. A state machine has a test for each transition, and one for each event that must change nothing. | Review |
 
 ## The mock of the Arduino core
 
