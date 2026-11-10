@@ -10,6 +10,10 @@ brings it.
   as `file:`, beside `packages:`, and the jobs of `ci.yml` and `static-analysis.yml` that build
   with CMake install it as well, so that CI has what the container has. The template writes the
   file once, empty; it is the project's, and an update leaves it alone.
+- **Coverage of a target in a subdirectory:** `tools/coverage.sh` took the notes of a target that
+  `add_subdirectory()` adds, as MaxMatrix's control program, for those of a deleted source, as it
+  looked for the source in the root; it removed them, and gcovr failed on the counts left
+  without. It finds the source in its subdirectory now.
 
 On the update: rebuild the dev container. A project that installed packages of its own in a
 workflow of its own can list them in `apt-packages.txt` and pass `file:` instead.
