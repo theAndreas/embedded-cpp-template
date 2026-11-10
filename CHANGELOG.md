@@ -3,6 +3,39 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+The scripts in `tools/`: one language fewer, the indenter of the Doxygen blocks tested, and a
+failure no longer hidden in a list of files.
+
+- **`tools/doc_indent.py` instead of `tools/doc_indent.pl`:** the scripts are shell, which drives
+  the tools, and Python, which reads and writes data; the Perl script was the one that nothing
+  checked. ruff reads it now, and the template needs Perl no more. It indents what the Perl
+  script indented, compared on every source and on 3000 generated blocks, with four exceptions,
+  each a fix:
+  - the width is counted in characters, as clang-format counts it, not in bytes: a line with
+    umlauts that fits 80 columns is no longer broken;
+  - a block ends where `*/` stands, also after the text of a line; before, the block went on to
+    the next line that started with `*/`, and so took in the comments after it;
+  - an example, `\code`, that is not closed ends with its block; before, the blocks after it
+    were taken for code and left as they were;
+  - a backtick that opens no code span stays; it was dropped, as was the closing one of a
+    `\param` whose name is a code span.
+- **Its cases:** `tests/doc_indent/`, which `tests/doc_indent.py` checks in the template's CI:
+  `--fix` makes the expected file of each, `--check` fails exactly where `--fix` changes
+  something, and a second `--fix` changes nothing.
+- **shellcheck's check of masked returns:** `.shellcheckrc` turns on
+  `check-extra-masked-returns` (SC2312). `mapfile -t files < <(git ls-files ...)` never saw git
+  fail: the list was empty, and the check over it passed. A list of files comes from
+  `list_files` in `tools/common.sh` now, which fails where git fails or no file matches; the
+  output of every other command goes into a variable before it is used.
+- **The template's own Python scripts are read by ruff** in its CI, with the rules of
+  `pyproject.toml`.
+
+On the update: nothing to do. A hook in `tools/project.sh` that reads a command's output through
+`< <(...)` or `$(...)` as an argument is reported by `make lint` now; give the output a variable
+first, as the template's scripts do.
+
 ## v0.4.0
 
 - **Ubuntu packages of the project's own:** `.devcontainer/apt-packages.txt`, one or more per

@@ -42,8 +42,15 @@ jobs:
           sudo apt-get install -y --no-install-recommends cmake ninja-build \
             libgtest-dev clang simavr jq doxygen cppcheck
 
-      - name: The template's own script
-        run: uvx --from shellcheck-py==0.11.0.1 shellcheck tests/check.sh
+      # With the checks template/.shellcheckrc turns on, and the rules of template/pyproject.toml.
+      - name: The template's own scripts
+        run: |
+          uvx --from shellcheck-py==0.11.0.1 shellcheck --enable=check-extra-masked-returns \
+            tests/check.sh
+          uvx --from ruff==0.17.3 ruff check --select F,E9 tests
+
+      - name: The indent of the Doxygen blocks against its cases
+        run: tests/doc_indent.py
 
       # For the clang-tidy module of the template, which tidy builds in the project as well.
       - uses: ./template/.github/actions/llvm-headers
