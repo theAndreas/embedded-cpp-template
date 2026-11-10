@@ -32,6 +32,24 @@ swaps the parentheses where it says so.
   text in flash, its critical sections and its registers.
 - **An expression does one thing** (CodingStyle.md T-18): a computation or condition of several
   steps is split into named steps.
+- **More rules in CodingStyle.md**: the promotion of a narrow type to `int`, widened before the
+  arithmetic (T-19); arrays that know their size (T-20); a `char` widened through `unsigned char`
+  (T-21); swappable parameters as types of their own (FN-16); a member that must exist as a
+  `reference_wrapper` by M-3 (FN-15); a `switch` over an `enum class` that handles an unnamed
+  value after it (T-15); objects of static storage made when compiling (M-5); constants in a
+  header whose address is taken (M-4); pointer casts across targets (T-9); no downcast (M-2); no
+  `virtual` for a test (C-6); no cycle of includes (F-14); examples fit to ship (F-15); reserved
+  names; and how a suppression is reasoned (S-1, S-4, S-5).
+- **`Discard()`** in `attributes.h`, for a result dropped on purpose (CodingStyle.md FN-10): before
+  C++17 GCC warns through a cast to `void`, clang does not, so the cast passed on the host and
+  failed for the target.
+- **More rules in Testing.md**: the tests follow the documentation, and an exclusion from coverage
+  says why, which `tools/coverage.sh` checks (TS-4); every test passes under the sanitizers
+  (TS-24); arguments outside the contract (TS-25); calls in the wrong order and every transition
+  of a state machine (TS-26); a table of what differs between host and target.
+- **Logical constness** (CodingStyle.md FN-11): a function is `const` when it leaves unchanged
+  what a user sees, the pin, register or buffer it controls through a pointer included; one that
+  writes a register through a member pointer is not `const`, though it compiles as one.
 - **Reuse before writing** (CodingStyle.md M-3): what the project has, then the standard library
   where every target has it, then a library like it such as the ETL or Utl; only what none has
   is written, once and for reuse.

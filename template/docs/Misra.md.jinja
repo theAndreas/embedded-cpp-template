@@ -112,7 +112,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 | Rule 7.0.2 | Required | No conversion to `bool` | `readability-implicit-bool-conversion` |  |
 | Rule 7.0.3 | Required | No numeric value of a character | Review |  |
 | Rule 7.0.4 | Required | Operands of bitwise and shift operators | CodingStyle H-8, Review |  |
-| Rule 7.0.5 | Required | Promotions keep signedness | `-Wconversion`, `-Wsign-conversion` |  |
+| Rule 7.0.5 | Required | Promotions keep signedness | `-Wconversion`, `-Wsign-conversion`, CodingStyle T-19 |  |
 | Rule 7.0.6 | Required | Numeric assignments appropriate | `-Wconversion`, `bugprone-narrowing-conversions` |  |
 | Rule 7.11.1 | Required | `nullptr` the only null pointer | `modernize-use-nullptr`, `-Wzero-as-null-pointer-constant` |  |
 | Rule 7.11.2 | Required | No array decaying as an argument | Review | An array passed as a pointer and a size, as C APIs of the platforms take it; `cppcoreguidelines-pro-bounds-array-to-pointer-decay` is off, see `.clang-tidy` |
@@ -132,7 +132,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 | Rule 8.2.5 | Required | No `reinterpret_cast` | `cppcoreguidelines-pro-type-reinterpret-cast` |  |
 | Rule 8.2.6 | Required | No integer or `void*` cast to a pointer | `cppcoreguidelines-pro-type-reinterpret-cast`, in part |  |
 | Rule 8.2.7 | Advisory | No pointer cast to an integer | `cppcoreguidelines-pro-type-reinterpret-cast`, in part |  |
-| Rule 8.2.8 | Required | Pointer to integer via `intptr_t` only | Review |  |
+| Rule 8.2.8 | Required | Pointer to integer via `intptr_t` only | CodingStyle T-9, Review |  |
 | Rule 8.2.9 | Required | No polymorphic operand of `typeid` | n/a: no RTTI (CodingStyle M-2) |  |
 | Rule 8.2.10 | Required | No recursion | `misc-no-recursion` |  |
 | Rule 8.2.11 | Required | Arguments to an ellipsis of fitting types | `cppcoreguidelines-pro-type-vararg` |  |
