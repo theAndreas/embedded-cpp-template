@@ -2,7 +2,7 @@
 #
 # Copyright 2026 Andreas Burnickl
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Checks template/tools/doc_indent.py against the cases in tests/doc_indent/.
+"""Checks template/tools/lib/doc_indent.py against the cases in tests/doc_indent/.
 
 Each case <name>.h is what clang-format may leave; <name>.expected.h is what --fix makes of
 it, and a case without one has to stay as it is. For each, --check fails exactly where --fix
@@ -21,7 +21,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRIPT = ROOT / "template" / "tools" / "doc_indent.py"
+SCRIPT = ROOT / "template" / "tools" / "lib" / "doc_indent.py"
 CASES = ROOT / "tests" / "doc_indent"
 
 

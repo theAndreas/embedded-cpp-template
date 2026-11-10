@@ -2,7 +2,7 @@
 #
 # Copyright 2026 Andreas Burnickl
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Checks the template's clang-tidy module, tools/tidy_module/, against the cases in tests/tidy_module/.
+"""Checks the template's clang-tidy module, tools/lib/tidy_module/, against tests/tidy_module/.
 
 Each file there marks the lines a check reports with a comment `house: <how>`; how is `fix`
 for a report with a fix-it, or a word that the message contains for one without. Every other
@@ -12,7 +12,7 @@ C++11 and, checked again, to keep only the reports without a fix-it.
 Usage:
   tests/tidy_module.py
 
-The module is built by template/tools/tidy_module.sh into build/tidy-module, against the
+The module is built by template/tools/lib/tidy_module.sh into build/tidy-module, against the
 headers that script finds: in the dev container, or in LLVM_INCLUDE_DIR.
 """
 
@@ -38,7 +38,7 @@ def build_module() -> Path:
     """Builds the module; the script says on stderr why, if it cannot."""
     result = subprocess.run(
         [
-            str(TEMPLATE / "tools" / "tidy_module.sh"),
+            str(TEMPLATE / "tools" / "lib" / "tidy_module.sh"),
             str(ROOT / "build" / "tidy-module"),
         ],
         stdout=subprocess.PIPE,

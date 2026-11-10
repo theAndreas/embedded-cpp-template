@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Checks the style of the C++ sources (clang-format, cpplint, and the indent
-# of the lines that continue a Doxygen command, tools/doc_indent.py), of the
+# of the lines that continue a Doxygen command, tools/lib/doc_indent.py), of the
 # scripts (shellcheck, with the checks .shellcheckrc turns on) and of the CI
 # workflow (actionlint). With --fix, formats the C++ sources instead of only
 # checking them. The Python scripts are read by ruff. The tools run from the
@@ -39,11 +39,11 @@ main() {
   # starts at the margin again, so the indent comes after it.
   if ((fix)); then
     "${UV_RUN[@]}" clang-format -i "${sources[@]}"
-    tools/doc_indent.py --fix "${sources[@]}"
+    tools/lib/doc_indent.py --fix "${sources[@]}"
   else
     "${UV_RUN[@]}" clang-format --dry-run --Werror \
       "${sources[@]}" || failed=1
-    tools/doc_indent.py --check "${sources[@]}" || failed=1
+    tools/lib/doc_indent.py --check "${sources[@]}" || failed=1
   fi
   "${UV_RUN[@]}" cpplint --quiet "${sources[@]}" || failed=1
   "${UV_RUN[@]}" shellcheck -x "${scripts[@]}" || failed=1
