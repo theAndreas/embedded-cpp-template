@@ -5,6 +5,12 @@ brings it.
 
 ## Unreleased
 
+- **The README's table of flash and RAM checked against the build:** `make sizes`, part of
+  `make check` and of CI, compares the table between `<!-- sizes -->` and `<!-- /sizes -->` in
+  README.md with the one the last `make examples` measured, byte for byte, as CI and the dev
+  container compile with the same pinned core; `make sizes FIX=1` writes it in.
+  `tools/compile_examples.sh` writes its table to `build/sizes.md` when every example compiles.
+  A README without the block has nothing to check.
 - **Checks of our own, as a clang-tidy module:** `tools/tidy_module/`, the module `house`, which
   `tools/tidy_module.sh` builds and `tools/tidy.sh` loads; `.clang-tidy` turns on `house-*`. The
   first check, `house-braced-member-init`, holds a constructor's member initializer list to braced
