@@ -27,6 +27,7 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
   TIDY_VARIANTS=(default)
   DOCS_INTERNAL_API=""
   CPPCHECK=1
+  HOST_CODE=()
 }
 
 # The hooks, which do nothing unless tools/project.sh defines them again, and

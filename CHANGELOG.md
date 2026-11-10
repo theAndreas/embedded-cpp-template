@@ -8,6 +8,10 @@ brings it.
 The scripts in `tools/`: in order, one language fewer, the indenter of the Doxygen blocks
 tested, and a failure no longer hidden in a list of files.
 
+- **Code of the project's own on the host:** `HOST_CODE` in `tools/project.sh`, the folders of
+  code that runs on the host beside the library, as a simulator or a tool, built by
+  `CMakeLists.txt`. `make lint` formats and checks them as `src/`, and `make tidy` reads them
+  with the tests. Empty by default.
 - **`tools/` holds what `make` calls, `tools/lib/` what those scripts call:** `doc_indent.py`,
   which `lint.sh` runs, and `tidy_module.sh` with the module's sources in `tidy_module/`, which
   `tidy.sh` builds. `tools/README.md` says what each file is, and when a script is shell or
