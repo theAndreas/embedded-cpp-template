@@ -3,7 +3,8 @@
 
 /*!
  * \file
- * \brief Attributes of a later standard, as macros for every standard.
+ * \brief Attributes of a later standard, as macros for every standard, and
+ *        Discard() for a result one of them marks.
  *
  * The library is written for C++11 and later. Where a later standard has an
  * attribute, the macro is that attribute; before it, the compiler's own
@@ -34,5 +35,23 @@
 #else
 #define {{ macro_prefix }}_NODISCARD
 #endif
+
+namespace {{ namespace }} {
+
+/*!
+ * \brief Drops a result that must not be ignored, where dropping it is meant.
+ *
+ * For a result {{ macro_prefix }}_NODISCARD marks: the call says that it is
+ * dropped on purpose, and a comment beside it why:
+ * `Discard(Send(frame));  // sent again on the next tick`. Not a cast to
+ * `void`: before C++17, GCC's `warn_unused_result` warns through one and clang
+ * does not, so a cast that passes on the host fails the build for the target.
+ *
+ * \tparam Value The type of the result.
+ */
+template <typename Value>
+void Discard(Value const& /*value*/) noexcept {}
+
+}  // namespace {{ namespace }}
 
 #endif  // {{ project_name|upper }}_SRC_{{ namespace|upper }}_ATTRIBUTES_H_
