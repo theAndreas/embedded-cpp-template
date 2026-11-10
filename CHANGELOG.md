@@ -17,6 +17,10 @@ brings it.
 - **cppcheck reads `__has_include` in C++11:** `tools/cppcheck.sh` passes
   `-D__has_include(x)=1`, as cppcheck knows it from C++17 only and stopped at it with a syntax
   error, where GCC and Clang accept it in every standard.
+- **git signs in to GitHub through gh**: the dev container's `postAttachCommand` runs
+  `gh auth setup-git` on every attach, so that `git push` takes gh's token, whose login stays in
+  its volume, instead of VS Code's helper, which opens a window on the host. Without a login it
+  does nothing.
 
 On the update: rebuild the dev container, for the headers. A member initializer written in
 parentheses now fails `make tidy`; `tools/tidy.sh` applies nothing, but clang-tidy's `--fix`

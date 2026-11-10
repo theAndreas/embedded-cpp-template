@@ -58,6 +58,10 @@
     // `make setup` installs the core, into the volume below, where it stays. The versions, so
     // that a broken tool shows when the container is made.
     "postCreateCommand": "arduino-cli version && arduino-lint --version && gh --version && uv --version && clangd --version && command -v simavr && doxygen --version && cppcheck --version && clang++ --version && cmake --version",
+    // git signs in to GitHub through gh, whose login is in the volume below, rather than
+    // through VS Code's helper, which opens a window on the host. On every attach, after VS Code
+    // has copied the host's .gitconfig in; nothing without a login.
+    "postAttachCommand": "gh auth status --hostname github.com >/dev/null 2>&1 && gh auth setup-git --hostname github.com || true",
     "mounts": [
         {
             "source": "embedded-cpp-template-arduino15",
