@@ -14,6 +14,9 @@ brings it.
 - **LLVM's headers in the dev container and in CI**, which the module is compiled against:
   `.devcontainer/llvm-headers.sh` from apt.llvm.org, at the major version `ARG LLVM_MAJOR` of the
   Dockerfile names; the action `llvm-headers` in `static-analysis.yml`.
+- **cppcheck reads `__has_include` in C++11:** `tools/cppcheck.sh` passes
+  `-D__has_include(x)=1`, as cppcheck knows it from C++17 only and stopped at it with a syntax
+  error, where GCC and Clang accept it in every standard.
 
 On the update: rebuild the dev container, for the headers. A member initializer written in
 parentheses now fails `make tidy`; `tools/tidy.sh` applies nothing, but clang-tidy's `--fix`
