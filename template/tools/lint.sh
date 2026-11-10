@@ -28,8 +28,16 @@ main() {
   fi
 
   cd "${ROOT_DIR}"
+  # The library, its examples and tests, and the code of HOST_CODE beside them.
+  local host_code
+  host_code_dirs host_code
+  local paths=('src/*' 'examples/*' 'test/*')
+  local dir
+  for dir in "${host_code[@]}"; do
+    paths+=("${dir}/*")
+  done
   local sources
-  list_files sources '\.(h|cpp|ino)$' 'src/*' 'examples/*' 'test/*'
+  list_files sources '\.(h|cpp|ino)$' "${paths[@]}"
   local scripts
   list_files scripts '\.sh$' 'tools/*.sh'
 

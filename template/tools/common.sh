@@ -27,6 +27,7 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
   TIDY_VARIANTS=(default)
   DOCS_INTERNAL_API=""
   CPPCHECK=1
+  HOST_CODE=()
 }
 
 # The hooks, which do nothing unless tools/project.sh defines them again, and
@@ -89,6 +90,24 @@ list_files() {
   fi
   # shellcheck disable=SC2034  # a nameref: what it fills is the caller's array
   mapfile -t list_files_into <<< "${listed}"
+}
+
+# Fills the array named first with the folders of HOST_CODE, each without the / at its end. Fails
+# where one is no folder, as a misspelt one would be checked by nothing, without a word.
+# Arguments:
+#   array: the name of the array to fill
+host_code_dirs() {
+  local -n host_code_dirs_into="$1"
+  host_code_dirs_into=()
+  local dir
+  for dir in "${HOST_CODE[@]}"; do
+    dir="${dir%/}"
+    if [[ ! -d "${ROOT_DIR}/${dir}" ]]; then
+      err "HOST_CODE in tools/project.sh names ${dir}, which is no folder of the project."
+      return 1
+    fi
+    host_code_dirs_into+=("${dir}")
+  done
 }
 
 # Compiles an example in a variant into BUILD_DIR/<variant>/<example> and prints what
