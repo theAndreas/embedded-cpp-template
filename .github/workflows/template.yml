@@ -35,12 +35,12 @@ jobs:
         with:
           version: 1.5.1
 
-      # As the Dockerfile of the template installs them.
+      # As the Dockerfile of the template installs them, through the action a project's CI
+      # installs with, so that a change to it is tried here before a project gets it.
       - name: Install the tools from apt
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends cmake ninja-build \
-            libgtest-dev clang simavr jq doxygen cppcheck
+        uses: ./template/.github/actions/apt-install
+        with:
+          packages: cmake ninja-build libgtest-dev clang simavr jq doxygen cppcheck
 
       # With the checks template/.shellcheckrc turns on, and the rules of template/pyproject.toml.
       - name: The template's own scripts
