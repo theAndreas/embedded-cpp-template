@@ -3,7 +3,10 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.5.1
+
+A project's CI gets its Ubuntu packages when the runners' mirrors do not answer: on 2026-11-11
+they reached no server of Canonical for hours, and every job that installed from apt failed.
 
 - **apt-get update moves off a mirror that does not answer:** `.github/actions/apt-install`
   takes Azure's mirror out of the runner's list from the second attempt at `apt-get update`, as
@@ -13,6 +16,9 @@ brings it.
   runners reached no server of Canonical for hours, and every CI job that installed from apt
   failed before it built anything; kernel.org's mirror answered at once. The template's own CI
   installs through the action now, so that it tries a change to it first.
+
+On the update: nothing to do. `.github/actions/apt-install` comes from the template, and
+`copier update` replaces it unless the project changed it.
 
 ## v0.5.0
 
