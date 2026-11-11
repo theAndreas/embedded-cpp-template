@@ -7,10 +7,12 @@ brings it.
 
 - **apt-get update moves off a mirror that does not answer:** `.github/actions/apt-install`
   takes Azure's mirror out of the runner's list from the second attempt at `apt-get update`, as
-  it did for the downloads already, so that apt goes on to archive.ubuntu.com. On 2026-11-11
-  azure.archive.ubuntu.com answered no index for hours, and every CI job that installed from
-  apt failed before it built anything. The template's own CI installs through the action now,
-  so that it tries a change to it first.
+  it did for the downloads already, so that apt goes on to archive.ubuntu.com, and the third
+  attempt goes to mirrors.edge.kernel.org, one of Ubuntu's listed mirrors that Canonical does
+  not run; apt checks the archive's signature whichever mirror serves it. On 2026-11-11 the
+  runners reached no server of Canonical for hours, and every CI job that installed from apt
+  failed before it built anything; kernel.org's mirror answered at once. The template's own CI
+  installs through the action now, so that it tries a change to it first.
 
 ## v0.5.0
 
