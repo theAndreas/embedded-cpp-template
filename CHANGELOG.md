@@ -3,6 +3,15 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **apt-get update moves off a mirror that does not answer:** `.github/actions/apt-install`
+  takes Azure's mirror out of the runner's list from the second attempt at `apt-get update`, as
+  it did for the downloads already, so that apt goes on to archive.ubuntu.com. On 2026-11-11
+  azure.archive.ubuntu.com answered no index for hours, and every CI job that installed from
+  apt failed before it built anything. The template's own CI installs through the action now,
+  so that it tries a change to it first.
+
 ## v0.5.0
 
 The scripts in `tools/`: in order, one language fewer, the indenter of the Doxygen blocks
