@@ -73,9 +73,10 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 |---|---|---|
 | C-1 | Find out whether the clang-tidy pinned from PyPI loads a plugin (`-load`); if not, clang-tidy and the LLVM headers from apt, pinned in the Dockerfile | done: it loads one and exports the symbols a module needs; only the headers come from apt.llvm.org, at the major version |
 | C-2 | A clang-tidy module of our own, with the first check: braced initialization in a member initializer list, with a fix-it (Utl's `function_ref.h:106` slipped through) | done: `house-braced-member-init` |
-| C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers; an `if … else if` ends with `else` (MISRA 9.4.1, `hicpp-multiway-paths-covered` is gone in clang-tidy 23); a template parameter is not a single letter (CodingStyle.md); an expression of too many steps, to split (CodingStyle.md T-18); a cast to `void` of a result `_NODISCARD` marks, which only avr-gcc reports (CodingStyle.md FN-10) | idea |
+| C-3 | Further candidates: a NOLINT names its check and its reason; an `if … else if` ends with `else` (MISRA 9.4.1, `hicpp-multiway-paths-covered` is gone in clang-tidy 23); a template parameter is not a single letter (CodingStyle.md); an expression of too many steps, to split (CodingStyle.md T-18); a cast to `void` of a result `_NODISCARD` marks, which only avr-gcc reports (CodingStyle.md FN-10) | idea |
 | C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
 | C-5 | Fixed-width integer types (MISRA C:2012 Dir 4.6, AUTOSAR A3-9-1): no `int`, `unsigned` in `src/`, but `char` for text, `bool`, `size_t`, and what the Arduino core's signatures give, as the `int` of `analogRead()`. `google-runtime-int`, which is on, reports only `short` and `long`. Utl keeps to it already | idea |
+| C-6 | Braced initialization outside the member initializer list (CodingStyle.md T-3): a variable and a data member's default, `auto` as well, with a fix-it where braces keep the meaning | done: `house-braced-var-init` |
 
 ### M5 - A generic embedded library on the ETL
 
