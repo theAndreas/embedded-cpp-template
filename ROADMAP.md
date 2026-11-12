@@ -103,6 +103,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | I-11 | A build per variant of the configuration: each switch of the library on in one tested build and off in another, all on and all off, so that one configuration cannot hide a break in another |
 | I-12 | Condition coverage for a decision of three conditions or more, each shown to change the outcome alone: GCC's `-fcondition-coverage` from GCC 14, as gcovr reads it |
 | I-13 | clang's `-Wglobal-constructors` and `-Wexit-time-destructors` for CodingStyle M-5, an object of static storage made when compiling and without a destructor; GCC has neither |
+| I-14 | `make tidy` for a change rather than for all: a cache in `build/tidy/` of the files that passed, keyed by a hash of the file preprocessed with its comments (`-E -CC`, so that a header and a `NOLINT` count), its flags, every `.clang-tidy`, the version of clang-tidy and the module, and `tidy.sh`; a list of changed files from git would miss a changed header. CI keeps reading all. Measured in MaxMatrix on 2026-11-12: of 387 s, clang's static analyzer took two minutes per variant of one test file of 2000 lines, the other checks 2 s; clangd is fast as its `FastCheckFilter` leaves the analyzer out. So first a project splits such a file, which #29 then reads on every core; next, if still slow, a `make tidy` without `clang-analyzer-*` for the edit loop, as clangd runs it, the analyzer in `make check` and CI; the cache last |
 
 ## Decisions
 
