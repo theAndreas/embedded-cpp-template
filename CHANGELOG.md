@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.5.2
 
 `make check` takes minutes fewer: the tests run side by side, and clang-tidy reads one file per
 core.
@@ -17,9 +17,9 @@ core.
   which the pinned clang-tidy brings and which prints the findings of a file together. It reads
   every file of the database it is given, so `tidy.sh` writes one of the files to read alone,
   in `build/tidy/selected/`, and a file the database lacks still fails rather than going
-  unread. In MaxMatrix, `make tidy` took 387 s rather than 529: the rest is one test file of
-  2000 lines, which clang's static analyzer reads for two minutes in each variant, and only
-  splitting it shortens.
+  unread. In MaxMatrix, `make tidy` took 387 s rather than 529: the rest was one test file of
+  2000 lines, which clang's static analyzer read for two minutes in each variant. Split into a
+  file per header, as TS-5 asks (MaxMatrix #83), it took 130 s.
 
 On the update: nothing to do, unless the tests of a project share something without saying so,
 as a port or a file: they get a `RESOURCE_LOCK` first, or fail now and then.
