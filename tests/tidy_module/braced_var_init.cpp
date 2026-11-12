@@ -12,6 +12,7 @@ namespace scalars {
 int const kGlobal = 1;      // house: fix
 static int s_static(2);     // house: fix
 int const kAlready{3};
+char const kName[] = "font";
 int s_uninitialized;
 
 int Locals(int value, double ratio, long wide, int const *pointer) {
@@ -27,7 +28,8 @@ int Locals(int value, double ratio, long wide, int const *pointer) {
   int narrowed = wide;      // house: narrowing
   bool is_set = pointer;    // house: narrowing
   int const &reference = same; // house: fix
-  char text[] = "abc";      // house: fix
+  char text[] = "abc";
+  char listed_text[] = {"abc"}; // house: fix
   int numbers[2] = {1, 2};  // house: fix
   static int calls = 0;     // house: fix
   int braced{value};
@@ -39,7 +41,7 @@ int Locals(int value, double ratio, long wide, int const *pointer) {
   }
   return same + static_cast<int>(widened) + parenthesized + listed + nested +
          static_cast<int>(constant) + fits + big + truncated + narrowed +
-         is_set + reference + text[0] + numbers[0] + calls + braced;
+         is_set + reference + text[0] + listed_text[0] + numbers[0] + calls + braced;
 }
 
 int Defaults(int value = 0) { return value; }
@@ -163,6 +165,7 @@ struct Defaults {
   int listed = {2};             // house: fix
   classes::Point point = classes::Point(1, 2); // house: fix
   int braced{3};
+  char name[8] = "abc";
   static int const kStatic = 4; // house: fix
   static int shared;
 };

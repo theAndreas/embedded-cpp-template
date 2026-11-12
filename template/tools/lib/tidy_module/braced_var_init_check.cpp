@@ -188,6 +188,14 @@ std::optional<Temporary> AsTemporary(Expr const& expr, QualType type,
   return temporary;
 }
 
+// `char const kName[] = "font";`, a C array from a string literal: T-20 writes
+// it with `=`, the one form modernize-avoid-c-arrays' AllowStringArrays lets
+// through; braces would turn it into a finding of that check.
+bool IsStringArray(QualType type, Expr const& init) {
+  return type->isArrayType() &&
+         llvm::isa<clang::StringLiteral>(init.IgnoreImplicit());
+}
+
 // `T x = value;`, `T x = {1, 2};` or `T x = T(1, 2);`, of a variable or of a
 // data member's default; `name` is where its name is.
 std::optional<Finding> CopyInit(Source const& source, ASTContext& context,
@@ -367,8 +375,8 @@ void BracedVarInitCheck::check(
     // A static data member's declaration in the class matches by the
     // initializer of its definition outside, which is reported there.
     if (var->getInit() == nullptr || var->isInitCapture() ||
-        var->isCXXForRangeDecl() ||
-        var->getLocation().isMacroID()) {
+        var->isCXXForRangeDecl() || var->getLocation().isMacroID() ||
+        IsStringArray(var->getType(), *var->getInit())) {
       return;
     }
     switch (var->getInitStyle()) {
@@ -388,7 +396,8 @@ void BracedVarInitCheck::check(
                  result.Nodes.getNodeAs<clang::FieldDecl>("field")) {
     decl = field;
     if (field->getInClassInitStyle() != clang::ICIS_CopyInit ||
-        field->getLocation().isMacroID()) {
+        field->getLocation().isMacroID() ||
+        IsStringArray(field->getType(), *field->getInClassInitializer())) {
       return;
     }
     finding = CopyInit(source, context, field->getLocation(), field->getType(),
