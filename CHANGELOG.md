@@ -3,6 +3,26 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+Braced initialization (CodingStyle.md T-3) is checked everywhere, not only in a constructor's
+member initializer list.
+
+- **`house-braced-var-init`, a second check of our own:** a variable or a data member's default
+  written with `=` or parentheses is reported: local, global, `static`, a static data member, the
+  variable of a `for` or of a condition, and with `auto` as well. Where braces keep the meaning,
+  its fix-it writes them: `int count = 0;` becomes `int count{0};`, `Point p = {1, 2};` and
+  `Point p = Point(1, 2);` become `Point p{1, 2};`. It reports without a fix-it where an argument
+  narrows, where the type is a template's parameter, and where `T x = value;` initializes a class
+  with an `explicit` constructor, which braces would consider; and not at all where braces would
+  choose a `std::initializer_list` constructor, or for `auto list = {1, 2};`. A parameter's
+  default, the variable of a range-based `for`, a structured binding and a lambda's capture are
+  left alone. It holds C++11 and C++17 alike, whose trees of the same initialization differ.
+
+On the update: `make tidy` reports every initialization with `=` or parentheses that a project
+has. Most have a fix-it, which `clang-tidy --fix` applies with the module loaded; the rest want
+the conversion written out, or a `NOLINT` naming T-3 and the reason.
+
 ## v0.5.2
 
 `make check` takes minutes fewer: the tests run side by side, and clang-tidy reads one file per
