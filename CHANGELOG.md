@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.6.0
 
 Braced initialization (CodingStyle.md T-3) is checked everywhere, not only in a constructor's
 member initializer list.
