@@ -3,6 +3,16 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`house-braced-var-init` leaves a text in a C array alone:** `char const kName[] = "font";`
+  keeps its `=`, as T-20 writes it. v0.6.0 reported it, and its fix-it, `kName[]{"font"}`, was
+  then reported by `modernize-avoid-c-arrays`, whose `AllowStringArrays` lets only the `=` form
+  through.
+
+On the update: a project that took v0.6.0's fix-its for such arrays writes them with `=` again,
+or `make tidy` reports them under `modernize-avoid-c-arrays`.
+
 ## v0.6.0
 
 Braced initialization (CodingStyle.md T-3) is checked everywhere, not only in a constructor's

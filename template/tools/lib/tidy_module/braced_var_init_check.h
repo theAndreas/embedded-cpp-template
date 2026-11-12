@@ -17,7 +17,9 @@ namespace house {
  * list, which house-braced-member-init checks: a local or global variable, a
  * `static` one, a static data member, the variable of a `for` or of a
  * condition, and the default of a data member. Not a parameter's default, the
- * variable of a range-based `for`, a structured binding or a lambda's capture.
+ * variable of a range-based `for`, a structured binding or a lambda's capture,
+ * nor a C array from a string literal, `char const kName[] = "font";`, which
+ * T-20 writes with `=`, as modernize-avoid-c-arrays allows no other form.
  *
  * The fix-it writes braces where that keeps the meaning, and only there:
  *
