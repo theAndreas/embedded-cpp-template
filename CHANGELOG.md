@@ -3,6 +3,27 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+`make check` takes minutes fewer: the tests run side by side, and clang-tidy reads one file per
+core.
+
+- **The tests run side by side:** the Makefile exports `CTEST_PARALLEL_LEVEL`, the number of
+  cores unless the environment sets it, so that ctest runs as many tests at a time as there are
+  cores, in every target that runs it. A project's tests wait on the clock and on ports as much
+  as on a core: MaxMatrix's 1646 took 10 s rather than 94, each time `make check` runs them. A
+  test that needs something to itself, as a port, says so with `RESOURCE_LOCK`.
+- **clang-tidy reads one file per core:** `tools/tidy.sh` runs it through `run-clang-tidy.py`,
+  which the pinned clang-tidy brings and which prints the findings of a file together. It reads
+  every file of the database it is given, so `tidy.sh` writes one of the files to read alone,
+  in `build/tidy/selected/`, and a file the database lacks still fails rather than going
+  unread. In MaxMatrix, `make tidy` took 387 s rather than 529: the rest is one test file of
+  2000 lines, which clang's static analyzer reads for two minutes in each variant, and only
+  splitting it shortens.
+
+On the update: nothing to do, unless the tests of a project share something without saying so,
+as a port or a file: they get a `RESOURCE_LOCK` first, or fail now and then.
+
 ## v0.5.1
 
 A project's CI gets its Ubuntu packages when the runners' mirrors do not answer: on 2026-11-11
