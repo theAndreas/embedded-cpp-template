@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.6.1
 
 - **`house-braced-var-init` leaves a text in a C array alone:** `char const kName[] = "font";`
   keeps its `=`, as T-20 writes it. v0.6.0 reported it, and its fix-it, `kName[]{"font"}`, was
