@@ -40,6 +40,9 @@
 #   HOST_CODE            folders of code that runs on the host beside the library, as a
 #                        simulator, built by CMakeLists.txt: tools/lint.sh formats and checks
 #                        them as src/, tools/tidy.sh reads them with the tests
+#   TIDY_SKIP            folders tools/tidy.sh leaves out, as a backend's tests built by a
+#                        script of their own: a target of tools/project.mk reads them with
+#                        clang-tidy and the database that script writes
 #
 #   target_settings TARGET  sets what differs for a target, as its FQBN; TARGET is set as well
 #   variant_flags VARIANT   prints the compiler flags of a variant, one per line
