@@ -9,8 +9,12 @@ brings it.
   `.devcontainer/llvm-headers.sh` failed the SC2312 that `.shellcheckrc` turns on, and nothing
   noticed until Wordclock's lint, which reads them all. Its last line takes the version into a
   variable first.
+- **`cppcheck_flags()` in `tools/project.sh`:** further flags of cppcheck, after those of
+  `tools/cppcheck.sh`, as include folders, a `--suppressions-list` or a later `--std`. A firmware
+  made from the template gives `--std=c++17` there, as it is compiled as gnu++17 and cppcheck read
+  it as C++11.
 
-On the update: nothing.
+On the update: nothing; a firmware made before may add the `--std=c++17` of a new one.
 
 ## v0.7.4
 
