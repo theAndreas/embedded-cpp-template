@@ -45,6 +45,11 @@
 #   variant_flags VARIANT   prints the compiler flags of a variant, one per line
 #   prepare                 builds what compiling needs beyond the core, such as a plugin
 #   check_elf VARIANT ELF   fails if a compiled example is wrong in a way no warning says
+#   coverage_suites         runs the project's tests that CMakeLists.txt does not build, with
+#                           --coverage, and prints the folders their counts lie in, one per line:
+#                           tools/coverage.sh reads them with the tests', and COVERAGE_MINIMUM is
+#                           what all of them reach together. It removes their counts of an
+#                           earlier run first, as these would add to this one
 
 # shellcheck disable=SC2034  # read by the scripts that source this file
 
