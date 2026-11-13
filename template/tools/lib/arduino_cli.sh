@@ -114,6 +114,11 @@ arduino_cli_build() {
   return "${failed}"
 }
 
+# Prints the name of every example, which arduino_cli_build() compiles each.
+arduino_cli_programs() {
+  list_examples
+}
+
 # Prints the path of the ELF file of an example that arduino_cli_build() made.
 arduino_cli_elf() {
   elf_of "$@"

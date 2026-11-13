@@ -3,12 +3,13 @@
 # Copyright 2026 Andreas Burnickl
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Runs clang-tidy on the library and the examples, with the flags each target compiles them with,
-# once for each of TIDY_VARIANTS in tools/project.sh, and on the tests on the host; the checks are
-# in .clang-tidy. The database of a target and variant is build/tidy/targets/<target>/<variant>,
-# written by target_database() of tools/common.sh: arduino-cli's rewritten as below, a CMake
-# build's by tools/lib/clang_database.py for clang. build/tidy/clangd points to that of the first
-# target and variant, which clangd reads for the examples, see .clangd.
+# Runs clang-tidy on the library and its examples, or on a firmware and its platform/, with the
+# flags each target compiles them with, once for each of TIDY_VARIANTS in tools/project.sh, and on
+# the tests on the host; the checks are in .clang-tidy. The database of a target and variant is
+# build/tidy/targets/<target>/<variant>, written by target_database() of tools/common.sh:
+# arduino-cli's rewritten as below, a CMake build's by tools/lib/clang_database.py for clang.
+# build/tidy/clangd points to that of the first target and variant, which clangd reads for
+# examples/ and platform/, see .clangd.
 #
 # With --database-only it writes the database of the first variant of each target, lists in
 # build/tidy/databases the folders of those that name the target's own compiler, one per line,
@@ -82,7 +83,7 @@ main() {
   cd "${ROOT_DIR}"
   mkdir -p "${TIDY_DIR}"
   local sources
-  list_files sources '\.(cpp|ino)$' 'src/*' 'examples/*'
+  list_files sources '\.(cpp|ino)$' 'src/*' 'examples/*' 'platform/*'
   MODULE=''
   if ((!database_only)); then
     MODULE="$(tools/lib/tidy_module.sh)"

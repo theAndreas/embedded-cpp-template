@@ -5,8 +5,9 @@
 #
 # The build system cmake: a target with BUILD_SYSTEM=cmake is CMakeLists.txt configured with the
 # toolchain file CMAKE_TOOLCHAIN and the definitions CMAKE_DEFINES of tools/project.sh, one build
-# folder per variant, <target build dir>/<variant>. CMakeLists.txt builds every example there as
-# examples/<Name>.elf when it is cross-compiled. tools/common.sh sources this file and calls the
+# folder per variant, <target build dir>/<variant>. Cross-compiled, CMakeLists.txt builds what it
+# builds for a target there as programs/<Name>.elf, the examples of a library or the image of a
+# firmware, and names them in programs.txt. tools/common.sh sources this file and calls the
 # functions cmake_*, which target_setup() and the others there describe. This file comes from the
 # template.
 
@@ -84,13 +85,26 @@ cmake_build() {
   fi
 }
 
-# Prints the path of the ELF file of an example.
+# Prints what CMakeLists.txt builds in a variant, as programs.txt of its build folder names it.
 # Arguments:
-#   variant, example
+#   variant: one of VARIANTS
+cmake_programs() {
+  local dir
+  dir="$(cmake_dir "$1")"
+  if [[ ! -f "${dir}/programs.txt" ]]; then
+    err "${dir}/programs.txt is missing: CMakeLists.txt names there what it builds for a target."
+    return 1
+  fi
+  cat "${dir}/programs.txt"
+}
+
+# Prints the path of the ELF file of a program.
+# Arguments:
+#   variant, program
 cmake_elf() {
   local dir
   dir="$(cmake_dir "$1")"
-  echo "${dir}/examples/$2.elf"
+  echo "${dir}/programs/$2.elf"
 }
 
 # Prints flash and RAM of an example, from its sections as the toolchain's size reads them:

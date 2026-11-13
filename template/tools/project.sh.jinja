@@ -44,7 +44,16 @@
 
 # A second target is a name in TARGETS and what differs for it in target_settings():
 #
-{%- if arduino %}
+{%- if kind == 'firmware' %}
+#   TARGETS=({{ mcu }} avr128da48)
+#   target_settings() {
+#     case "$1" in
+#       avr128da48)
+#         CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+#         ;;
+#     esac
+#   }
+{%- elif arduino %}
 #   TARGETS=(uno mega)
 #   target_settings() {
 #     case "$1" in
@@ -75,14 +84,30 @@ ARDUINO_BOARD_URLS=""
 TARGETS=({{ mcu }})
 BUILD_SYSTEM="cmake"
 CMAKE_TOOLCHAIN="cmake/toolchains/avr-gcc.cmake"
+{%- if kind == 'firmware' %}
+# PLATFORM names the folder of platform/ the image is built with, beside src/.
+CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU={{ mcu }} -DAVR_F_CPU={{ f_cpu }})
+{%- else %}
 CMAKE_DEFINES=(-DAVR_MCU={{ mcu }} -DAVR_F_CPU={{ f_cpu }})
 {%- endif %}
+{%- endif %}
+{%- if kind == 'firmware' %}
+# An image runs as long as the part has power; there is no SelfCheck that ends for simavr.
+SIMAVR_MCU=""
+{%- else %}
 SIMAVR_MCU="{{ simavr_mcu }}"
 SIMAVR_FREQUENCY="{{ simavr_frequency }}"
+{%- endif %}
 
+{%- if kind == 'firmware' %}
+# One build of the image, as avr-gcc builds it by default. A variant whose defines take other
+# branches of #if, a switch for checks the firmware makes only on request, is added here and in
+# TIDY_VARIANTS, its flags in variant_flags():
+{%- else %}
 # One build of each example, as avr-gcc builds it by default. A variant whose defines take
 # other branches of #if, a switch for checks the library makes only on request, is added here
 # and in TIDY_VARIANTS, its flags in variant_flags():
+{%- endif %}
 #
 #   VARIANTS=(default checked)
 #   TIDY_VARIANTS=(default checked)

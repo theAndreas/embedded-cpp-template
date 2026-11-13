@@ -5,6 +5,33 @@ brings it.
 
 ## Unreleased
 
+A project can be a firmware: `kind: firmware` makes an image of its own for each target rather
+than a library with examples, the third step of E-1.
+
+- **`kind`, a question of `copier copy`:** library, the default, or firmware. A firmware has its
+  portable code in `src/`, a folder per module, tested on the host, and what each target needs
+  beside it in `platform/<name>/`; `PLATFORM` in `CMAKE_DEFINES` of `tools/project.sh` says
+  which. It is built by CMake with a toolchain file as gnu++17, as `arduino` is a library's
+  question; its skeleton is a module, `Blinker`, its test, and `platform/avr/main.cpp`, which
+  counts milliseconds with a timer of a classic AVR or of the megaAVR 0 and Dx series. No
+  SelfCheck: an image runs as long as the part has power.
+- **What a target builds is named by its build system:** `target_programs` prints the examples
+  of a library or the image of a firmware; CMake writes them into `programs.txt` of its build
+  folder, and the ELF files go into `programs/` rather than `examples/`. The table of sizes is
+  headed `Image` for a firmware, still `Example` for a library.
+- **`platform/` is read as `examples/` is:** formatted and checked by `make lint`, read by
+  clang-tidy with the target's flags and by clangd through `build/tidy/clangd`, with a
+  `.clang-tidy` of its own that lets an interrupt routine share a global and a register take the
+  datasheet's numbers.
+- copier refuses `arduino=true` for a firmware.
+- **The SelfCheck of a library of CMake alone passes clang-tidy on a Dx part:** #37's compiled
+  there, but clang-tidy reported `<avr/sleep.h>`, which clang does not know for a Dx part, a
+  register read through avr-libc's union, and `<avr/sfr_defs.h>` unused. It now sleeps only where
+  simavr runs it, on a classic AVR, writes the flat `USART0_BAUD` and its bits without `_BV`.
+  `tests/check.sh --no-arduino --targets` builds and reads it for an AVR128DA48 as a third target.
+
+On the update: nothing for a library.
+
 A library need not be an Arduino library: `arduino: no` makes one of C++ and CMake alone, built for
 its targets by avr-gcc with a toolchain file, the second step of E-1.
 

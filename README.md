@@ -1,15 +1,16 @@
 # Template for embedded C++
 
-The template of an embedded C++ library, an Arduino library or one of C++ and CMake alone: its
-style, its static analysis, its tests on the host and on its targets, its CI and its dev
-container. A project is
+The template of an embedded C++ project, a library, an Arduino one or one of C++ and CMake
+alone, or a firmware: its style, its static analysis, its tests on the host and on its targets,
+its CI and its dev container. A project is
 made from it with [copier](https://copier.readthedocs.io) and kept up to date with it: every
 improvement made here reaches each project as a merge, not as a copy by hand.
 
 The library is C++11 without a standard library, so that avr-gcc compiles it as well as any
 other compiler. Today the template checks it on the host, by GCC and by clang, and for each of
 its targets, AVRs built by arduino-cli against an Arduino core or by CMake and avr-gcc alone, in
-simavr where simavr runs the part; firmware, PlatformIO and other targets are next, see
+simavr where simavr runs the part. A firmware is built by CMake, an image for each target from
+its portable `src/` and its `platform/<name>/`. PlatformIO and other targets are next, see
 [ROADMAP.md](ROADMAP.md).
 
 ## What a project gets
@@ -37,8 +38,8 @@ cd LedMatrix && git init && git add -A && git commit -m "LedMatrix: from the tem
 make setup && make check
 ```
 
-copier asks for the name, the namespace, whether it is an Arduino library, the board or the part
-and the rest. The folder has to be named as the project: cpplint takes the header guards from
+copier asks for the name, the namespace, whether it is a library or a firmware, whether a library
+is an Arduino library, the board or the part and the rest. The folder has to be named as the project: cpplint takes the header guards from
 it. A further target is a name in `TARGETS` of `tools/project.sh` and what differs for it in
 `target_settings()`; the file says how.
 

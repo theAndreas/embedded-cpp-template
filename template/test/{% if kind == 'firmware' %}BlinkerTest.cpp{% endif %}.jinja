@@ -1,0 +1,42 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+
+#include "Blinker/Blinker.h"
+
+#include <gtest/gtest.h>
+
+#include <cstdint>
+
+namespace {
+
+TEST(BlinkerTest, IsOnInTheFirstHalfOfAPeriod) {
+  Blinker const blinker{1000};
+  EXPECT_TRUE(blinker.IsOnAt(0));
+  EXPECT_TRUE(blinker.IsOnAt(499));
+}
+
+TEST(BlinkerTest, IsOffInTheSecondHalf) {
+  Blinker const blinker{1000};
+  EXPECT_FALSE(blinker.IsOnAt(500));
+  EXPECT_FALSE(blinker.IsOnAt(999));
+}
+
+TEST(BlinkerTest, IsOnAgainInTheNextPeriod) {
+  Blinker const blinker{1000};
+  EXPECT_TRUE(blinker.IsOnAt(1000));
+}
+
+TEST(BlinkerTest, StaysOnWithAPeriodTooShortToBlink) {
+  Blinker const blinker{1};
+  EXPECT_TRUE(blinker.IsOnAt(0));
+  EXPECT_TRUE(blinker.IsOnAt(12345));
+}
+
+TEST(BlinkerTest, GoesOnAcrossTheOverflowOfTheClock) {
+  Blinker const blinker{1000};
+  uint32_t const last{UINT32_MAX};
+  // The answer is a function of the time alone, also at the last millisecond.
+  EXPECT_EQ(blinker.IsOnAt(last), ((last / 500U) % 2U) == 0U);
+}
+
+}  // namespace
