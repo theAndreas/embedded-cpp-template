@@ -4,7 +4,7 @@
 {{ description }} An embedded C++ firmware: its portable code in `src/`, tested on the host, and
 what each target needs in `platform/<name>/`; gnu++17, without the standard library. This project
 builds and checks it on the host by GCC and clang, and for each target of `tools/project.sh`
-through CMake and avr-gcc.
+through {% if platformio %}PlatformIO{% else %}CMake and avr-gcc{% endif %}.
 {%- else %}
 {{ description }} An embedded C++ library for targets from an 8-bit microcontroller to the host:
 C++11 as the least standard, without the standard library. This project builds and checks it on

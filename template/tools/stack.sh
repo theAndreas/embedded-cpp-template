@@ -6,9 +6,9 @@
 # Checks that the deepest stack of every program, the examples of a library or the image of a
 # firmware, fits the RAM it leaves free, on every AVR target that CMake builds, in each variant:
 # tools/avr_stack.py adds it up from the call graphs avr-gcc writes beside the objects. Builds
-# first, as make examples does. Leaves out a target built by arduino-cli: arduino:avr's avr-gcc is
-# 7.3, and -fcallgraph-info came with GCC 10. Also leaves out a target CMake builds for another
-# processor; none is there yet.
+# first, as make examples does. Leaves out a target that CMake does not build: arduino:avr's
+# avr-gcc, and PlatformIO's atmelavr's, is 7.3, and -fcallgraph-info came with GCC 10; and one
+# that CMake builds for another processor than an AVR.
 
 set -euo pipefail
 
@@ -35,7 +35,8 @@ main() {
   for target in "${TARGETS[@]}"; do
     select_target "${target}"
     if [[ "${BUILD_SYSTEM}" != cmake ]]; then
-      echo "stack.sh: ${target} is built by ${BUILD_SYSTEM}, whose avr-gcc writes no call graph."
+      echo "stack.sh: ${target} is built by ${BUILD_SYSTEM}; only an AVR that CMake builds has" \
+        "the call graphs avr_stack.py adds up."
       continue
     fi
     for variant in "${VARIANTS[@]}"; do

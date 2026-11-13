@@ -1,0 +1,29 @@
+; Copyright {{ copyright_year }} {{ author }}
+; SPDX-License-Identifier: {{ license }}
+;
+; {{ project_name }} on an AVR, built by PlatformIO: the sources of this folder, main.cpp among
+; them, and the portable code of ../../src/, without a framework, as main.cpp drives the part
+; itself. tools/ build it as the target tools/project.sh names with PIO_DIR and PIO_ENV:
+;
+;   uv run --frozen pio run -d platform/avr -e avr
+;
+; and give it PLATFORMIO_BUILD_DIR, the variant's flags in PLATFORMIO_BUILD_FLAGS and -Werror in
+; PLATFORMIO_BUILD_SRC_FLAGS, see tools/lib/platformio.sh.
+
+[platformio]
+src_dir = .
+
+[env:avr]
+; Pinned, as the platform brings the toolchain: avr-gcc 7.3 with atmelavr 5.
+platform = platformio/atmelavr@5.3.0
+board = uno
+board_build.mcu = {{ mcu }}
+board_build.f_cpu = {{ f_cpu }}L
+build_src_filter = +<*.cpp> +<../../src/>
+; gnu++17, as CMakeLists.txt builds the code of src/ on the host.
+build_unflags = -std=gnu++11
+build_flags =
+    -std=gnu++17
+    -I../../src
+; The warnings of cmake/checks.cmake, on the project's own sources only.
+build_src_flags = -Wall -Wextra -Wconversion -Wsign-conversion -Wshadow

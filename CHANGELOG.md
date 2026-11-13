@@ -5,6 +5,32 @@ brings it.
 
 ## Unreleased
 
+`platformio`, the third build system, and a firmware built by it: the first half of E-1's step 4.
+
+- **A target with `BUILD_SYSTEM=platformio`** is the environment `PIO_ENV` of the `platformio.ini`
+  in `PIO_DIR` of `tools/project.sh`; its platform, board and framework, the Arduino core or none,
+  are the `platformio.ini`'s to name and pin. `tools/lib/platformio.sh` builds it with the
+  PlatformIO `uv.lock` pins, and gives it what the tools need in PlatformIO's own variables: the
+  build folder per variant, the variant's flags, and `-Werror` on the project's own sources only,
+  as a framework's warnings are not the project's to fix. The sizes are what pio reports; the
+  database is `pio run -t compiledb`'s, moved out of the sources and rewritten for clang.
+- **PlatformIO 6.2.0 in `pyproject.toml` and `uv.lock`,** pinned, as an unpinned one became 6.2.0
+  under Wordclock without anybody asking. CI's `target-setup` syncs the tools and caches
+  PlatformIO's platforms where a target is built by it.
+- **`platformio`, a question of `copier copy` for a firmware:** yes builds the image through
+  `platform/avr/platformio.ini`, `platformio/atmelavr@5.3.0` without a framework, rather than with
+  CMake; the host tests stay CMake's.
+- **Build systems mix in one project:** `tests/check.sh --platformio --targets` builds the
+  ATmega328P by PlatformIO and the AVR128DA48 by CMake, each read by clang-tidy and its headers
+  compiled by its own compiler. `make stack` adds up the second and says why not the first.
+- `clang_database.py` names each file by its whole path, as PlatformIO names them relative to its
+  project, and drops `PICO_PLATFORM`, a CMake variable of the Pico SDK passed on as a macro.
+- `platform/avr/main.cpp` is free of warnings under avr-gcc 7 as well, which PlatformIO's
+  atmelavr brings, and which warns under `-Wconversion` of `|=` on a register.
+
+On the update: `uv sync` installs PlatformIO into the tools' environment; nothing else changes
+until a target names it.
+
 What the compiler has to warn of is tested as what it must not compile is:
 `add_compile_warn_tests()` in `cmake/checks.cmake`, the cases in `test/compile_warn/`.
 

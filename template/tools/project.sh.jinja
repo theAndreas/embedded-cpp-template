@@ -18,6 +18,8 @@
 #   CMAKE_TOOLCHAIN      for cmake: the toolchain file, as cmake/toolchains/avr-gcc.cmake
 #   CMAKE_DEFINES        for cmake: what the toolchain file is told, as the part and its clock,
 #                        an array of -D options
+#   PIO_DIR              for platformio: the folder of the platformio.ini, as platform/avr
+#   PIO_ENV              for platformio: its environment the target is
 #   FQBN                 for arduino-cli: the board the examples are compiled for
 #   ARDUINO_CORE         for arduino-cli: the core, pinned, as arduino-cli installs it
 #   ARDUINO_BOARD_URLS   for arduino-cli: the index of a third-party core, for update-index
@@ -80,6 +82,13 @@ NAMESPACE="{{ namespace }}"
 FQBN="{{ fqbn }}"
 ARDUINO_CORE="{{ arduino_core }}"
 ARDUINO_BOARD_URLS=""
+{%- elif platformio %}
+TARGETS=({{ mcu }})
+BUILD_SYSTEM="platformio"
+# The image of platform/avr/platformio.ini's environment avr, whose platform, board and framework
+# it names, pinned.
+PIO_DIR="platform/avr"
+PIO_ENV="avr"
 {%- else %}
 TARGETS=({{ mcu }})
 BUILD_SYSTEM="cmake"

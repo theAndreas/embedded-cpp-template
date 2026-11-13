@@ -10,7 +10,8 @@ The library is C++11 without a standard library, so that avr-gcc compiles it as 
 other compiler. Today the template checks it on the host, by GCC and by clang, and for each of
 its targets, AVRs built by arduino-cli against an Arduino core or by CMake and avr-gcc alone, in
 simavr where simavr runs the part. A firmware is built by CMake, an image for each target from
-its portable `src/` and its `platform/<name>/`. PlatformIO and other targets are next, see
+its portable `src/` and its `platform/<name>/`, or by PlatformIO through a `platformio.ini`
+there. A library for PlatformIO's registry and targets beyond the AVR are next, see
 [ROADMAP.md](ROADMAP.md).
 
 ## What a project gets
@@ -22,7 +23,7 @@ its portable `src/` and its `platform/<name>/`. PlatformIO and other targets are
 | Static analysis | clang-tidy with the C++ Core Guidelines, CERT, bugprone, the analyzer, Google's names and clang's warnings beyond `-Wall -Wextra`, every exception with its reason, and checks of our own (`house-*`) for the rules no check of clang-tidy's holds; cppcheck beside it; every header compiled on its own | `.clang-tidy`, `tools/`, `tools/lib/tidy_module/` |
 | Warnings | `-Wall -Wextra -Wconversion -Wsign-conversion -Wshadow`, errors in CI and under `make check` | `cmake/checks.cmake`, `CMakePresets.json` |
 | Tests | GoogleTest on the host, by GCC and by clang, against a mock of the Arduino core for an Arduino library, also under ASan and UBSan, with coverage; tests of what must not compile; fuzzers on libFuzzer, going on from what the last run found; a self check on each target in simavr | `CMakeLists.txt`, `test/`, `examples/SelfCheck` |
-| Targets | One or several, each built by arduino-cli or by CMake with a toolchain file (`cmake/toolchains/avr-gcc.cmake`); every example compiled for each, without a warning, its flash and RAM in a table, and read by clang-tidy as the target compiles it; on an AVR that CMake builds, the deepest stack of each against the RAM it leaves | `tools/project.sh`, `tools/lib/`, `tools/avr_stack.py` |
+| Targets | One or several, each built by arduino-cli, by CMake with a toolchain file (`cmake/toolchains/avr-gcc.cmake`) or by PlatformIO, mixed in one project as it needs; every example compiled for each, without a warning, its flash and RAM in a table, and read by clang-tidy as the target compiles it; on an AVR that CMake builds, the deepest stack of each against the RAM it leaves | `tools/project.sh`, `tools/lib/`, `tools/avr_stack.py` |
 | Documentation | Doxygen, failing on a gap, published on GitHub Pages | `Doxyfile`, `tools/docs.sh` |
 | CI | Every target of `make check`, in `ci.yml` and `static-analysis.yml`, each with a badge; a release from a tag | `.github/` |
 | Tools | The Python tools pinned in `uv.lock`, the same in the container and in CI | `pyproject.toml`, `uv.lock` |

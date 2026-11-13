@@ -8,7 +8,7 @@
 # only if a project made from it passes; this is that check, for a person and for CI alike.
 #
 # Usage:
-#   tests/check.sh [--keep] [--targets] [--no-arduino | --firmware] [CHECK...]
+#   tests/check.sh [--keep] [--targets] [--no-arduino | --firmware | --platformio] [CHECK...]
 #
 # CHECK is a target of the project's Makefile, as lint, tests, clang, tidy, headers or
 # self-check; all of what `make check` runs if none is given. With --keep the project is left in
@@ -20,7 +20,9 @@
 # and an ATmega2560, both run in simavr, and an AVR128DA48, which takes the other branch of
 # SelfCheck and is compiled and read but not run. With --firmware the project is a firmware (kind=firmware): src/, test/ and
 # platform/avr/, its image built by CMake as well; with --targets for an ATmega328P and an
-# AVR128DA48, which simavr does not run and a firmware does not need it to. The folder is named after the project, as cpplint
+# AVR128DA48, which simavr does not run and a firmware does not need it to. With --platformio the
+# firmware is built by PlatformIO (platformio=true), through platform/avr/platformio.ini; with
+# --targets as well, its AVR128DA48 by CMake, two build systems in one project. The folder is named after the project, as cpplint
 # takes the header guards from it. The url is the template's, as arduino-lint checks that it
 # answers.
 
@@ -69,6 +71,20 @@ target_settings() {
       ;;
   esac
 }'
+# The same for a firmware of --platformio: the second target built by CMake rather than by
+# PlatformIO, as Wordclock builds its AVR, so that one project mixes two build systems.
+# shellcheck disable=SC2016
+readonly MIXED_TARGETS='
+TARGETS=(atmega328p avr128da48)
+target_settings() {
+  case "$1" in
+    avr128da48)
+      BUILD_SYSTEM="cmake"
+      CMAKE_TOOLCHAIN="cmake/toolchains/avr-gcc.cmake"
+      CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+      ;;
+  esac
+}'
 # The same for a project of --no-arduino, with a third target.
 # shellcheck disable=SC2016
 readonly TWO_CMAKE_TARGETS='
@@ -91,6 +107,7 @@ main() {
   local targets=0
   local arduino=true
   local kind=library
+  local platformio=false
   while [[ "${1:-}" == --* ]]; do
     case "$1" in
       --keep) keep=1 ;;
@@ -100,8 +117,13 @@ main() {
         kind=firmware
         arduino=false
         ;;
+      --platformio)
+        kind=firmware
+        arduino=false
+        platformio=true
+        ;;
       *)
-        err "Usage: $0 [--keep] [--targets] [--no-arduino | --firmware] [CHECK...]"
+        err "Usage: $0 [--keep] [--targets] [--no-arduino | --firmware | --platformio] [CHECK...]"
         exit 2
         ;;
     esac
@@ -117,6 +139,7 @@ main() {
   uvx "${COPIER}" copy --quiet --defaults --vcs-ref HEAD \
     --data project_name=Demo \
     --data "kind=${kind}" \
+    --data "platformio=${platformio}" \
     --data "arduino=${arduino}" \
     --data "description=A library made from the template, to check it." \
     --data "url=https://github.com/theAndreas/embedded-cpp-template" \
@@ -128,7 +151,9 @@ main() {
   # A project is a repository: the tools list its files with git.
   cd "${PROJECT_DIR}"
   if ((targets)); then
-    if [[ "${kind}" == firmware ]]; then
+    if [[ "${platformio}" == true ]]; then
+      echo "${MIXED_TARGETS}" >> tools/project.sh
+    elif [[ "${kind}" == firmware ]]; then
       echo "${TWO_FIRMWARE_TARGETS}" >> tools/project.sh
     elif [[ "${arduino}" == true ]]; then
       echo "${TWO_TARGETS}" >> tools/project.sh
