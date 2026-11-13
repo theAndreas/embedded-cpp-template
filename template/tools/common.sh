@@ -3,10 +3,16 @@
 # Copyright 2026 Andreas Burnickl
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Shared by the scripts in tools/: where things lie, and how an example is compiled in each
-# variant. The defaults below are what a project gets that says nothing else; tools/project.sh,
-# sourced after them, is where it says otherwise. This file comes from the template and is
-# brought up to date with `copier update`; what is the project's goes into tools/project.sh.
+# Shared by the scripts in tools/: where things lie, which targets the project is built for, and
+# how a target is selected. The defaults below are what a project gets that says nothing else;
+# tools/project.sh, sourced after them, is where it says otherwise. This file comes from the
+# template and is brought up to date with `copier update`; what is the project's goes into
+# tools/project.sh.
+#
+# A target is a board or chip the project is compiled for, by one build system: today
+# arduino-cli, whose functions are in tools/lib/arduino_cli.sh. A script that works on the
+# targets walks TARGETS and calls select_target() for each, which sets the settings of
+# TARGET_SETTINGS to that target's; a project of one target need not name it.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly ROOT_DIR
@@ -16,6 +22,8 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
 # shellcheck disable=SC2034  # used by the scripts that source this file
 {
   NAMESPACE=""
+  TARGETS=(board)
+  BUILD_SYSTEM="arduino-cli"
   FQBN="arduino:avr:uno"
   ARDUINO_CORE="arduino:avr"
   ARDUINO_BOARD_URLS=""
@@ -42,6 +50,10 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
     :
   }
 
+  target_settings() {
+    :
+  }
+
   check_elf() {
     :
   }
@@ -50,24 +62,67 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
 # shellcheck source=tools/project.sh
 source "${ROOT_DIR}/tools/project.sh"
 
+# The settings a target may have of its own, through target_settings() in tools/project.sh; what
+# tools/project.sh sets for them is each target's starting point. Kept as declarations, with -g,
+# so that select_target() restores them as globals although it is a function.
+readonly TARGET_SETTINGS=(BUILD_SYSTEM FQBN ARDUINO_CORE ARDUINO_BOARD_URLS SIMAVR_MCU
+  SIMAVR_FREQUENCY DATABASE_EXAMPLE SELF_CHECK_EXAMPLE)
+PROJECT_SETTINGS="$(declare -p "${TARGET_SETTINGS[@]}" | sed 's/^declare /declare -g /')"
+readonly PROJECT_SETTINGS
+
+# shellcheck source=tools/lib/arduino_cli.sh
+source "${ROOT_DIR}/tools/lib/arduino_cli.sh"
+
 err() {
   echo "$*" >&2
 }
 
-# Prints the name of every example, one per line.
-list_examples() {
-  local dir
-  for dir in "${ROOT_DIR}"/examples/*/; do
-    basename "${dir}"
-  done
+# Makes the target named the one the tools work on: TARGET is its name, and the settings of
+# TARGET_SETTINGS are those of tools/project.sh with what target_settings() sets for it. Fails on
+# a target TARGETS does not name or whose name is no folder's, and on a build system the template
+# does not know, as a misspelt one would build nothing without a word.
+# Arguments:
+#   target: one of TARGETS
+select_target() {
+  local target="$1"
+  if [[ " ${TARGETS[*]} " != *" ${target} "* ]]; then
+    err "${target} is no target of TARGETS in tools/project.sh: ${TARGETS[*]}."
+    return 1
+  fi
+  if [[ ! "${target}" =~ ^[a-z][a-z0-9-]*$ ]]; then
+    err "Target ${target}: a name is lower case, digits and -, as it names folders of build/."
+    return 1
+  fi
+  eval "${PROJECT_SETTINGS}"
+  TARGET="${target}"
+  target_settings "${target}"
+  case "${BUILD_SYSTEM}" in
+    arduino-cli) ;;
+    *)
+      err "Target ${target}: BUILD_SYSTEM=${BUILD_SYSTEM}, which the template does not know;" \
+        "it knows arduino-cli."
+      return 1
+      ;;
+  esac
 }
 
-# Prints the bin directory of the avr-gcc that arduino-cli uses for FQBN.
-avr_gcc_bin_dir() {
-  local properties
-  properties="$(arduino-cli compile --fqbn "${FQBN}" --show-properties \
-    "${ROOT_DIR}/examples/${DATABASE_EXAMPLE}" 2>/dev/null)"
-  sed -n 's/^compiler\.path=//p' <<< "${properties}"
+# Prints the folder the builds of the selected target go into, one folder per variant below it.
+target_build_dir() {
+  echo "${BUILD_DIR}/targets/${TARGET}"
+}
+
+# Prints what names a variant of the selected target in a message or a table: the variant alone
+# where the project has one target, so that its table of sizes reads as it always has, else
+# target/variant.
+# Arguments:
+#   variant: one of VARIANTS
+target_label() {
+  local variant="$1"
+  if ((${#TARGETS[@]} == 1)); then
+    echo "${variant}"
+  else
+    echo "${TARGET}/${variant}"
+  fi
 }
 
 # Fills the array named first with the files git has below the pathspecs whose paths match the
@@ -110,34 +165,6 @@ host_code_dirs() {
   done
 }
 
-# Compiles an example in a variant into BUILD_DIR/<variant>/<example> and prints what
-# arduino-cli prints. The flags of the variant go into compiler.cpp.extra_flags, which reaches
-# every C++ file of the build, the core's as well. Its callers test its status, which turns off
-# set -e within it, so it returns on a failure itself.
-# Arguments:
-#   variant: one of VARIANTS
-#   example: the name of a folder in examples/
-compile_example() {
-  local variant="$1"
-  local example="$2"
-  local args=(
-    --fqbn "${FQBN}"
-    --library "${ROOT_DIR}"
-    --warnings all
-    --build-path "${BUILD_DIR}/${variant}/${example}"
-  )
-  local flags
-  flags="$(variant_flags "${variant}")" || return
-  flags="${flags//$'\n'/ }"
-  if [[ -n "${flags}" ]]; then
-    args+=(--build-property "compiler.cpp.extra_flags=${flags}")
-  fi
-  arduino-cli compile "${args[@]}" "${ROOT_DIR}/examples/${example}" 2>&1
-}
-
-# Prints the path of the ELF file that compile_example made.
-elf_of() {
-  local variant="$1"
-  local example="$2"
-  echo "${BUILD_DIR}/${variant}/${example}/${example}.ino.elf"
-}
+# The first target, selected for a script that never selects one, as a script of the project's
+# own written before there were targets: it finds FQBN and the rest set as they always were.
+select_target "${TARGETS[0]}"

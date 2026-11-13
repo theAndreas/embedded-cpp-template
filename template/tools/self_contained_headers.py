@@ -10,12 +10,15 @@ cannot see it either, as it asks what a file uses, not whether the file compiles
 neighbours.
 
 So each header is compiled alone, by the compiler and with the flags of a compilation database:
-the host's, which CMake writes (g++, gnu++11, against the mock of the core), and the board's,
+the host's, which CMake writes (g++, gnu++11, against the mock of the core), and each target's,
 which tools/tidy.sh writes from arduino-cli's (avr-g++, the core and the board's pins). An #if
-that only the board takes is so compiled for the board.
+that only a board takes is so compiled for that board.
 
 Usage:
-    tools/self_contained_headers.py build/host build/tidy/default
+    tools/self_contained_headers.py build/host @build/tidy/databases
+
+An argument that starts with @ names a file of further arguments, one per line, as
+tools/tidy.sh --database-only writes the list of its databases.
 """
 
 import argparse
@@ -105,7 +108,7 @@ def check_database(build, headers):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
+    parser = argparse.ArgumentParser(description=__doc__, fromfile_prefix_chars='@',
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('builds', nargs='+', type=Path,
                         help='the directories holding a compile_commands.json')

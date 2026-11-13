@@ -1,8 +1,8 @@
 # Which compilation database clangd reads, by path. src/ and test/ come from
 # CMake, against the mock of the core (cmake --preset default writes it);
-# examples/ from tools/tidy.sh --database-only, with the flags the board is
-# compiled with, as only that one has the sketches, an .ino as C++ with
-# Arduino.h included first. Both add the warnings that .clang-tidy passes as
+# examples/ from tools/tidy.sh --database-only, with the flags the first target
+# is compiled with, as only that one has the sketches, an .ino as C++ with
+# Arduino.h included first; build/tidy/clangd points to it. Both add the warnings that .clang-tidy passes as
 # ExtraArgs, the checks of the Doxygen blocks among them, as clangd does not
 # read ExtraArgs.
 CompileFlags:
@@ -20,7 +20,7 @@ CompileFlags:
 If:
   PathMatch: examples/.*
 CompileFlags:
-  CompilationDatabase: build/tidy/default
+  CompilationDatabase: build/tidy/clangd
   Add: [-Wcast-qual, -Wcomma, -Wconditional-uninitialized, -Wdeprecated,
         -Wno-deprecated-redundant-constexpr-static-def, -Wdouble-promotion,
         -Wextra-semi, -Wformat=2, -Wimplicit-fallthrough, -Wloop-analysis,

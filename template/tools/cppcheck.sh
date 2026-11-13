@@ -42,13 +42,18 @@ main() {
 
   cd "${ROOT_DIR}"
   local defines=()
+  local target
   local variant
   local flag
-  # The defines of the variants, so that the branches each takes are read as well.
-  for variant in "${TIDY_VARIANTS[@]}"; do
-    while IFS= read -r flag; do
-      defines+=("${flag}")
-    done < <(variant_flags "${variant}" | grep -E '^-D' || true)
+  # The defines of the variants of every target, so that the branches each takes are read as
+  # well.
+  for target in "${TARGETS[@]}"; do
+    select_target "${target}"
+    for variant in "${TIDY_VARIANTS[@]}"; do
+      while IFS= read -r flag; do
+        defines+=("${flag}")
+      done < <(variant_flags "${variant}" | grep -E '^-D' || true)
+    done
   done
 
   # The headers as well, by name: given a folder, cppcheck reads only its .cpp
