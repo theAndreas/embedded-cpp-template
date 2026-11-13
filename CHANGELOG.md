@@ -3,6 +3,18 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`coverage_suites()` in `tools/project.sh`:** a project's tests that `CMakeLists.txt` does not
+  build, as a backend's suite compiled by a script of its own, run with `--coverage` and count
+  in `make coverage` with the tests', against `COVERAGE_MINIMUM` together. Wordclock's two host
+  suites reach 4.6 % of its lines that its core tests do not.
+- **`make coverage` keeps the notes of a source outside its `CMakeLists.txt`'s folder.** CMake
+  writes each `..` of such a path as `__`, `__/__/src/Display.cpp.gcno`, and the check for notes
+  whose source is gone took them all for stale: gcov then read counts without notes and failed.
+
+On the update: nothing.
+
 ## v0.7.2
 
 - **`COVERAGE_MINIMUM` in `tools/project.sh`:** the percentages of lines, branches and conditions
