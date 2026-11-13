@@ -36,11 +36,12 @@ jobs:
           version: 1.5.1
 
       # As the Dockerfile of the template installs them, through the action a project's CI
-      # installs with, so that a change to it is tried here before a project gets it.
+      # installs with, so that a change to it is tried here before a project gets it; gcc-avr and
+      # avr-libc as apt-packages.txt names them for a library of CMake alone.
       - name: Install the tools from apt
         uses: ./template/.github/actions/apt-install
         with:
-          packages: cmake ninja-build libgtest-dev clang simavr jq doxygen cppcheck
+          packages: cmake ninja-build libgtest-dev clang simavr jq doxygen cppcheck gcc-avr avr-libc
 
       # With the checks template/.shellcheckrc turns on, and the rules of template/pyproject.toml.
       - name: The template's own scripts
@@ -60,8 +61,17 @@ jobs:
       - name: The checks of our own against their cases
         run: tests/tidy_module.py
 
-      # The project built for two targets, an Uno and a Mega: the checks that walk TARGETS. Before
-      # the step below, which keeps build/Demo for arduino-lint, as each run makes it anew.
+      # A library of CMake alone, arduino=false: every check, and the checks that walk TARGETS for
+      # an ATmega328P and an ATmega2560. Before the Arduino library's steps, as each run makes
+      # build/Demo anew and the last one's is kept for arduino-lint.
+      - name: Make a library of CMake alone and check it
+        run: tests/check.sh --no-arduino
+
+      - name: Make a library of CMake alone for two targets and check it
+        run: tests/check.sh --no-arduino --targets tidy cppcheck headers examples self-check
+
+      # The Arduino library built for two targets, an Uno and a Mega: the checks that walk
+      # TARGETS.
       - name: Make a project of two targets and check it
         run: tests/check.sh --targets tidy cppcheck headers examples self-check
 

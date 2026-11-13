@@ -8,13 +8,16 @@
 # only if a project made from it passes; this is that check, for a person and for CI alike.
 #
 # Usage:
-#   tests/check.sh [--keep] [--targets] [CHECK...]
+#   tests/check.sh [--keep] [--targets] [--no-arduino] [CHECK...]
 #
 # CHECK is a target of the project's Makefile, as lint, tests, clang, tidy, headers or
 # self-check; all of what `make check` runs if none is given. With --keep the project is left in
 # build/Demo for a look, else it is removed. With --targets the project is built for two targets
 # rather than one, an Uno and a Mega, as tools/project.sh describes a second target: the same
-# core, so that it costs no download, and each run in simavr. The folder is named after the project, as cpplint
+# core, so that it costs no download, and each run in simavr. With --no-arduino the project is
+# a library of CMake alone (arduino=false): built by avr-gcc from apt with the template's
+# toolchain file, its examples programs of their own; with --targets as well, for an ATmega328P
+# and an ATmega2560. The folder is named after the project, as cpplint
 # takes the header guards from it. The url is the template's, as arduino-lint checks that it
 # answers.
 
@@ -52,16 +55,30 @@ target_settings() {
       ;;
   esac
 }'
+# The same for a project of --no-arduino.
+# shellcheck disable=SC2016
+readonly TWO_CMAKE_TARGETS='
+TARGETS=(atmega328p atmega2560)
+target_settings() {
+  case "$1" in
+    atmega2560)
+      CMAKE_DEFINES=(-DAVR_MCU=atmega2560 -DAVR_F_CPU=16000000)
+      SIMAVR_MCU="atmega2560"
+      ;;
+  esac
+}'
 
 main() {
   local keep=0
   local targets=0
+  local arduino=true
   while [[ "${1:-}" == --* ]]; do
     case "$1" in
       --keep) keep=1 ;;
       --targets) targets=1 ;;
+      --no-arduino) arduino=false ;;
       *)
-        err "Usage: $0 [--keep] [--targets] [CHECK...]"
+        err "Usage: $0 [--keep] [--targets] [--no-arduino] [CHECK...]"
         exit 2
         ;;
     esac
@@ -76,6 +93,7 @@ main() {
   mkdir -p "$(dirname "${PROJECT_DIR}")"
   uvx "${COPIER}" copy --quiet --defaults --vcs-ref HEAD \
     --data project_name=Demo \
+    --data "arduino=${arduino}" \
     --data "description=A library made from the template, to check it." \
     --data "url=https://github.com/theAndreas/embedded-cpp-template" \
     "${TEMPLATE_DIR}" "${PROJECT_DIR}"
@@ -86,7 +104,11 @@ main() {
   # A project is a repository: the tools list its files with git.
   cd "${PROJECT_DIR}"
   if ((targets)); then
-    echo "${TWO_TARGETS}" >> tools/project.sh
+    if [[ "${arduino}" == true ]]; then
+      echo "${TWO_TARGETS}" >> tools/project.sh
+    else
+      echo "${TWO_CMAKE_TARGETS}" >> tools/project.sh
+    fi
   fi
   git init --quiet
   git add --all

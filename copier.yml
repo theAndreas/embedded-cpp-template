@@ -45,7 +45,7 @@ _message_after_copy: |
   {{ project_name }} is ready. In the dev container, or with its tools installed:
 
     git init && git add -A && git commit -m "{{ project_name }}: from the template"
-    tools/setup.sh                      # the Arduino core, and what tools/project.sh prepares
+    tools/setup.sh                      # what each target needs, and what tools/project.sh prepares
     cmake --workflow --preset default   # the tests on the host
     tools/lint.sh && tools/tidy.sh      # the style and clang-tidy
     tools/self_check.sh                 # examples/SelfCheck in simavr
@@ -84,10 +84,18 @@ macro_prefix:
     Upper case, as a macro.
     {% endif %}
 
+arduino:
+  type: bool
+  help: >-
+    An Arduino library: library.properties, the examples as sketches, built by arduino-cli
+    against an Arduino core and checked by arduino-lint; no for a library of C++ and CMake
+    alone, built by avr-gcc with the toolchain file of cmake/toolchains/
+  default: true
+
 description:
   type: str
   help: One sentence that says what the library is, for library.properties and the README
-  default: An Arduino library for the AVR.
+  default: "{{ 'An Arduino library for the AVR.' if arduino else 'A C++ library for the AVR.' }}"
 
 author:
   type: str
@@ -121,18 +129,36 @@ fqbn:
   type: str
   help: The board the examples are compiled for, as arduino-cli names it
   default: arduino:avr:uno
+  when: "{{ arduino }}"
 
 arduino_core:
   type: str
   help: The Arduino core, pinned, as arduino-cli installs it
   default: arduino:avr@1.8.8
+  when: "{{ arduino }}"
+
+mcu:
+  type: str
+  help: The AVR the examples are compiled for, as avr-gcc's -mmcu names it
+  default: atmega328p
+  when: "{{ not arduino }}"
+  validator: >-
+    {% if not (mcu | regex_search('^[a-z0-9]+$')) %}
+    Lower case and digits, as -mmcu takes it: atmega328p, avr128da48.
+    {% endif %}
+
+f_cpu:
+  type: int
+  help: Its clock, in Hz, which F_CPU says to the code
+  default: 16000000
+  when: "{{ not arduino }}"
 
 simavr_mcu:
   type: str
   help: The MCU simavr runs examples/SelfCheck as; empty if simavr cannot run the board
-  default: atmega328p
+  default: "{{ 'atmega328p' if arduino else mcu }}"
 
 simavr_frequency:
   type: int
   help: The clock simavr runs it at, in Hz
-  default: 16000000
+  default: "{{ 16000000 if arduino else f_cpu }}"

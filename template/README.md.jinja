@@ -3,7 +3,7 @@
 {{ description }}
 
 ## Installing
-
+{% if arduino %}
 Clone it into the `libraries` folder of your sketchbook, under the name `{{ project_name }}`:
 
 ```bash
@@ -24,7 +24,25 @@ void loop() {
   delay(1000);
 }
 ```
+{% else %}
+Its headers lie in `src/`; a program puts that folder on its include path, or takes the library
+with CMake:
 
+```cmake
+add_subdirectory({{ project_name }})
+```
+
+It is built and checked for the `{{ mcu }}` by avr-gcc, without the Arduino core.
+
+## Using it
+
+```cpp
+#include <{{ project_name }}.h>
+#include <stdint.h>
+
+int16_t Limited(int16_t reading) { return {{ namespace }}::Clamp<int16_t>(reading, 100, 900); }
+```
+{% endif %}
 The examples in [examples/](examples) show more; the reference is built from the Doxygen blocks
 of `src/`, see [docs/Documentation.md](docs/Documentation.md).
 
@@ -34,7 +52,11 @@ The dev container in [.devcontainer/](.devcontainer/README.md) carries every too
 every build and check, the same CI runs:
 
 ```bash
+{%- if arduino %}
 make setup    # the pinned Arduino core, once
+{%- else %}
+make setup    # checks the toolchain file of each target, once
+{%- endif %}
 make lint     # the checks of seconds; make fmt formats
 make tests    # the tests on the host
 make check    # all of it, warnings as errors, as CI

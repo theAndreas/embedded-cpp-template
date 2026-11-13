@@ -58,7 +58,6 @@ main() {
   local target
   local variant
   local label
-  local output
   local elf
   local actual
   local status
@@ -72,13 +71,11 @@ main() {
     for variant in "${VARIANTS[@]}"; do
       ran=1
       label="$(target_label "${variant}")"
-      if ! output="$(compile_example "${variant}" "${SELF_CHECK_EXAMPLE}")"; then
-        err "${SELF_CHECK_EXAMPLE} (${label}) does not compile:"
-        err "${output}"
+      if ! target_build "${variant}" "${SELF_CHECK_EXAMPLE}"; then
         failed=1
         continue
       fi
-      elf="$(elf_of "${variant}" "${SELF_CHECK_EXAMPLE}")"
+      elf="$(target_elf "${variant}" "${SELF_CHECK_EXAMPLE}")"
       status=0
       actual="$(run_in_simavr "${elf}")" || status=$?
       if ((status == 124)); then

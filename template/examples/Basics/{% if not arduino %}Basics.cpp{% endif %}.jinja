@@ -1,0 +1,22 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+//
+// How a program uses {{ project_name }}: a reading, limited to a range.
+
+#include <{{ project_name }}.h>
+#include <stdint.h>
+
+namespace {
+
+// Stand for a sensor and what reads it, volatile so that the compiler cannot
+// fold the call away.
+int16_t volatile reading{512};
+int16_t volatile limited{0};
+
+}  // namespace
+
+int main() {
+  for (;;) {
+    limited = {{ namespace }}::Clamp<int16_t>(reading, 100, 900);
+  }
+}

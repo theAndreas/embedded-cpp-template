@@ -3,22 +3,24 @@
 # Copyright 2026 Andreas Burnickl
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Runs clang-tidy on the library and the examples, with the flags arduino-cli compiles them with
-# for each target, once for each of TIDY_VARIANTS in tools/project.sh, and on the tests on the
-# host; the checks are in .clang-tidy. The database of a target and variant is
-# build/tidy/targets/<target>/<variant>; build/tidy/clangd points to that of the first target and
-# variant, which clangd reads for the examples, see .clangd.
+# Runs clang-tidy on the library and the examples, with the flags each target compiles them with,
+# once for each of TIDY_VARIANTS in tools/project.sh, and on the tests on the host; the checks are
+# in .clang-tidy. The database of a target and variant is build/tidy/targets/<target>/<variant>,
+# written by target_database() of tools/common.sh: arduino-cli's rewritten as below, a CMake
+# build's by tools/lib/clang_database.py for clang. build/tidy/clangd points to that of the first
+# target and variant, which clangd reads for the examples, see .clangd.
 #
-# With --database-only it writes the database of the first variant of each target, lists their
-# folders in build/tidy/databases, one per line, for tools/self_contained_headers.py, and stops.
-# clang-tidy runs from the environment uv.lock pins, like the tools of lint.sh.
+# With --database-only it writes the database of the first variant of each target, lists in
+# build/tidy/databases the folders of those that name the target's own compiler, one per line,
+# for tools/self_contained_headers.py, and stops. clang-tidy runs from the environment uv.lock
+# pins, like the tools of lint.sh.
 #
 # arduino-cli compiles copies of a sketch's files in its build folder, and a finding there would
 # point to the copy. So the flags are taken from its compilation database, and a database of our
 # own names the files in the repository; an .ino is compiled as C++ with Arduino.h included
 # first, which is what arduino-cli adds to it.
 #
-# The library is read with the board's flags, not only through the host's database: an int has
+# The library is read with each target's flags, not only through the host's database: an int has
 # 16 bits on the AVR and 32 on the host, and a check that only saw the host would never meet the
 # code as the board does.
 #
@@ -33,32 +35,12 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 readonly RUN_CLANG_TIDY=(uv run --frozen run-clang-tidy.py)
 readonly TIDY_DIR="${BUILD_DIR}/tidy"
 
-# Writes <dir>/compile_commands.json for the files given, with the flags of arduino_flags() of
-# tools/lib/arduino_cli.sh.
-# Arguments:
-#   dir, flags, then the files
-write_database() {
-  local dir="$1"
-  local flags="$2"
-  shift 2
-  mkdir -p "${dir}"
-  printf '%s\n' "$@" | jq -R . | jq -s \
-    --arg dir "${ROOT_DIR}" --argjson flags "${flags}" '
-    map({
-      directory: $dir,
-      file: .,
-      arguments: ($flags
-        + (if endswith(".ino") then ["-x", "c++", "-include", "Arduino.h"]
-           else [] end)
-        + [.])
-    })' > "${dir}/compile_commands.json"
-}
-
 # Runs clang-tidy on the files given, with the entries the database in <dir> has for them, one
 # file per core: clang-tidy alone reads one file after the other. run-clang-tidy prints the
 # findings of a file together, and reads every file of the database it is given, so it gets a
 # database of these files alone, written beside the others; a file the database lacks fails
-# here, as clang-tidy fails on it, rather than going unread.
+# here, as clang-tidy fails on it, rather than going unread. One entry per file: CMake compiles a
+# source of the library into each example, and the file would be read once for each.
 # Arguments:
 #   dir, the header filter (empty for that of .clang-tidy), then the files
 run_tidy() {
@@ -70,7 +52,8 @@ run_tidy() {
   jq --arg root "${ROOT_DIR}" '
     def path: if (.file | startswith("/")) then .file else .directory + "/" + .file end;
     ($ARGS.positional | map($root + "/" + .)) as $wanted
-    | [.[] | select(path as $path | any($wanted[]; . == $path))] as $entries
+    | [.[] | select(path as $path | any($wanted[]; . == $path))] | unique_by(path)
+    | . as $entries
     | ($wanted - ($entries | map(path))) as $missing
     | if ($missing | length) > 0
       then error("in no entry of the database: " + ($missing | join(", ")))
@@ -110,7 +93,7 @@ main() {
   local failed=0
   local target
   local variant
-  local flags
+  local compiler_database
   local dir
   local label
   local databases=()
@@ -118,10 +101,9 @@ main() {
     select_target "${target}"
     for variant in "${TIDY_VARIANTS[@]}"; do
       dir="${TIDY_DIR}/targets/${target}/${variant}"
-      flags="$(arduino_flags "${variant}" "${TIDY_DIR}/arduino/${target}/${variant}")"
-      write_database "${dir}" "${flags}" "${sources[@]}"
+      compiler_database="$(target_database "${variant}" "${dir}")"
       if ((database_only)); then
-        databases+=("${dir}")
+        databases+=("${compiler_database}")
         break
       fi
       label="$(target_label "${variant}")"

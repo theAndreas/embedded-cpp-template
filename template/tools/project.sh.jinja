@@ -14,13 +14,16 @@
 #                        set. Each takes the settings below, from BUILD_SYSTEM to
 #                        SELF_CHECK_EXAMPLE, as they are set here, and target_settings()
 #                        changes them for a target
-#   BUILD_SYSTEM         what builds a target: arduino-cli
-#   FQBN                 the board the examples are compiled for
-#   ARDUINO_CORE         the core, pinned, as arduino-cli installs it
-#   ARDUINO_BOARD_URLS   the index of a third-party core, for arduino-cli core update-index
+#   BUILD_SYSTEM         what builds a target: arduino-cli, or cmake with a toolchain file
+#   CMAKE_TOOLCHAIN      for cmake: the toolchain file, as cmake/toolchains/avr-gcc.cmake
+#   CMAKE_DEFINES        for cmake: what the toolchain file is told, as the part and its clock,
+#                        an array of -D options
+#   FQBN                 for arduino-cli: the board the examples are compiled for
+#   ARDUINO_CORE         for arduino-cli: the core, pinned, as arduino-cli installs it
+#   ARDUINO_BOARD_URLS   for arduino-cli: the index of a third-party core, for update-index
 #   SIMAVR_MCU           what simavr runs examples/SelfCheck as; empty: no run in simavr
 #   SIMAVR_FREQUENCY     its clock, in Hz
-#   DATABASE_EXAMPLE     the example whose compiler flags tools/tidy.sh takes for the rest
+#   DATABASE_EXAMPLE     for arduino-cli: the example whose flags tools/tidy.sh takes for all
 #   SELF_CHECK_EXAMPLE   the example tools/self_check.sh runs
 #   VARIANTS             the builds every example is compiled in, see variant_flags()
 #   TIDY_VARIANTS        the variants clang-tidy and cppcheck read: those whose defines change
@@ -41,6 +44,7 @@
 
 # A second target is a name in TARGETS and what differs for it in target_settings():
 #
+{%- if arduino %}
 #   TARGETS=(uno mega)
 #   target_settings() {
 #     case "$1" in
@@ -50,11 +54,29 @@
 #         ;;
 #     esac
 #   }
+{%- else %}
+#   TARGETS=({{ mcu }} atmega2560)
+#   target_settings() {
+#     case "$1" in
+#       atmega2560)
+#         CMAKE_DEFINES=(-DAVR_MCU=atmega2560 -DAVR_F_CPU=16000000)
+#         SIMAVR_MCU="atmega2560"
+#         ;;
+#     esac
+#   }
+{%- endif %}
 
 NAMESPACE="{{ namespace }}"
+{%- if arduino %}
 FQBN="{{ fqbn }}"
 ARDUINO_CORE="{{ arduino_core }}"
 ARDUINO_BOARD_URLS=""
+{%- else %}
+TARGETS=({{ mcu }})
+BUILD_SYSTEM="cmake"
+CMAKE_TOOLCHAIN="cmake/toolchains/avr-gcc.cmake"
+CMAKE_DEFINES=(-DAVR_MCU={{ mcu }} -DAVR_F_CPU={{ f_cpu }})
+{%- endif %}
 SIMAVR_MCU="{{ simavr_mcu }}"
 SIMAVR_FREQUENCY="{{ simavr_frequency }}"
 
