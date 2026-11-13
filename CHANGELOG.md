@@ -3,6 +3,18 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`docs_inputs()` in `tools/project.sh`:** the input folders of each run of Doxygen, one line a
+  run, each into `build/docs/<n>/`, for a firmware whose backends each define a class of the same
+  name, which one run would merge; a warning the runs share counts once. Without it, one run as
+  before (#62).
+- **`make docs` counts warnings, not lines:** one that goes on over lines of its own was counted
+  once per line, and the gaps let pass could come out negative. And with no `NAMESPACE` it no
+  longer speaks of `::internal`.
+
+On the update: nothing.
+
 ## v0.7.5
 
 - **`make lint` reads every shell script with shellcheck,** not those of `tools/` alone:
