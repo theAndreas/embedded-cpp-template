@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.7.2
 
 - **`COVERAGE_MINIMUM` in `tools/project.sh`:** the percentages of lines, branches and conditions
   of `src/` that `make coverage` demands, `100 100 100` unless set. For a project brought in below
