@@ -8,9 +8,9 @@
 bool Blinker::IsOnAt(uint32_t now_ms) const {
   // On in the even halves of each period, off in the odd ones: the count of
   // halves, not the time, so that an overflow of now_ms only shifts the phase.
-  if (half_period_ms_ == 0U) {
+  if (half_period_ms_ == 0u) {
     return true;
   }
   uint32_t const halves{now_ms / half_period_ms_};
-  return (halves % 2U) == 0U;
+  return (halves % 2u) == 0u;
 }

@@ -24,7 +24,7 @@ class Blinker {
    * \param[in] period_ms The time of one blink, in milliseconds.
    */
   explicit Blinker(uint16_t period_ms)
-      : half_period_ms_{static_cast<uint16_t>(period_ms / 2U)} {}
+      : half_period_ms_{static_cast<uint16_t>(period_ms / 2u)} {}
 
   /*!
    * \brief Says whether the light is on at `now_ms`.
