@@ -103,6 +103,7 @@ it:
 | T-19 | Arithmetic on a type narrower than `int` is done in `int`, after the promotion, and `int` has a sign and on an 8-bit microcontroller 16 bits: there `uint8_t * uint8_t` overflows from 182 * 182 on, on the host `uint16_t * uint16_t` from 46341 * 46341, and the overflow of a signed type is undefined. An operand is widened before the operation, to the least unsigned width that holds the result: `uint32_t const area{static_cast<uint32_t>(width) * height};`. Not wider: on an 8-bit target an operation of 32 bits costs several of 16 (P-1). `~` of a `uint8_t` is a negative `int`, cast back before it is compared or shifted. | `-Wconversion` for the narrowing back, `make sanitize` for the widths of the host, Review |
 | T-20 | An array is a class that knows its size, `std::array` or its counterpart by M-3, which does not decay to a pointer; a C array only for a string literal: `char const kName[] = "font";`. An element is reached by index, not by arithmetic on a pointer. | `modernize-avoid-c-arrays`, `cppcoreguidelines-pro-bounds-pointer-arithmetic` |
 | T-21 | A `char` is widened to a number through `unsigned char`: whether `char` has a sign depends on the target, and where it has one, a character above 127 turns negative. | `bugprone-signed-char-misuse` |
+| T-22 | A literal's suffix with the `u` in lower case and every `L` in upper case: `192u`, `1000uL`, `1LL`, `1.0L`. An `l` is read as a 1; a `U` reads as one more digit of a hexadecimal value, as in `0x04U`, where a `u` stands apart. A float's `f` is written either way. | `readability-uppercase-literal-suffix` |
 
 T-18 in an example:
 
@@ -156,7 +157,7 @@ if (elapsed && running) {
 | H-5 | An interrupt routine does the least it can: it copies a value or sets a flag, and returns. No output, no wait, no floating point, no call that takes long. | Review |
 | H-6 | What an interrupt routine and the rest share is `volatile`. The rest reads or changes it in a critical section, with the interrupts off, where it is wider than what the target reads in one access or is read and written in one step, as `++count`. The profile says how a critical section is written. | Review |
 | H-7 | Fixed point before `float` where the smallest target has no floating point unit, as the profile says: there the first `float` brings the soft-float routines and their flash. A `float` takes its reason in a comment. No `double`: its width differs between targets, 32 bits on some and 64 on the host, so that a test on the host does not compute what the device does. | `-Wdouble-promotion`, Review |
-| H-8 | Bitwise operators on unsigned types only, the masks named: `constexpr uint8_t kReadyBit{0x04U};`. A shift is by less than the width of its type, after the promotion to `int` that a `uint8_t` takes. | `-Wshift-count-overflow`, Review |
+| H-8 | Bitwise operators on unsigned types only, the masks named: `constexpr uint8_t kReadyBit{0x04u};`. A shift is by less than the width of its type, after the promotion to `int` that a `uint8_t` takes. | `-Wshift-count-overflow`, Review |
 
 ## Errors
 

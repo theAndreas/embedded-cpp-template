@@ -36,7 +36,7 @@ TEST(BlinkerTest, GoesOnAcrossTheOverflowOfTheClock) {
   Blinker const blinker{1000};
   uint32_t const last{UINT32_MAX};
   // The answer is a function of the time alone, also at the last millisecond.
-  EXPECT_EQ(blinker.IsOnAt(last), ((last / 500U) % 2U) == 0U);
+  EXPECT_EQ(blinker.IsOnAt(last), ((last / 500u) % 2u) == 0u);
 }
 
 }  // namespace

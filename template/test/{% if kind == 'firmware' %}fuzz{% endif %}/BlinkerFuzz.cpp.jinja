@@ -22,8 +22,8 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size) {
   std::memcpy(&now_ms, data + sizeof period_ms, sizeof now_ms);
   // An odd period blinks in halves one millisecond short of it: whole periods
   // of the halves, two of them, are what repeats.
-  uint32_t const repeat{2U * (period_ms / 2U)};
-  if ((repeat == 0U) || (now_ms > UINT32_MAX - repeat)) {
+  uint32_t const repeat{2u * (period_ms / 2u)};
+  if ((repeat == 0u) || (now_ms > UINT32_MAX - repeat)) {
     return 0;
   }
   Blinker const blinker{period_ms};

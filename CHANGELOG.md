@@ -5,6 +5,11 @@ brings it.
 
 ## Unreleased
 
+- **A literal's suffix is `u` and `L`: `192u`, `1000uL`, `1LL`** (CodingStyle T-22).
+  `readability-uppercase-literal-suffix` asked for `192U`, which a hexadecimal value reads on as
+  a digit; `NewSuffixes` keeps the `L` upper case, as MISRA 5.13.5 asks, and turns the `u` to
+  lower case. The template's own code follows.
+
 - **`docs_inputs()` in `tools/project.sh`:** the input folders of each run of Doxygen, one line a
   run, each into `build/docs/<n>/`, for a firmware whose backends each define a class of the same
   name, which one run would merge; a warning the runs share counts once. Without it, one run as
@@ -13,7 +18,8 @@ brings it.
   once per line, and the gaps let pass could come out negative. And with no `NAMESPACE` it no
   longer speaks of `::internal`.
 
-On the update: nothing.
+On the update: a `U` in a suffix is a finding of `make tidy` now; clang-tidy's `--fix`
+writes it as `u`, or `sed -E 's/\b(0[xX][0-9a-fA-F]+|[0-9]+)U(L{0,2})\b/\1u\2/g'` over the sources.
 
 ## v0.7.5
 

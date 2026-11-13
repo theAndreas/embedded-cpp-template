@@ -29,14 +29,14 @@ uint32_t Now() {
 #ifdef TCCR0A
 // The bit of a register, as avr-libc's _BV, typed as the 8 bits it is.
 constexpr uint8_t Bit(uint8_t number) {
-  return static_cast<uint8_t>(1U << number);
+  return static_cast<uint8_t>(1u << number);
 }
 
 // Timer 0 of a classic AVR, as the ATmega328P's, in CTC mode: a match every
 // millisecond at F_CPU / 64. The light on PB5, the LED of an Uno.
 void StartClock() {
   TCCR0A = Bit(WGM01);
-  OCR0A = static_cast<uint8_t>((F_CPU / 64U / 1000U) - 1U);
+  OCR0A = static_cast<uint8_t>((F_CPU / 64u / 1000u) - 1u);
   TIMSK0 = Bit(OCIE0A);
   TCCR0B = static_cast<uint8_t>(Bit(CS01) | Bit(CS00));
 }
@@ -58,7 +58,7 @@ void SetLight(bool on) {
 // every millisecond at F_CPU / 2. The light on PA7. TCB0_CCMP rather than
 // TCB0.CCMP, which avr-libc declares as a union of the word and its bytes.
 void StartClock() {
-  TCB0_CCMP = static_cast<uint16_t>((F_CPU / 2U / 1000U) - 1U);
+  TCB0_CCMP = static_cast<uint16_t>((F_CPU / 2u / 1000u) - 1u);
   TCB0.INTCTRL = TCB_CAPT_bm;
   TCB0.CTRLA = TCB_CLKSEL_DIV2_gc | TCB_ENABLE_bm;
 }
@@ -80,11 +80,11 @@ void SetLight(bool on) {
 }  // namespace
 
 #ifdef TCCR0A
-ISR(TIMER0_COMPA_vect) { milliseconds = milliseconds + 1U; }
+ISR(TIMER0_COMPA_vect) { milliseconds = milliseconds + 1u; }
 #else
 ISR(TCB0_INT_vect) {
   TCB0.INTFLAGS = TCB_CAPT_bm;
-  milliseconds = milliseconds + 1U;
+  milliseconds = milliseconds + 1u;
 }
 #endif
 
