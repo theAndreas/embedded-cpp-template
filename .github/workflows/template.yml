@@ -41,7 +41,9 @@ jobs:
       - name: Install the tools from apt
         uses: ./template/.github/actions/apt-install
         with:
-          packages: cmake ninja-build libgtest-dev clang simavr jq doxygen cppcheck gcc-avr avr-libc
+          packages: >-
+            cmake ninja-build libgtest-dev clang libclang-rt-dev simavr jq doxygen cppcheck gcc-avr
+            avr-libc
 
       # With the checks template/.shellcheckrc turns on, and the rules of template/pyproject.toml.
       - name: The template's own scripts

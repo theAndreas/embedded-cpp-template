@@ -3,6 +3,20 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+Four faults of v0.7.0, found on MaxMatrix's update to it.
+
+- **`make fuzz` links in the dev container:** it installs `libclang-rt-dev`, libFuzzer and the
+  sanitizers of clang, which `clang` only recommends; CI passed, as its runner has them already.
+- **`AGENTS.md` has the blank line below its title again,** which v0.7.0 dropped.
+- **`make tidy` no longer warns** `could not open directory 'test/fuzz/'` in a project without
+  fuzzers.
+- **`make arduino-lint` passes with a file deleted and not yet staged,** as after a
+  `copier update` that removes one, where `tar` failed on it.
+
+On the update: rebuild the dev container.
+
 ## v0.7.0
 
 `platformio`, the third build system, and a firmware built by it: the first half of E-1's step 4.
