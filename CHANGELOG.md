@@ -5,6 +5,23 @@ brings it.
 
 ## Unreleased
 
+What the compiler has to warn of is tested as what it must not compile is:
+`add_compile_warn_tests()` in `cmake/checks.cmake`, the cases in `test/compile_warn/`.
+
+- **A case** does what compiles but is a mistake, as dropping a result `_NODISCARD` marks, and
+  names the warning in its line `// Expected: ...`. Its test passes only if the compiler gives
+  that warning, in each standard the call names: the macro may be another attribute in each.
+  The case is compiled to an object with the build's warnings, as GCC reports
+  `warn_unused_result` only when it generates code.
+- **clang-tidy leaves the folder out,** as it does `test/compile_fail/`: a case warns on purpose
+  and is in no database. MaxMatrix had to write its case into the build folder for that.
+- **A new library** gets one case, a dropped `Clamp()`, in gnu++11 and C++17; a firmware the
+  call, in gnu++17, and no case.
+
+On the update: `CMakeLists.txt` is the project's, so a project that wants such tests adds the
+call itself, as the template's `CMakeLists.txt` has it, and puts its cases in
+`test/compile_warn/`.
+
 `_NODISCARD` is `[[nodiscard]]` wherever the compiler has it, chosen by `__has_cpp_attribute`
 rather than by `__cplusplus` (CodingStyle FN-10).
 

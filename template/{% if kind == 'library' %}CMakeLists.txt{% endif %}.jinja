@@ -72,7 +72,7 @@ endif()
 find_package(GTest REQUIRED)
 include(GoogleTest)
 file(GLOB_RECURSE test_sources CONFIGURE_DEPENDS test/*Test.cpp test/*_test.cpp)
-list(FILTER test_sources EXCLUDE REGEX "/test/(mock|compile_fail|fuzz)/")
+list(FILTER test_sources EXCLUDE REGEX "/test/(mock|compile_fail|compile_warn|fuzz)/")
 
 # One library and one test program per variant: a switch that changes what is compiled makes
 # a build of its own. A variant is added with its defines, as add_variant(checked
@@ -123,6 +123,13 @@ add_variant(default)
 add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY {{ namespace }}_default)
 
 add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARD gnu++11
+{%- if arduino %}
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test/mock)
+{%- else %}
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src)
+{%- endif %}
+# In gnu++11, as a sketch is built, and in C++17, as the tests are.
+add_compile_warn_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_warn STANDARDS gnu++11 c++17
 {%- if arduino %}
                        INCLUDES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test/mock)
 {%- else %}

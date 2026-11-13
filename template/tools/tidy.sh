@@ -123,11 +123,12 @@ main() {
   # test/: the tests are C++17, and the headers of the library, checked above as the gnu++11
   # they are, would be held to C++17. Not the mock in test/mock/, which stands in for the
   # Arduino core and follows it, not the Google style. Nor what lies in test/compile_fail/,
-  # which must not compile and is in no database. And the code of HOST_CODE, which CMake builds
-  # beside the tests, and its headers.
+  # which must not compile, and in test/compile_warn/, which warns on purpose: neither is in a
+  # database. And the code of HOST_CODE, which CMake builds beside the tests, and its headers.
   local host_code
   host_code_dirs host_code
-  local paths=('test/*' ':!test/mock/*' ':!test/compile_fail/*' ':!test/fuzz/*')
+  local paths=('test/*' ':!test/mock/*' ':!test/compile_fail/*' ':!test/compile_warn/*'
+    ':!test/fuzz/*')
   local filter='test'
   for dir in "${host_code[@]}"; do
     paths+=("${dir}/*")
