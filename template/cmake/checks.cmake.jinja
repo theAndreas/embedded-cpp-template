@@ -10,9 +10,11 @@
 #                      CMAKE_COMPILE_WARNING_AS_ERROR is on, as the ci- presets set it
 #   CHECK_INSTRUMENT   --coverage, or the sanitizers, for the compile and the link options
 #   add_compile_fail_tests(DIRECTORY dir STANDARD std INCLUDES dir...)
+#   add_fuzzers(DIRECTORY dir LIBRARY target)
 
 option({{ macro_prefix }}_COVERAGE "Build with --coverage, for gcovr" OFF)
 option({{ macro_prefix }}_SANITIZE "Build with AddressSanitizer and UBSan" OFF)
+option({{ macro_prefix }}_FUZZ "Build the fuzzers of test/fuzz/, with libFuzzer, ASan and UBSan" OFF)
 
 # -Wconversion and -Wsign-conversion above all: an int has 16 bits on the AVR, and a
 # conversion that is harmless on the host can lose a value there. Braced initialization finds
@@ -27,6 +29,16 @@ if({{ macro_prefix }}_COVERAGE)
 endif()
 if({{ macro_prefix }}_SANITIZE)
   list(APPEND CHECK_INSTRUMENT -fsanitize=address,undefined
+       -fno-sanitize-recover=all -fno-omit-frame-pointer)
+endif()
+# The library as well as each fuzzer: libFuzzer steers by the coverage of the code it reaches, and
+# code built without -fsanitize=fuzzer-no-link is code it cannot see into. clang only, which
+# brings libFuzzer; the preset fuzz names it.
+if({{ macro_prefix }}_FUZZ)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message(FATAL_ERROR "{{ macro_prefix }}_FUZZ needs clang, which brings libFuzzer: cmake --preset fuzz")
+  endif()
+  list(APPEND CHECK_INSTRUMENT -fsanitize=fuzzer-no-link,address,undefined
        -fno-sanitize-recover=all -fno-omit-frame-pointer)
 endif()
 
@@ -58,5 +70,27 @@ function(add_compile_fail_tests)
       compile_fail/${name}
       PROPERTIES PASS_REGULAR_EXPRESSION
                  "static assertion failed[^\n]*${expected}")
+  endforeach()
+endfunction()
+
+# The fuzzers: each <Name>Fuzz.cpp or <name>_fuzz.cpp of DIRECTORY defines LLVMFuzzerTestOneInput()
+# and becomes the program <Name> in fuzz/ of the build, linked with LIBRARY and libFuzzer, under
+# ASan and UBSan, so that what a fuzzer finds is a crash, a read out of bounds or undefined
+# behaviour. Only with {{ macro_prefix }}_FUZZ on; tools/fuzz.sh runs them.
+function(add_fuzzers)
+  cmake_parse_arguments(PARSE_ARGV 0 arg "" "DIRECTORY;LIBRARY" "")
+  if(NOT {{ macro_prefix }}_FUZZ)
+    return()
+  endif()
+  file(GLOB fuzzers CONFIGURE_DEPENDS ${arg_DIRECTORY}/*Fuzz.cpp ${arg_DIRECTORY}/*_fuzz.cpp)
+  foreach(source IN LISTS fuzzers)
+    get_filename_component(name ${source} NAME_WE)
+    add_executable(${name} ${source})
+    target_compile_features(${name} PRIVATE cxx_std_17)
+    target_include_directories(${name} PRIVATE ${CMAKE_SOURCE_DIR})
+    target_compile_options(${name} PRIVATE ${CHECK_WARNINGS} ${CHECK_INSTRUMENT})
+    target_link_options(${name} PRIVATE -fsanitize=fuzzer,address,undefined)
+    target_link_libraries(${name} PRIVATE ${arg_LIBRARY})
+    set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/fuzz)
   endforeach()
 endfunction()

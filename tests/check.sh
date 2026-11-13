@@ -29,7 +29,7 @@ set -euo pipefail
 TEMPLATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly TEMPLATE_DIR
 readonly ALL_CHECKS=(lint arduino-lint tests clang sanitize coverage tidy cppcheck headers docs
-  examples sizes self-check stack)
+  examples sizes self-check stack fuzz)
 # copier from PyPI through uvx, at a fixed version, like the tools of a project.
 readonly COPIER="copier==9.19.1"
 # Global, as the trap that removes it runs after main() has returned.
@@ -40,9 +40,9 @@ err() {
 }
 
 # Runs one check in the project's folder: a target of its Makefile, with warnings as errors, as
-# CI runs it.
+# CI runs it; the fuzzers 10 seconds each, which shows they run, not what they would find.
 run_check() {
-  STRICT=1 make "$1"
+  STRICT=1 FUZZ_SECONDS="${FUZZ_SECONDS:-10}" make "$1"
 }
 
 # What tools/project.sh of the project gets with --targets, after what the template wrote: the

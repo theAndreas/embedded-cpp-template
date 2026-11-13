@@ -12,6 +12,7 @@ through.
 | `compile_examples.sh` | `make examples`: every example for each target and variant; the table of flash and RAM |
 | `documented_sizes.py` | `make sizes`: the README's table against the last `make examples` |
 | `self_check.sh` | `make self-check`: examples/SelfCheck in simavr, on each target simavr runs |
+| `fuzz.sh` | `make fuzz`: every fuzzer of `test/fuzz/` side by side, `FUZZ_SECONDS` each, from the corpus of the last run |
 | `stack.sh` | `make stack`: the deepest stack of each program on each AVR target CMake builds, by `avr_stack.py` |
 | `avr_stack.py` | The deepest stack of one AVR program, from avr-gcc's call graphs and its disassembly, against the RAM it leaves |
 | `coverage.sh` | `make coverage`: the tests with --coverage |

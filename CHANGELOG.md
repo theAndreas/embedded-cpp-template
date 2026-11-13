@@ -5,6 +5,28 @@ brings it.
 
 ## Unreleased
 
+`make fuzz`: fuzzers on libFuzzer, under ASan and UBSan, part of `make check` and of CI (I-10).
+
+- **A fuzzer is `test/fuzz/<name>_fuzz.cpp` or `<Class>Fuzz.cpp`,** defining
+  `LLVMFuzzerTestOneInput()`. `add_fuzzers()` of `cmake/checks.cmake` builds each against the
+  library of the default variant when `<PREFIX>_FUZZ` is on, which the new preset `fuzz` turns on,
+  by clang into `build/fuzz/`; the library is instrumented as well, as libFuzzer steers by the
+  coverage of what it reaches.
+- **`tools/fuzz.sh` runs them side by side, `FUZZ_SECONDS` each, 60 if not set,** each in a folder
+  of its own below `build/fuzz/work/`, going on from the corpus the last run left, and starting
+  from the seeds in `test/fuzz/corpus/<Name>/`, with `<Name>.dict` and `<Name>.options` beside the
+  source where there are. What failed is named with the file that replays it.
+- **CI:** a job `fuzz` in `static-analysis.yml`, which keeps the corpus between runs and uploads
+  what failed; clang-tidy reads the fuzzers with the database of the preset `fuzz`.
+- **The skeleton has one:** `clamp_fuzz.cpp` for a library, `BlinkerFuzz.cpp` for a firmware, with
+  a `test/fuzz/.clang-tidy` that lets a fuzzer cut its input by offsets. Testing.md has the rules
+  TS-24 to TS-27.
+
+On the update: `make check` runs `make fuzz`, which has nothing to run until the project adds
+`add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY <namespace>_default)` to its
+`CMakeLists.txt`, which the update does not touch, and a fuzzer to `test/fuzz/`, with the
+`.clang-tidy` of the skeleton's beside it.
+
 `make stack`: the deepest stack of every program on an AVR, against the RAM it leaves free (W-11).
 
 - **`tools/avr_stack.py`, out of Wordclock's `avr-stack.py`:** the deepest path from `main()` and
