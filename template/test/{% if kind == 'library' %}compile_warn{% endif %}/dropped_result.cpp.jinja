@@ -1,0 +1,11 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+
+// A result {{ macro_prefix }}_NODISCARD marks, dropped: the compiler has
+// to say so in every standard the library is built in, as the macro may
+// be another attribute in each (FN-10).
+// Expected: -Wunused-result
+
+#include "{{ namespace }}/clamp.h"
+
+void DropClamp() { {{ namespace }}::Clamp(5, 0, 10); }
