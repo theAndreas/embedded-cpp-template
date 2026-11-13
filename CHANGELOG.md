@@ -5,6 +5,22 @@ brings it.
 
 ## Unreleased
 
+`_NODISCARD` is `[[nodiscard]]` wherever the compiler has it, chosen by `__has_cpp_attribute`
+rather than by `__cplusplus` (CodingStyle FN-10).
+
+- **Why:** GCC, clang and avr-gcc 7.3 have `[[nodiscard]]` in C++11 already, and GCC's
+  `warn_unused_result`, which the macro was before C++17, made every example of MaxMatrix 10 to
+  30 bytes of flash larger on the Uno; with `[[nodiscard]]` they are as without the marks, to
+  the byte. clang reports the attribute before C++17 only under `-Wpedantic`, which the template
+  does not turn on.
+- **A cast to `void`** now silences the warning on every compiler the template builds with, so
+  none reports one any more; FN-10 keeps `Discard()` all the same, as a cast does not say that
+  the drop is meant, and the macro still falls back to `warn_unused_result` where a compiler
+  lacks the attribute.
+
+On the update: nothing to do; a result dropped through a cast that avr-gcc reported before no
+longer fails, so review looks for one (ROADMAP C-3).
+
 `make coverage` fails unless the tests reach every line, branch and condition of `src/` (C-7, idea
 I-12 before).
 
