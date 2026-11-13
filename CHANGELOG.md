@@ -3,6 +3,16 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **The Doxygen blocks are wrapped to the project's `ColumnLimit`.** `tools/lib/doc_indent.py`
+  rewrapped a command's paragraph to 80 columns whatever `.clang-format` said, and so fought
+  clang-format in a project with a limit of its own: Wordclock's 100 columns turned into 160
+  findings of `make lint` on blocks clang-format had left alone. It reads `ColumnLimit` from
+  `.clang-format` now, 80 where it sets none.
+
+On the update: nothing; a project that sets no `ColumnLimit` is wrapped at 80 as before.
+
 ## v0.7.3
 
 - **`coverage_suites()` in `tools/project.sh`:** a project's tests that `CMakeLists.txt` does not
