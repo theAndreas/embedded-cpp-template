@@ -3,6 +3,15 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`make lint` reads every shell script with shellcheck,** not those of `tools/` alone:
+  `.devcontainer/llvm-headers.sh` failed the SC2312 that `.shellcheckrc` turns on, and nothing
+  noticed until Wordclock's lint, which reads them all. Its last line takes the version into a
+  variable first.
+
+On the update: nothing.
+
 ## v0.7.4
 
 - **The Doxygen blocks are wrapped to the project's `ColumnLimit`.** `tools/lib/doc_indent.py`
