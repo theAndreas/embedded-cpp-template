@@ -3,6 +3,16 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`COVERAGE_MINIMUM` in `tools/project.sh`:** the percentages of lines, branches and conditions
+  of `src/` that `make coverage` demands, `100 100 100` unless set. For a project brought in below
+  them, as Wordclock is at 94 % of its lines: it states what it reaches and raises it as it
+  reaches more, where the only choice was to leave `make coverage` out of `make check`. A
+  value that is no percentage, or a fourth, fails rather than being read as 0.
+
+On the update: nothing; a project without the setting demands 100 % as before.
+
 ## v0.7.1
 
 Four faults of v0.7.0, found on MaxMatrix's update to it.
