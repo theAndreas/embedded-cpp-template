@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.7.1
 
 Four faults of v0.7.0, found on MaxMatrix's update to it.
 
