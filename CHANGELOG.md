@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.7.3
 
 - **`coverage_suites()` in `tools/project.sh`:** a project's tests that `CMakeLists.txt` does not
   build, as a backend's suite compiled by a script of its own, run with `--coverage` and count
