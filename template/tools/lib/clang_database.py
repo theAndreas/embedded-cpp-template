@@ -34,6 +34,7 @@ import sys
 from pathlib import Path
 
 GCC_ONLY_FLAGS = {
+    '-fcallgraph-info=su',
     '-fno-shrink-wrap',
     '-fno-tree-switch-conversion',
     '-fstrict-volatile-bitfields',

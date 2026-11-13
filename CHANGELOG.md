@@ -5,6 +5,29 @@ brings it.
 
 ## Unreleased
 
+`make stack`: the deepest stack of every program on an AVR, against the RAM it leaves free (W-11).
+
+- **`tools/avr_stack.py`, out of Wordclock's `avr-stack.py`:** the deepest path from `main()` and
+  the static constructors, plus the deepest interrupt handlers that can be on the stack at once,
+  from the call graphs avr-gcc writes beside each object, and library code by its disassembly;
+  against the part's RAM less `.data` and `.bss`. It refuses recursion, a call through a pointer,
+  a frame of dynamic size and `malloc()`, each of which would make the sum a lower bound.
+- **Made general for any AVR:** a return address of three bytes on a part with more than 128 KiB
+  of flash, as the ATmega2560; one handler at a time on a classic AVR, and a handler that sets
+  the interrupt flag refused, two on the megaAVR 0 and Dx series; the RAM from `RAMSTART` and
+  `RAMEND`, which every part's header defines.
+- **A call into libgcc the graph does not list is counted:** avr-gcc calls its helpers, as
+  `__udivmodsi4` for a division of 32 bits, after it wrote the graph, so each function's own
+  instructions are read for them. Wordclock's tool, which lacks this, comes out one byte short on
+  its own image: 628 bytes against 629, through `__udivmodqi4` below `SetPixel`.
+- **`cmake/toolchains/avr-gcc.cmake` compiles with `-fstack-usage -fcallgraph-info=su`,** which
+  change no byte of the code; `tools/lib/clang_database.py` drops the second for clang.
+- `tools/stack.sh` walks every program of every AVR target CMake builds, in each variant, and
+  says so where there is none: arduino:avr's avr-gcc 7.3 writes no call graph.
+
+On the update: `make check` runs `make stack` as well; for an Arduino library it has nothing to
+add up and says so.
+
 A project can be a firmware: `kind: firmware` makes an image of its own for each target rather
 than a library with examples, the third step of E-1.
 
