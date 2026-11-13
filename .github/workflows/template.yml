@@ -88,7 +88,7 @@ jobs:
       - name: Make a project and check it
         run: |
           tests/check.sh --keep lint tests clang sanitize coverage tidy cppcheck headers \
-            docs examples sizes self-check stack
+            docs examples sizes self-check stack fuzz
 
       # What git has of the project, without the .venv the checks made beside it, whose links
       # arduino-lint would report.

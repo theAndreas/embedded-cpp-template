@@ -127,7 +127,7 @@ main() {
   # beside the tests, and its headers.
   local host_code
   host_code_dirs host_code
-  local paths=('test/*' ':!test/mock/*' ':!test/compile_fail/*')
+  local paths=('test/*' ':!test/mock/*' ':!test/compile_fail/*' ':!test/fuzz/*')
   local filter='test'
   for dir in "${host_code[@]}"; do
     paths+=("${dir}/*")
@@ -138,6 +138,19 @@ main() {
   cmake --preset default >/dev/null
   echo "clang-tidy, the tests on the host:"
   run_tidy "${BUILD_DIR}/host" "(^|/)(${filter})/" "${tests[@]}" || failed=1
+
+  # The fuzzers, with the database of the preset fuzz, which alone builds them; configured, not
+  # built, as clang-tidy compiles each file itself.
+  local fuzzers=()
+  local found
+  found="$(git ls-files --cached --others --exclude-standard -- 'test/fuzz/*Fuzz.cpp' \
+    'test/fuzz/*_fuzz.cpp')"
+  if [[ -n "${found}" ]]; then
+    mapfile -t fuzzers <<< "${found}"
+    cmake --preset fuzz >/dev/null
+    echo "clang-tidy, the fuzzers:"
+    run_tidy "${BUILD_DIR}/fuzz" '(^|/)test/' "${fuzzers[@]}" || failed=1
+  fi
   exit "${failed}"
 }
 

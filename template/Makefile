@@ -27,20 +27,22 @@ export CTEST_PARALLEL_LEVEL ?= $(shell nproc)
 
 STRICT ?= $(CI)
 PRESET = $(if $(STRICT),ci-)
+# How long each fuzzer runs; tools/fuzz.sh reads it.
+export FUZZ_SECONDS ?= 60
 PROJECT_CHECKS :=
 
 # Before the rules, as `check` reads PROJECT_CHECKS when it is read; its targets are listed after
 # these all the same, as `make help` reads the files in turn.
 -include tools/project.mk
 
-.PHONY: help check lint fmt setup tests clang sanitize coverage examples sizes self-check stack \
+.PHONY: help check lint fmt setup tests clang sanitize coverage examples sizes self-check stack fuzz \
         tidy cppcheck headers docs arduino-lint clean
 
 help: ## This list
 	@awk 'BEGIN { FS = ":.*## " } /^## / { printf "\n%s\n", substr($$0, 4) } \
 	      /^[a-z0-9-]+:.*## / { printf "  make %-12s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@echo
-	@echo '  STRICT=1 for warnings as errors, as in CI.'
+	@echo '  STRICT=1 for warnings as errors, as in CI; FUZZ_SECONDS=n for a shorter fuzzing run.'
 
 ## Everything at once
 
@@ -48,7 +50,7 @@ help: ## This list
 check: STRICT := 1
 check: ## What CI runs, all of it
 check: lint arduino-lint tests clang tidy cppcheck headers docs sanitize coverage examples \
-       sizes self-check stack $(PROJECT_CHECKS)
+       sizes self-check stack fuzz $(PROJECT_CHECKS)
 
 lint: ## The checks of seconds: clang-format, cpplint, shellcheck, actionlint, ruff
 	tools/lint.sh
@@ -91,6 +93,12 @@ self-check: ## examples/SelfCheck in simavr, for each target and variant
 # Where an AVR target is built by CMake: arduino:avr's avr-gcc 7.3 writes no call graph.
 stack: ## The deepest stack of each program against the RAM it leaves, on each AVR target
 	tools/stack.sh
+
+# Built with clang, which brings libFuzzer, into build/fuzz; what each found before is the corpus
+# it goes on from.
+fuzz: ## The fuzzers of test/fuzz/, FUZZ_SECONDS each, under ASan and UBSan
+	cmake --workflow --preset fuzz
+	tools/fuzz.sh
 
 ## Analysers
 
