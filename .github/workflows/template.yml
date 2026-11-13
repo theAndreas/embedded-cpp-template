@@ -60,6 +60,11 @@ jobs:
       - name: The checks of our own against their cases
         run: tests/tidy_module.py
 
+      # The project built for two targets, an Uno and a Mega: the checks that walk TARGETS. Before
+      # the step below, which keeps build/Demo for arduino-lint, as each run makes it anew.
+      - name: Make a project of two targets and check it
+        run: tests/check.sh --targets tidy cppcheck headers examples self-check
+
       # Every target of `make check` but arduino-lint, which the runner has not installed, with
       # warnings as errors.
       - name: Make a project and check it

@@ -3,6 +3,32 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+A project is built for one target or several, each with its build system: the first step of E-1,
+which brings CMake and PlatformIO as build systems beside arduino-cli, and firmware beside the
+library.
+
+- **`TARGETS` in `tools/project.sh`:** the targets a project is built for, each with its own
+  board, core and simavr MCU through `target_settings()`, and its `BUILD_SYSTEM`, of which
+  arduino-cli is the first. `make setup`, `examples`, `self-check`, `tidy`, `cppcheck` and
+  `headers` walk them all. A project that names no target has one, `board`, with the settings it
+  always had, and nothing changes for it: its table of sizes keeps its columns, and a target
+  name joins them only where there are two.
+- **The arduino-cli functions in `tools/lib/arduino_cli.sh`:** `compile_example`, `elf_of`,
+  `avr_gcc_bin_dir` and `list_examples` keep their names, so a `check_elf()` that calls them, as
+  Utl's does, works as before; `select_target()` has set FQBN and the rest for the target.
+- **New places in `build/`:** a target's builds in `build/targets/<target>/<variant>/`, its
+  compilation database in `build/tidy/targets/<target>/<variant>/`. clangd reads the examples'
+  through `build/tidy/clangd`, which points to the first target's, and `make headers` takes the
+  list of databases from `build/tidy/databases`.
+- **`tests/check.sh --targets`** makes the project for an Uno and a Mega, one core and both run
+  in simavr, and the template's CI checks it beside the project of one target.
+
+On the update: nothing to do. A script of the project's own that reads `build/<variant>/` or
+`build/tidy/default/` reads the new places; one that sources `tools/common.sh` finds the first
+target selected.
+
 ## v0.6.1
 
 - **`house-braced-var-init` leaves a text in a C array alone:** `char const kName[] = "font";`

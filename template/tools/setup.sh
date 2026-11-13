@@ -3,9 +3,9 @@
 # Copyright 2026 Andreas Burnickl
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Installs the Arduino core of tools/project.sh, pinned, and builds what prepare() there builds
-# beyond it. The dev container runs it when it is created, CI before it compiles an example;
-# run it again after ARDUINO_CORE has changed.
+# Installs the Arduino core of each target of tools/project.sh, pinned, and builds what prepare()
+# there builds beyond them. The dev container runs it when it is created, CI before it compiles an
+# example; run it again after ARDUINO_CORE has changed.
 
 set -euo pipefail
 
@@ -18,12 +18,11 @@ main() {
     exit 2
   fi
 
-  local urls=()
-  if [[ -n "${ARDUINO_BOARD_URLS}" ]]; then
-    urls=(--additional-urls "${ARDUINO_BOARD_URLS}")
-  fi
-  arduino-cli core update-index "${urls[@]}"
-  arduino-cli core install "${ARDUINO_CORE}" "${urls[@]}"
+  local target
+  for target in "${TARGETS[@]}"; do
+    select_target "${target}"
+    arduino_setup
+  done
   prepare
 }
 
