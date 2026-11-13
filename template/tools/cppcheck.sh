@@ -56,6 +56,12 @@ main() {
     done
   done
 
+  # The mock of the Arduino core in place of the core, where the library is an Arduino library.
+  local mock=()
+  if [[ -d test/mock ]]; then
+    mock=(-Itest/mock)
+  fi
+
   # The headers as well, by name: given a folder, cppcheck reads only its .cpp
   # files, and a library of templates may have none.
   local files
@@ -72,7 +78,8 @@ main() {
     --error-exitcode=1 \
     --quiet \
     --cppcheck-build-dir="${BUILD_DIR}/cppcheck" \
-    -Isrc -Itest/mock \
+    -Isrc \
+    "${mock[@]}" \
     '-D__has_include(x)=1' \
     "${defines[@]}" \
     "${files[@]}"

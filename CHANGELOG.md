@@ -5,6 +5,38 @@ brings it.
 
 ## Unreleased
 
+A library need not be an Arduino library: `arduino: no` makes one of C++ and CMake alone, built for
+its targets by avr-gcc with a toolchain file, the second step of E-1.
+
+- **`arduino`, a question of `copier copy`:** yes, the default, makes the Arduino library it always
+  made. No makes a library without `library.properties`, without the mock of the core in
+  `test/mock/`, and with its examples as programs, `examples/<Name>/<Name>.cpp` with a `main()`;
+  SelfCheck writes to the first USART itself, of a classic AVR as simavr runs it or of the
+  megaAVR 0 and Dx series. copier then asks for the part and its clock, `mcu` and `f_cpu`, in
+  place of the board and the core.
+- **`cmake`, the second build system:** a target with `BUILD_SYSTEM=cmake` is `CMakeLists.txt`
+  configured with the toolchain file `CMAKE_TOOLCHAIN` and the definitions `CMAKE_DEFINES` of
+  `tools/project.sh`, one build folder per variant, the variant's flags in `VARIANT_FLAGS`, as
+  MinSizeRel and with warnings as errors. Cross-compiled, `CMakeLists.txt` builds each example as
+  `examples/<Name>.elf`, the library compiled into it. The template brings
+  `cmake/toolchains/avr-gcc.cmake`, for avr-gcc and avr-libc from apt, which
+  `.devcontainer/apt-packages.txt` names for such a library.
+- **clang-tidy reads a CMake target as the target:** `tools/lib/clang_database.py`, out of
+  Wordclock's `cross-clang-tidy.py`, rewrites GCC's database for clang, with the target, the
+  compiler's own include folders and without GCC's own flags. `make headers` compiles each header
+  with the target's own compiler, from the database CMake wrote.
+- **What a build system does is a function of its own:** `target_setup`, `target_build`,
+  `target_elf`, `target_sizes` and `target_database` in `tools/common.sh` call those of
+  `tools/lib/arduino_cli.sh` or `tools/lib/cmake.sh`; `make examples` fails as well where a build
+  that passed left no ELF file of an example.
+- **CI follows the build systems:** the action `arduino-setup` is now `target-setup`, which
+  installs arduino-cli only where a target is built by it (`tools/setup.sh --systems`).
+  arduino-lint runs where there is a `library.properties`, and `release.yml` takes the version
+  from `project()` of `CMakeLists.txt` where there is none.
+
+On the update: an Arduino library has nothing to do; its workflows name `target-setup` after the
+update, and `.github/actions/arduino-setup/` goes.
+
 A project is built for one target or several, each with its build system: the first step of E-1,
 which brings CMake and PlatformIO as build systems beside arduino-cli, and firmware beside the
 library.

@@ -1,6 +1,7 @@
 // Copyright {{ copyright_year }} {{ author }}
 // SPDX-License-Identifier: {{ license }}
 
+{%- if arduino %}
 /*!
  * \file
  * \brief The header a sketch includes, before any other of the library.
@@ -13,6 +14,17 @@
  */
 
 // The name is the library's, as Arduino expects, not lower case as Google's.
+{%- else %}
+/*!
+ * \file
+ * \brief The header a program includes for all of the library.
+ *
+ * A file that needs one part only may include that part's header by its path
+ * below `src/` instead.
+ */
+
+// The name is the library's, as the folder's, not lower case as Google's.
+{%- endif %}
 // The export pragmas tell clang-tidy's include-cleaner that this header
 // provides what it includes.
 

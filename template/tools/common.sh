@@ -9,10 +9,11 @@
 # template and is brought up to date with `copier update`; what is the project's goes into
 # tools/project.sh.
 #
-# A target is a board or chip the project is compiled for, by one build system: today
-# arduino-cli, whose functions are in tools/lib/arduino_cli.sh. A script that works on the
-# targets walks TARGETS and calls select_target() for each, which sets the settings of
-# TARGET_SETTINGS to that target's; a project of one target need not name it.
+# A target is a board or chip the project is compiled for, by one build system: arduino-cli or
+# cmake, whose functions are in tools/lib/arduino_cli.sh and tools/lib/cmake.sh. A script that
+# works on the targets walks TARGETS and calls select_target() for each, which sets the settings
+# of TARGET_SETTINGS to that target's; a project of one target need not name it. It then calls
+# the target_ functions below, which call those of the target's build system.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly ROOT_DIR
@@ -24,6 +25,8 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
   NAMESPACE=""
   TARGETS=(board)
   BUILD_SYSTEM="arduino-cli"
+  CMAKE_TOOLCHAIN=""
+  CMAKE_DEFINES=()
   FQBN="arduino:avr:uno"
   ARDUINO_CORE="arduino:avr"
   ARDUINO_BOARD_URLS=""
@@ -65,13 +68,15 @@ source "${ROOT_DIR}/tools/project.sh"
 # The settings a target may have of its own, through target_settings() in tools/project.sh; what
 # tools/project.sh sets for them is each target's starting point. Kept as declarations, with -g,
 # so that select_target() restores them as globals although it is a function.
-readonly TARGET_SETTINGS=(BUILD_SYSTEM FQBN ARDUINO_CORE ARDUINO_BOARD_URLS SIMAVR_MCU
-  SIMAVR_FREQUENCY DATABASE_EXAMPLE SELF_CHECK_EXAMPLE)
+readonly TARGET_SETTINGS=(BUILD_SYSTEM CMAKE_TOOLCHAIN CMAKE_DEFINES FQBN ARDUINO_CORE
+  ARDUINO_BOARD_URLS SIMAVR_MCU SIMAVR_FREQUENCY DATABASE_EXAMPLE SELF_CHECK_EXAMPLE)
 PROJECT_SETTINGS="$(declare -p "${TARGET_SETTINGS[@]}" | sed 's/^declare /declare -g /')"
 readonly PROJECT_SETTINGS
 
 # shellcheck source=tools/lib/arduino_cli.sh
 source "${ROOT_DIR}/tools/lib/arduino_cli.sh"
+# shellcheck source=tools/lib/cmake.sh
+source "${ROOT_DIR}/tools/lib/cmake.sh"
 
 err() {
   echo "$*" >&2
@@ -97,13 +102,57 @@ select_target() {
   TARGET="${target}"
   target_settings "${target}"
   case "${BUILD_SYSTEM}" in
-    arduino-cli) ;;
+    arduino-cli | cmake) ;;
     *)
       err "Target ${target}: BUILD_SYSTEM=${BUILD_SYSTEM}, which the template does not know;" \
-        "it knows arduino-cli."
+        "it knows arduino-cli and cmake."
       return 1
       ;;
   esac
+}
+
+# What a script does to the selected target, each by the functions of its build system,
+# <system>_setup and so on, with - as _: arduino_cli_setup, cmake_setup.
+
+# Installs or checks what building the target needs, as its core or its compiler.
+target_setup() {
+  "${BUILD_SYSTEM//-/_}_setup"
+}
+
+# Compiles every example in a variant, or the one named, failing on an error and on a warning
+# outside the toolchain's own files, and prints what went wrong.
+# Arguments:
+#   variant: one of VARIANTS
+#   example: optional, the name of a folder in examples/
+target_build() {
+  "${BUILD_SYSTEM//-/_}_build" "$@"
+}
+
+# Prints the path of the ELF file of an example that target_build made.
+# Arguments:
+#   variant, example
+target_elf() {
+  "${BUILD_SYSTEM//-/_}_elf" "$@"
+}
+
+# Prints flash and RAM of an example that target_build made, in bytes, separated by a blank;
+# nothing where it was not built. Flash is .text and .data, RAM .data, .bss and .noinit, as
+# arduino-cli counts them for an AVR.
+# Arguments:
+#   variant, example
+target_sizes() {
+  "${BUILD_SYSTEM//-/_}_sizes" "$@"
+}
+
+# Writes the compilation database of a variant that clang-tidy and clangd read into
+# <dir>/compile_commands.json, for the sources of src/ and examples/, and prints the folder of
+# the one that names the target's own compiler, which tools/self_contained_headers.py compiles
+# each header with; that may be <dir> itself.
+# Arguments:
+#   variant: one of TIDY_VARIANTS
+#   dir: the folder to write into
+target_database() {
+  "${BUILD_SYSTEM//-/_}_database" "$@"
 }
 
 # Prints the folder the builds of the selected target go into, one folder per variant below it.

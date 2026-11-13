@@ -5,8 +5,9 @@
 #
 # The build system arduino-cli: how a target with BUILD_SYSTEM=arduino-cli is set up, how an
 # example is compiled for it, and the flags clang-tidy reads it with. tools/common.sh sources this
-# file; every function works on the target select_target() selected, through its FQBN,
-# ARDUINO_CORE, ARDUINO_BOARD_URLS and DATABASE_EXAMPLE. This file comes from the template.
+# file and calls the functions arduino_cli_*, which target_setup() and the others there describe;
+# every function works on the target select_target() selected, through its FQBN, ARDUINO_CORE,
+# ARDUINO_BOARD_URLS and DATABASE_EXAMPLE. This file comes from the template.
 
 # Prints the name of every example, one per line.
 list_examples() {
@@ -18,7 +19,7 @@ list_examples() {
 
 # Installs the core of the selected target, pinned, from the index of ARDUINO_BOARD_URLS as well
 # if it names one.
-arduino_setup() {
+arduino_cli_setup() {
   local urls=()
   if [[ -n "${ARDUINO_BOARD_URLS}" ]]; then
     urls=(--additional-urls "${ARDUINO_BOARD_URLS}")
@@ -58,6 +59,120 @@ compile_example() {
     args+=(--build-property "compiler.cpp.extra_flags=${flags}")
   fi
   arduino-cli compile "${args[@]}" "${ROOT_DIR}/examples/${example}" 2>&1
+}
+
+# Prints the path of the file arduino_cli_build() keeps what arduino-cli printed for an example
+# in, which arduino_cli_sizes() reads.
+# Arguments:
+#   variant, example
+arduino_cli_log() {
+  local variant="$1"
+  local example="$2"
+  local dir
+  dir="$(target_build_dir)"
+  echo "${dir}/${variant}/${example}.log"
+}
+
+# Compiles every example in a variant, or the one named, and fails where one does not compile
+# or warns outside the Arduino core.
+# Arguments:
+#   variant: one of VARIANTS
+#   example: optional, the name of a folder in examples/
+arduino_cli_build() {
+  local variant="$1"
+  local examples=("${2:-}")
+  if [[ -z "${examples[0]}" ]]; then
+    local listed
+    listed="$(list_examples)"
+    mapfile -t examples <<< "${listed}"
+  fi
+  local label
+  label="$(target_label "${variant}")"
+  local failed=0
+  local example
+  local log
+  local output
+  local warnings
+  for example in "${examples[@]}"; do
+    log="$(arduino_cli_log "${variant}" "${example}")"
+    mkdir -p "${log%/*}"
+    rm -f "${log}"
+    if ! output="$(compile_example "${variant}" "${example}")"; then
+      err "${example} (${label}) does not compile:"
+      err "${output}"
+      failed=1
+      continue
+    fi
+    echo "${output}" > "${log}"
+    warnings="$(grep 'warning:' <<< "${output}" | grep -v '/cores/arduino/' || true)"
+    if [[ -n "${warnings}" ]]; then
+      err "${example} (${label}) warns:"
+      err "${warnings}"
+      failed=1
+    fi
+  done
+  return "${failed}"
+}
+
+# Prints the path of the ELF file of an example that arduino_cli_build() made.
+arduino_cli_elf() {
+  elf_of "$@"
+}
+
+# Prints flash and RAM of an example as arduino-cli reported them, nothing where it did not
+# compile.
+# Arguments:
+#   variant, example
+arduino_cli_sizes() {
+  local log
+  log="$(arduino_cli_log "$1" "$2")"
+  if [[ ! -f "${log}" ]]; then
+    return 0
+  fi
+  local output
+  output="$(< "${log}")"
+  local flash
+  local ram
+  flash="$(sed -n 's/^Sketch uses* \([0-9]*\) bytes.*/\1/p' <<< "${output}")"
+  ram="$(sed -n 's/^Global variables uses* \([0-9]*\) bytes.*/\1/p' <<< "${output}")"
+  echo "${flash} ${ram}"
+}
+
+# Writes the database of a variant for the sources of src/ and examples/ with the flags of
+# arduino_flags(), and prints its folder: the same database serves clang-tidy and the headers,
+# as arduino_flags() already turned it into one that clang reads.
+# Arguments:
+#   variant: one of TIDY_VARIANTS
+#   dir: the folder to write into
+arduino_cli_database() {
+  local variant="$1"
+  local dir="$2"
+  local sources
+  list_files sources '\.(cpp|ino)$' 'src/*' 'examples/*'
+  local flags
+  flags="$(arduino_flags "${variant}" "${BUILD_DIR}/tidy/arduino/${TARGET}/${variant}")"
+  write_database "${dir}" "${flags}" "${sources[@]}"
+  echo "${dir}"
+}
+
+# Writes <dir>/compile_commands.json for the files given, with the flags of arduino_flags() of
+# tools/lib/arduino_cli.sh.
+# Arguments:
+#   dir, flags, then the files
+write_database() {
+  local dir="$1"
+  local flags="$2"
+  shift 2
+  mkdir -p "${dir}"
+  jq -n --arg dir "${ROOT_DIR}" --argjson flags "${flags}" '
+    $ARGS.positional | map({
+      directory: $dir,
+      file: .,
+      arguments: ($flags
+        + (if endswith(".ino") then ["-x", "c++", "-include", "Arduino.h"]
+           else [] end)
+        + [.])
+    })' --args "$@" > "${dir}/compile_commands.json"
 }
 
 # Prints the path of the ELF file that compile_example made.

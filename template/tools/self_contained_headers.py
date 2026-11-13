@@ -11,8 +11,9 @@ neighbours.
 
 So each header is compiled alone, by the compiler and with the flags of a compilation database:
 the host's, which CMake writes (g++, gnu++11, against the mock of the core), and each target's,
-which tools/tidy.sh writes from arduino-cli's (avr-g++, the core and the board's pins). An #if
-that only a board takes is so compiled for that board.
+which tools/tidy.sh writes from arduino-cli's (avr-g++, the core and the board's pins) or names
+in a CMake build (avr-g++ of the toolchain file). An #if that only a board takes is so compiled
+for that board.
 
 Usage:
     tools/self_contained_headers.py build/host @build/tidy/databases
@@ -45,13 +46,17 @@ def arguments_of(entry):
 
 def library_entry(database):
     """The flags the library is compiled with: a source of src/, else the mock of the core,
-    which the host's library target compiles with the same flags, else a sketch, whose
-    `-include Arduino.h` is dropped below, as a header has to include what it uses itself."""
+    which the host's library target compiles with the same flags, else an example: a sketch,
+    whose `-include Arduino.h` is dropped below, as a header has to include what it uses itself,
+    or a program of a target built by CMake. On the host a library of headers alone without a
+    mock has none of these, and its headers are compiled with a test's flags, as C++17; a
+    target's database still compiles them as the library is."""
     def under(entry, part, suffix):
         path = (Path(entry['directory']) / entry['file']).resolve().as_posix()
         return part in path and path.endswith(suffix)
 
-    for part, suffix in (('/src/', '.cpp'), ('/test/mock/', '.cpp'), ('/examples/', '.ino')):
+    for part, suffix in (('/src/', '.cpp'), ('/test/mock/', '.cpp'), ('/examples/', '.ino'),
+                         ('/examples/', '.cpp'), ('/test/', '.cpp')):
         for entry in database:
             if under(entry, part, suffix):
                 return entry
