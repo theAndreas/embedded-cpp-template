@@ -16,6 +16,10 @@ brings it.
   now, and one that none compiles fails, rather than going unread. `HOST_CODE` is read with the
   tests only, and `TIDY_SKIP` in `tools/project.sh` names folders a target of the project's own
   reads, as a backend's tests built by a script of their own.
+- **A GCC warning or optimisation clang does not know is no error of `make tidy`.** A build that
+  asks GCC for `-Wduplicated-cond`, or ESP-IDF's `-freorder-blocks`, had clang-tidy report each
+  as an error of every file of the target: 373 and 56 on Wordclock. `tools/lib/clang_database.py`
+  passes `-Wno-unknown-warning-option` and `-Wno-ignored-optimization-argument` now.
 
 On the update: nothing; a project that sets no `ColumnLimit` is wrapped at 80 as before, and one
 of one platform is read as before.
