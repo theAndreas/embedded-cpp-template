@@ -10,8 +10,15 @@ brings it.
   clang-format in a project with a limit of its own: Wordclock's 100 columns turned into 160
   findings of `make lint` on blocks clang-format had left alone. It reads `ColumnLimit` from
   `.clang-format` now, 80 where it sets none.
+- **`make tidy` reads a firmware of several platforms.** A target's database holds the sources
+  of its own folder of `platform/`, not the others', and `tools/tidy.sh` failed on the first source
+  of another target's folder. A source of `platform/` is read with the targets that compile it
+  now, and one that none compiles fails, rather than going unread. `HOST_CODE` is read with the
+  tests only, and `TIDY_SKIP` in `tools/project.sh` names folders a target of the project's own
+  reads, as a backend's tests built by a script of their own.
 
-On the update: nothing; a project that sets no `ColumnLimit` is wrapped at 80 as before.
+On the update: nothing; a project that sets no `ColumnLimit` is wrapped at 80 as before, and one
+of one platform is read as before.
 
 ## v0.7.3
 
