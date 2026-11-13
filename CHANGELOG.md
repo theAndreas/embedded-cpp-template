@@ -13,6 +13,11 @@ brings it.
   `tools/cppcheck.sh`, as include folders, a `--suppressions-list` or a later `--std`. A firmware
   made from the template gives `--std=c++17` there, as it is compiled as gnu++17 and cppcheck read
   it as C++11.
+- **`make stack` reads a firmware linked with `-flto`, and one whose image a subfolder adds.**
+  `cmake_graphs()` takes the call graphs of the link where it finds them beside the ELF,
+  `<program>.elf.ltrans<N>.ltrans.ci` of `-save-temps=obj`, as the frames of the compile are those
+  before LTO inlined across sources; else `CMakeFiles/<program>.dir`, wherever in the build it
+  lies.
 - **A build of PlatformIO fails on the project's own warnings, not on a library's.** It was
   given `-Werror` on the project's sources, which a header of a library or of the framework
   that such a source includes failed as well: Wordclock's RP2350 on `ESPAsyncWebServer`. The log
