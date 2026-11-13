@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.7.4
 
 - **The Doxygen blocks are wrapped to the project's `ColumnLimit`.** `tools/lib/doc_indent.py`
   rewrapped a command's paragraph to 80 columns whatever `.clang-format` said, and so fought
