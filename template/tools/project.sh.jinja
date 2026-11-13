@@ -33,6 +33,10 @@
 #   DOCS_INTERNAL_API    a regex of the files in NAMESPACE::internal that are API after all,
 #                        such as a base a public class takes members from
 #   CPPCHECK             0 if cppcheck cannot parse the library, with the reason; else 1
+#   COVERAGE_MINIMUM     the percentages of lines, branches and conditions of src/ the tests
+#                        have to reach, in that order; 100 100 100 if not set. Lower only for
+#                        a project brought in below them, at what it reaches, and raised as
+#                        it reaches more (Testing.md TS-4)
 #   HOST_CODE            folders of code that runs on the host beside the library, as a
 #                        simulator, built by CMakeLists.txt: tools/lint.sh formats and checks
 #                        them as src/, tools/tidy.sh reads them with the tests

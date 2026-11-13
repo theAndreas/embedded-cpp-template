@@ -4,7 +4,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Runs the tests on the host with --coverage and fails unless they reach every
-# line, branch and condition of src/ (docs/Testing.md TS-4): what no test
+# line, branch and condition of src/ (docs/Testing.md TS-4), or as much of them
+# as COVERAGE_MINIMUM of tools/project.sh says: what no test
 # reaches on the terminal, and all of it as HTML in build/coverage/html/. The variants of CMakeLists.txt count together, as
 # each takes other branches of #if. gcovr runs from the environment uv.lock
 # pins, like the tools of lint.sh.
@@ -73,8 +74,29 @@ report() {
     "$@"
 }
 
+# Fails unless COVERAGE_MINIMUM is three percentages, as gcovr would take a fourth in silence and
+# read a word as 0.
+check_minimum() {
+  local valid=1
+  if ((${#COVERAGE_MINIMUM[@]} != 3)); then
+    valid=0
+  fi
+  local value
+  for value in "${COVERAGE_MINIMUM[@]}"; do
+    if [[ ! "${value}" =~ ^[0-9]+$ ]] || ((value > 100)); then
+      valid=0
+    fi
+  done
+  if ((valid == 0)); then
+    err "COVERAGE_MINIMUM of tools/project.sh is three percentages, of the lines, branches and"
+    err "conditions, as (100 100 100); it is (${COVERAGE_MINIMUM[*]})."
+    exit 1
+  fi
+}
+
 main() {
   cd "${ROOT_DIR}"
+  check_minimum
   check_exclusions
   # Counts from an earlier run would add to this one.
   find "${COVERAGE_DIR}" -name '*.gcda' -delete 2>/dev/null || true
@@ -112,7 +134,8 @@ main() {
   local status=0
   report "${tracefile}" \
     --html-details "${COVERAGE_DIR}/html/index.html" \
-    --fail-under-line 100 --fail-under-branch 100 --fail-under-condition 100 \
+    --fail-under-line "${COVERAGE_MINIMUM[0]}" --fail-under-branch "${COVERAGE_MINIMUM[1]}" \
+    --fail-under-condition "${COVERAGE_MINIMUM[2]}" \
     --print-summary || status=$?
   echo
   # The files with something missed, and the lines of what. gcovr names no line for a condition:
@@ -122,7 +145,12 @@ main() {
     exit "${status}"
   fi
   if (( status != 0 )); then
-    err "Not every line, branch and condition of src/ is reached by a test (Testing.md TS-4)."
+    if [[ "${COVERAGE_MINIMUM[*]}" == "100 100 100" ]]; then
+      err "Not every line, branch and condition of src/ is reached by a test (Testing.md TS-4)."
+    else
+      err "The tests reach less of src/ than COVERAGE_MINIMUM of tools/project.sh, the lines," \
+        "branches and conditions in percent: ${COVERAGE_MINIMUM[*]} (Testing.md TS-4)."
+    fi
     err "The conditions missed are marked in ${COVERAGE_DIR}/html/index.html."
     exit 1
   fi
