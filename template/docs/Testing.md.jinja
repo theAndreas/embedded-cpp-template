@@ -9,9 +9,9 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 
 | Kind | Where | Proves | Run by |
 |---|---|---|---|
-| **On the host** | `test/*_test.cpp`, GoogleTest{% if arduino %} against the mock in `test/mock/`{% endif %} | What the library computes: every function, every branch, every edge | `make tests`, `make clang`, `make sanitize`, `make coverage` |
+| **On the host** | `test/*_test.cpp`, GoogleTest{% if arduino %} against the mock in `test/mock/`{% endif %} | What the {% if kind == 'firmware' %}code of `src/`{% else %}library{% endif %} computes: every function, every branch, every edge | `make tests`, `make clang`, `make sanitize`, `make coverage` |
 | **What must not compile** | `test/compile_fail/*.cpp` | That a misuse is stopped by the compiler, with the message it names | `make tests` |
-| **On the target** | `examples/SelfCheck`, in simavr for the AVR | What only the target shows: the width of its `int`, text in its flash, the variants as its compiler builds them | `make self-check` |
+| **On the target** | {% if kind == 'firmware' %}the image, built for each target without a warning, and on the board itself{% else %}`examples/SelfCheck`, in simavr for the AVR{% endif %} | What only the target shows: the width of its `int`, text in its flash, the variants as its compiler builds them | `make self-check` |
 
 Where host and target differ, a test on the host passes and the device fails. What differs, and
 what catches it:
@@ -37,7 +37,11 @@ what catches it:
 | Id | Rule | Checked by |
 |---|---|---|
 | TS-5 | One test file per header, in the folder of `test/` that mirrors the header's in `src/`, named as the class it tests and `Test`: `src/Text/MaxMatrixText.h` is tested in `test/Text/MaxMatrixTextTest.cpp`, as its suite is `MaxMatrixTextTest`. A family of functions in lower case takes `_test`: `clamp.h` in `clamp_test.cpp`. CMake takes every such file below `test/`. | Review |
+{%- if kind == 'firmware' %}
+| TS-6 | A test lies in an anonymous namespace, inside the namespace of the code it tests where that has one, as the skeleton's does. | Review |
+{%- else %}
 | TS-6 | A test lies in the library's namespace and an anonymous one inside it, as the skeleton's does. | Review |
+{%- endif %}
 | TS-7 | The suite is the entity and `Test`, the test is what it does, as a sentence in the third person: `TEST(ClampTest, LimitsAValueBelow)` reads "Clamp limits a value below". No underscore, which GoogleTest reserves; no "Test", "Works" or "Correct" in the name of a test. | Review |
 | TS-8 | A test reaches the library through its API only, as a sketch does: no `friend`, no `#define private public`, no header of `internal` unless the test is of `internal`. | Review |
 

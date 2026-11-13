@@ -8,7 +8,7 @@
 # only if a project made from it passes; this is that check, for a person and for CI alike.
 #
 # Usage:
-#   tests/check.sh [--keep] [--targets] [--no-arduino] [CHECK...]
+#   tests/check.sh [--keep] [--targets] [--no-arduino | --firmware] [CHECK...]
 #
 # CHECK is a target of the project's Makefile, as lint, tests, clang, tidy, headers or
 # self-check; all of what `make check` runs if none is given. With --keep the project is left in
@@ -17,7 +17,10 @@
 # core, so that it costs no download, and each run in simavr. With --no-arduino the project is
 # a library of CMake alone (arduino=false): built by avr-gcc from apt with the template's
 # toolchain file, its examples programs of their own; with --targets as well, for an ATmega328P
-# and an ATmega2560. The folder is named after the project, as cpplint
+# and an ATmega2560, both run in simavr, and an AVR128DA48, which takes the other branch of
+# SelfCheck and is compiled and read but not run. With --firmware the project is a firmware (kind=firmware): src/, test/ and
+# platform/avr/, its image built by CMake as well; with --targets for an ATmega328P and an
+# AVR128DA48, which simavr does not run and a firmware does not need it to. The folder is named after the project, as cpplint
 # takes the header guards from it. The url is the template's, as arduino-lint checks that it
 # answers.
 
@@ -55,15 +58,30 @@ target_settings() {
       ;;
   esac
 }'
-# The same for a project of --no-arduino.
+# The same for a firmware.
+# shellcheck disable=SC2016
+readonly TWO_FIRMWARE_TARGETS='
+TARGETS=(atmega328p avr128da48)
+target_settings() {
+  case "$1" in
+    avr128da48)
+      CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+      ;;
+  esac
+}'
+# The same for a project of --no-arduino, with a third target.
 # shellcheck disable=SC2016
 readonly TWO_CMAKE_TARGETS='
-TARGETS=(atmega328p atmega2560)
+TARGETS=(atmega328p atmega2560 avr128da48)
 target_settings() {
   case "$1" in
     atmega2560)
       CMAKE_DEFINES=(-DAVR_MCU=atmega2560 -DAVR_F_CPU=16000000)
       SIMAVR_MCU="atmega2560"
+      ;;
+    avr128da48)
+      CMAKE_DEFINES=(-DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+      SIMAVR_MCU=""
       ;;
   esac
 }'
@@ -72,13 +90,18 @@ main() {
   local keep=0
   local targets=0
   local arduino=true
+  local kind=library
   while [[ "${1:-}" == --* ]]; do
     case "$1" in
       --keep) keep=1 ;;
       --targets) targets=1 ;;
       --no-arduino) arduino=false ;;
+      --firmware)
+        kind=firmware
+        arduino=false
+        ;;
       *)
-        err "Usage: $0 [--keep] [--targets] [--no-arduino] [CHECK...]"
+        err "Usage: $0 [--keep] [--targets] [--no-arduino | --firmware] [CHECK...]"
         exit 2
         ;;
     esac
@@ -93,6 +116,7 @@ main() {
   mkdir -p "$(dirname "${PROJECT_DIR}")"
   uvx "${COPIER}" copy --quiet --defaults --vcs-ref HEAD \
     --data project_name=Demo \
+    --data "kind=${kind}" \
     --data "arduino=${arduino}" \
     --data "description=A library made from the template, to check it." \
     --data "url=https://github.com/theAndreas/embedded-cpp-template" \
@@ -104,7 +128,9 @@ main() {
   # A project is a repository: the tools list its files with git.
   cd "${PROJECT_DIR}"
   if ((targets)); then
-    if [[ "${arduino}" == true ]]; then
+    if [[ "${kind}" == firmware ]]; then
+      echo "${TWO_FIRMWARE_TARGETS}" >> tools/project.sh
+    elif [[ "${arduino}" == true ]]; then
       echo "${TWO_TARGETS}" >> tools/project.sh
     else
       echo "${TWO_CMAKE_TARGETS}" >> tools/project.sh

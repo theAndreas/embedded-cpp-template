@@ -61,10 +61,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The library in a folder named after it: what git tracks, without the dev container, CI
+      # The project in a folder named after it: what git tracks, without the dev container, CI
       # and the tools, which a user of it does not need. An Arduino library as the Arduino IDE
-      # installs it, one of CMake alone with what add_subdirectory() reads.
-      - name: Pack the library
+      # installs it, one of CMake alone with what add_subdirectory() reads, a firmware with its
+      # platform/ to build it from. Only what there is: git archive fails on a path it lacks.
+      - name: Pack the sources
         run: |
           if [ -f library.properties ]; then
             name=$(sed -n 's/^name=//p' library.properties)
@@ -73,9 +74,14 @@ jobs:
             name=$(sed -n 's/^project(\([A-Za-z0-9]*\).*/\1/p' CMakeLists.txt)
             files=(CMakeLists.txt cmake)
           fi
+          for path in LICENSE README.md src examples platform; do
+            if [ -e "$path" ]; then
+              files+=("$path")
+            fi
+          done
           git archive --format=zip --prefix="${name}/" \
             --output="${name}-${GITHUB_REF_NAME}.zip" HEAD \
-            -- "${files[@]}" LICENSE README.md src examples
+            -- "${files[@]}"
 
       - name: Publish
         env:

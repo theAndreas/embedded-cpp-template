@@ -70,6 +70,14 @@ jobs:
       - name: Make a library of CMake alone for two targets and check it
         run: tests/check.sh --no-arduino --targets tidy cppcheck headers examples self-check
 
+      # A firmware, kind=firmware: every check, and the checks that walk TARGETS for an
+      # ATmega328P and an AVR128DA48, which takes the other branch of platform/avr/main.cpp.
+      - name: Make a firmware and check it
+        run: tests/check.sh --firmware
+
+      - name: Make a firmware for two targets and check it
+        run: tests/check.sh --firmware --targets tidy cppcheck headers examples self-check
+
       # The Arduino library built for two targets, an Uno and a Mega: the checks that walk
       # TARGETS.
       - name: Make a project of two targets and check it

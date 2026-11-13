@@ -24,11 +24,11 @@ _skip_if_exists:
   - /Doxyfile.project
   - /tools/project.mk
 
-# The starting point of a new library, src/, test/ and the examples Basics and SelfCheck: written
-# only by `copier copy`, and only with the answer skeleton. An update leaves them out on both of
-# its sides, so it neither brings back what a project deleted nor merges into what it changed;
-# switching skeleton off on an update would delete them instead. The first entries are copier's
-# defaults, which _exclude replaces.
+# The starting point of a new project, src/, test/, and the examples Basics and SelfCheck of a
+# library or platform/avr/ of a firmware: written only by `copier copy`, and only with the answer
+# skeleton. An update leaves them out on both of its sides, so it neither brings back what a
+# project deleted nor merges into what it changed; switching skeleton off on an update would
+# delete them instead. The first entries are copier's defaults, which _exclude replaces.
 _exclude:
   - copier.yml
   - "~*"
@@ -40,6 +40,7 @@ _exclude:
   - "{% if _copier_operation == 'update' or not skeleton %}/test{% endif %}"
   - "{% if _copier_operation == 'update' or not skeleton %}/examples/Basics{% endif %}"
   - "{% if _copier_operation == 'update' or not skeleton %}/examples/SelfCheck{% endif %}"
+  - "{% if _copier_operation == 'update' or not skeleton %}/platform/avr{% endif %}"
 
 _message_after_copy: |
   {{ project_name }} is ready. In the dev container, or with its tools installed:
@@ -54,7 +55,9 @@ _message_after_copy: |
 
 skeleton:
   type: bool
-  help: Write the starting point of a new library, src/, test/ and the examples; no for a project brought in
+  help: >-
+    Write the starting point of a new project, src/ and test/, and the examples of a library or
+    platform/ of a firmware; no for a project brought in
   default: true
 
 project_name:
@@ -84,18 +87,34 @@ macro_prefix:
     Upper case, as a macro.
     {% endif %}
 
+kind:
+  type: str
+  help: >-
+    What the project delivers: a library, which others build into their programs, with examples;
+    or a firmware, an image of its own for each target, its portable code in src/ and what each
+    target needs beside it in platform/<name>/
+  choices:
+    - library
+    - firmware
+  default: library
+
 arduino:
   type: bool
   help: >-
     An Arduino library: library.properties, the examples as sketches, built by arduino-cli
     against an Arduino core and checked by arduino-lint; no for a library of C++ and CMake
     alone, built by avr-gcc with the toolchain file of cmake/toolchains/
-  default: true
+  default: "{{ kind == 'library' }}"
+  when: "{{ kind == 'library' }}"
+  validator: >-
+    {% if arduino and kind != 'library' %}
+    A firmware is built by CMake, not as an Arduino library: arduino=false.
+    {% endif %}
 
 description:
   type: str
   help: One sentence that says what the library is, for library.properties and the README
-  default: "{{ 'An Arduino library for the AVR.' if arduino else 'A C++ library for the AVR.' }}"
+  default: "{{ 'A firmware for the AVR.' if kind == 'firmware' else 'An Arduino library for the AVR.' if arduino else 'A C++ library for the AVR.' }}"
 
 author:
   type: str
@@ -139,7 +158,7 @@ arduino_core:
 
 mcu:
   type: str
-  help: The AVR the examples are compiled for, as avr-gcc's -mmcu names it
+  help: The AVR the examples or the image are compiled for, as avr-gcc's -mmcu names it
   default: atmega328p
   when: "{{ not arduino }}"
   validator: >-
@@ -156,9 +175,11 @@ f_cpu:
 simavr_mcu:
   type: str
   help: The MCU simavr runs examples/SelfCheck as; empty if simavr cannot run the board
-  default: "{{ 'atmega328p' if arduino else mcu }}"
+  default: "{{ '' if kind == 'firmware' else 'atmega328p' if arduino else mcu }}"
+  when: "{{ kind == 'library' }}"
 
 simavr_frequency:
   type: int
   help: The clock simavr runs it at, in Hz
   default: "{{ 16000000 if arduino else f_cpu }}"
+  when: "{{ kind == 'library' }}"

@@ -128,6 +128,14 @@ target_build() {
   "${BUILD_SYSTEM//-/_}_build" "$@"
 }
 
+# Prints the names of what target_build makes in a variant, one per line: the examples of a
+# library, the image of a firmware.
+# Arguments:
+#   variant: one of VARIANTS
+target_programs() {
+  "${BUILD_SYSTEM//-/_}_programs" "$@"
+}
+
 # Prints the path of the ELF file of an example that target_build made.
 # Arguments:
 #   variant, example
