@@ -77,6 +77,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
 | C-5 | Fixed-width integer types (MISRA C:2012 Dir 4.6, AUTOSAR A3-9-1): no `int`, `unsigned` in `src/`, but `char` for text, `bool`, `size_t`, and what the Arduino core's signatures give, as the `int` of `analogRead()`. `google-runtime-int`, which is on, reports only `short` and `long`. Utl keeps to it already | idea |
 | C-6 | Braced initialization outside the member initializer list (CodingStyle.md T-3): a variable and a data member's default, `auto` as well, with a fix-it where braces keep the meaning | done: `house-braced-var-init` |
+| C-7 | MC/DC, idea I-12 before: each condition of a decision shown to turn its outcome alone, GCC's `-fcondition-coverage` from GCC 14, as gcovr reads it; and `make coverage` fails below every line, branch and condition of `src/`, which TS-4 asked for and only review checked | done, #40 |
 
 ### M5 - A generic embedded library on the ETL
 
@@ -102,7 +103,6 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | I-9 | A `MODULE.bazel` for a project that consumes the library with Bazel, as the ETL ships one beside CMake; the build of our own stays CMake and arduino-cli |
 | I-10 | Fuzzing of what reads bytes or text, as a parser or a protocol: libFuzzer with the sanitizers on the host, a `make fuzz` with a limit of time, the corpus of inputs in the repository; Wordclock's fuzzing (R-4) is the model. Done in E-1 step 3c: `make fuzz`, `add_fuzzers()`, Testing.md TS-24 to TS-27 |
 | I-11 | A build per variant of the configuration: each switch of the library on in one tested build and off in another, all on and all off, so that one configuration cannot hide a break in another |
-| I-12 | Condition coverage for a decision of three conditions or more, each shown to change the outcome alone: GCC's `-fcondition-coverage` from GCC 14, as gcovr reads it |
 | I-13 | clang's `-Wglobal-constructors` and `-Wexit-time-destructors` for CodingStyle M-5, an object of static storage made when compiling and without a destructor; GCC has neither |
 | I-14 | `make tidy` for a change rather than for all: a cache in `build/tidy/` of the files that passed, keyed by a hash of the file preprocessed with its comments (`-E -CC`, so that a header and a `NOLINT` count), its flags, every `.clang-tidy`, the version of clang-tidy and the module, and `tidy.sh`; a list of changed files from git would miss a changed header. CI keeps reading all. Measured in MaxMatrix on 2026-11-12: of 387 s, clang's static analyzer took two minutes per variant of one test file of 2000 lines, the other checks 2 s; clangd is fast as its `FastCheckFilter` leaves the analyzer out. So first a project splits such a file, which #29 then reads on every core; next, if still slow, a `make tidy` without `clang-analyzer-*` for the edit loop, as clangd runs it, the analyzer in `make check` and CI; the cache last |
 

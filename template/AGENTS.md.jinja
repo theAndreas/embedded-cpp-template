@@ -81,8 +81,8 @@ make tests     # GoogleTest on the host
 A change is done when all of these hold, not when it compiles:
 
 - `make check` passes: it is what CI runs, all of it.
-- Every line and branch the change adds is reached by a test: `make coverage` lists the lines
-  missed per file.
+- Every line, branch and condition the change adds is reached by a test: `make coverage` fails
+  otherwise and lists the lines missed per file.
 - What a sketch can use is documented (Documentation.md), and `make docs` passes.
 - The README's table of flash and RAM, if it has one, is what the build measures: after a change
   that moves them, `make examples` and `make sizes FIX=1`.
