@@ -22,6 +22,10 @@ brings it.
   firmware's backends are compiled by their own compilers, and their headers were checked by
   none. A header of `src/` takes its flags from a source of the project's `src/`, no longer from
   any path with `/src/` in it.
+- **A GCC warning or optimisation clang does not know is no error of `make tidy`.** A build that
+  asks GCC for `-Wduplicated-cond`, or ESP-IDF's `-freorder-blocks`, had clang-tidy report each
+  as an error of every file of the target: 373 and 56 on Wordclock. `tools/lib/clang_database.py`
+  passes `-Wno-unknown-warning-option` and `-Wno-ignored-optimization-argument` now.
 
 On the update: nothing; a project that sets no `ColumnLimit` is wrapped at 80 as before, and one
 of one platform is read as before.
