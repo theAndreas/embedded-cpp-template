@@ -36,7 +36,10 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # The part and its clock reach every file, and each function and object its own section, so that
 # the linker drops what nothing calls: a library's function that no example uses costs no flash.
-set(CMAKE_C_FLAGS_INIT "-mmcu=${AVR_MCU} -DF_CPU=${AVR_F_CPU}UL -ffunction-sections -fdata-sections")
+# -fstack-usage -fcallgraph-info=su: each function's frame and calls, beside each object, which
+# tools/avr_stack.py adds up; the code is byte for byte the same without them.
+set(CMAKE_C_FLAGS_INIT "-mmcu=${AVR_MCU} -DF_CPU=${AVR_F_CPU}UL -ffunction-sections -fdata-sections \
+-fstack-usage -fcallgraph-info=su")
 set(CMAKE_CXX_FLAGS_INIT "${CMAKE_C_FLAGS_INIT}")
 set(CMAKE_EXE_LINKER_FLAGS_INIT "-mmcu=${AVR_MCU} -Wl,--gc-sections")
 

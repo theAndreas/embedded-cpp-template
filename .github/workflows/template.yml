@@ -68,7 +68,7 @@ jobs:
         run: tests/check.sh --no-arduino
 
       - name: Make a library of CMake alone for two targets and check it
-        run: tests/check.sh --no-arduino --targets tidy cppcheck headers examples self-check
+        run: tests/check.sh --no-arduino --targets tidy cppcheck headers examples self-check stack
 
       # A firmware, kind=firmware: every check, and the checks that walk TARGETS for an
       # ATmega328P and an AVR128DA48, which takes the other branch of platform/avr/main.cpp.
@@ -76,7 +76,7 @@ jobs:
         run: tests/check.sh --firmware
 
       - name: Make a firmware for two targets and check it
-        run: tests/check.sh --firmware --targets tidy cppcheck headers examples self-check
+        run: tests/check.sh --firmware --targets tidy cppcheck headers examples self-check stack
 
       # The Arduino library built for two targets, an Uno and a Mega: the checks that walk
       # TARGETS.
@@ -88,7 +88,7 @@ jobs:
       - name: Make a project and check it
         run: |
           tests/check.sh --keep lint tests clang sanitize coverage tidy cppcheck headers \
-            docs examples sizes self-check
+            docs examples sizes self-check stack
 
       # What git has of the project, without the .venv the checks made beside it, whose links
       # arduino-lint would report.

@@ -98,6 +98,25 @@ cmake_programs() {
   cat "${dir}/programs.txt"
 }
 
+# Prints the folder CMake compiles a program's objects into, where avr-gcc writes the call graph
+# of each beside it, for tools/avr_stack.py.
+# Arguments:
+#   variant, program
+cmake_graphs() {
+  local dir
+  dir="$(cmake_dir "$1")"
+  echo "${dir}/CMakeFiles/$2.dir"
+}
+
+# Prints the cache entry of a variant's build folder named, empty where it has none.
+# Arguments:
+#   variant, name, as AVR_MCU
+cmake_cache() {
+  local dir
+  dir="$(cmake_dir "$1")"
+  sed -n "s/^$2:[A-Z]*=//p" "${dir}/CMakeCache.txt"
+}
+
 # Prints the path of the ELF file of a program.
 # Arguments:
 #   variant, program

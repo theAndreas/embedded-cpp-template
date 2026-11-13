@@ -33,7 +33,7 @@ PROJECT_CHECKS :=
 # these all the same, as `make help` reads the files in turn.
 -include tools/project.mk
 
-.PHONY: help check lint fmt setup tests clang sanitize coverage examples sizes self-check \
+.PHONY: help check lint fmt setup tests clang sanitize coverage examples sizes self-check stack \
         tidy cppcheck headers docs arduino-lint clean
 
 help: ## This list
@@ -48,7 +48,7 @@ help: ## This list
 check: STRICT := 1
 check: ## What CI runs, all of it
 check: lint arduino-lint tests clang tidy cppcheck headers docs sanitize coverage examples \
-       sizes self-check $(PROJECT_CHECKS)
+       sizes self-check stack $(PROJECT_CHECKS)
 
 lint: ## The checks of seconds: clang-format, cpplint, shellcheck, actionlint, ruff
 	tools/lint.sh
@@ -87,6 +87,10 @@ sizes: ## The table of flash and RAM in README.md against the last make examples
 
 self-check: ## examples/SelfCheck in simavr, for each target and variant
 	tools/self_check.sh
+
+# Where an AVR target is built by CMake: arduino:avr's avr-gcc 7.3 writes no call graph.
+stack: ## The deepest stack of each program against the RAM it leaves, on each AVR target
+	tools/stack.sh
 
 ## Analysers
 

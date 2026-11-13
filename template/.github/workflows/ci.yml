@@ -8,7 +8,8 @@
 #                  of src/ into the job's summary
 #   clang          the same tests by clang, which warns about other things than GCC
 #   examples       SelfCheck in simavr, and every example for every target and variant, without a
-#                  warning; flash and RAM into the job's summary
+#                  warning; flash and RAM into the job's summary; the deepest stack of each on an
+#                  AVR that CMake builds
 #   arduino-lint   the rules of the Arduino Library Manager, for an Arduino library
 #
 # Every job carries a timeout-minutes well above what it takes, for a job that has stopped
@@ -124,6 +125,9 @@ jobs:
 
       - name: The sizes in the README
         run: make sizes
+
+      - name: The deepest stack against the RAM
+        run: make stack
 
   arduino-lint:
     name: arduino-lint
