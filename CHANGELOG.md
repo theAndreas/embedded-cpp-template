@@ -16,6 +16,12 @@ brings it.
   now, and one that none compiles fails, rather than going unread. `HOST_CODE` is read with the
   tests only, and `TIDY_SKIP` in `tools/project.sh` names folders a target of the project's own
   reads, as a backend's tests built by a script of their own.
+- **`make headers` compiles the headers of `platform/` too.** A header of `platform/<name>/` is
+  compiled on its own by each target that compiles a source of that folder, with that source's
+  flags, where it lies under one of their include folders and not in a hidden one, as `.pio/`: a
+  firmware's backends are compiled by their own compilers, and their headers were checked by
+  none. A header of `src/` takes its flags from a source of the project's `src/`, no longer from
+  any path with `/src/` in it.
 
 On the update: nothing; a project that sets no `ColumnLimit` is wrapped at 80 as before, and one
 of one platform is read as before.
