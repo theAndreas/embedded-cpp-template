@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.7.0
 
 `platformio`, the third build system, and a firmware built by it: the first half of E-1's step 4.
 
