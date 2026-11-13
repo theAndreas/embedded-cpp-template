@@ -8,7 +8,9 @@ Each case <name>.h is what clang-format may leave; <name>.expected.h is what --f
 it, and a case without one has to stay as it is. For each, --check fails exactly where --fix
 changes something, and a file --fix has made passes --check and stays as it is under a second
 --fix: tools/lint.sh runs --fix after clang-format on every source, and one that went on
-changing would never pass.
+changing would never pass. And the width is the ColumnLimit of the project's .clang-format: a
+block wrapped at 100 columns passes in a project that sets 100 and is rewrapped in one that sets
+none.
 
 Usage:
   tests/doc_indent.py
@@ -61,12 +63,41 @@ def check_case(case: Path, work: Path) -> list[str]:
     return errors
 
 
+# A brief wrapped at 100 columns, as a project with ColumnLimit: 100 has it.
+WIDE = """/*!
+ * \\brief The letter of the port that carries TCA0's waveform outputs: B, unless the build defines
+ *        another.
+ */
+"""
+
+
+def check_column_limit(work: Path) -> list[str]:
+    """The block passes where .clang-format sets 100 columns, and not where it sets none."""
+    errors = []
+    for limit, wanted in (("ColumnLimit: 100\n", 0), ("", 1)):
+        project = work / f"limit{wanted}"
+        (project / "tools" / "lib").mkdir(parents=True)
+        shutil.copyfile(SCRIPT, project / "tools" / "lib" / "doc_indent.py")
+        (project / ".clang-format").write_text("BasedOnStyle: Google\n" + limit)
+        source = project / "wide.h"
+        source.write_text(WIDE)
+        status = subprocess.run(
+            [sys.executable, str(project / "tools" / "lib" / "doc_indent.py"), "--check",
+             str(source)],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False).returncode
+        if status != wanted:
+            errors.append(f"a block at 100 columns, {limit.strip() or 'no ColumnLimit'}: "
+                          f"--check ended with {status}, not {wanted}")
+    return errors
+
+
 def main() -> int:
     cases = sorted(p for p in CASES.glob("*.h") if not p.name.endswith(".expected.h"))
     errors = []
     with tempfile.TemporaryDirectory() as work:
         for case in cases:
             errors += check_case(case, Path(work))
+        errors += check_column_limit(Path(work))
         if run("--neither", Path(work) / cases[0].name, subprocess.DEVNULL) != 2:
             errors.append("a call without --fix or --check does not end with 2")
     for error in errors:
