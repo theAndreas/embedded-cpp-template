@@ -5,6 +5,25 @@ brings it.
 
 ## Unreleased
 
+`make coverage` fails unless the tests reach every line, branch and condition of `src/` (C-7, idea
+I-12 before).
+
+- **Conditions, MC/DC:** with GCC 14 and later the coverage build adds `-fcondition-coverage`,
+  which shows whether each condition of a decision turns its outcome alone; gcovr counts them
+  beside the lines and branches. Another compiler gets a warning when CMake configures: the
+  conditions are then not checked.
+- **A figure that fails:** TS-4 of `docs/Testing.md` asked for every line and branch, and review
+  checked it; now gcovr fails below 100 % of each. An exclusion stays as it was,
+  `GCOVR_EXCL_LINE: ` and its reason, and `GCOVR_EXCL_BR_LINE: ` takes the conditions of its
+  line along with the branches.
+- **What was missed:** the terminal lists the lines of each file, and of the branches; gcovr
+  names no line for a condition, as it counts one as reached once either of its outcomes is, so
+  the HTML report in `build/coverage/html/` marks those.
+
+On the update: `make coverage`, and so `make check`, fails where the tests miss something they
+missed before without a word. MaxMatrix, measured first, missed 6 lines, 9 branches and 11 of
+394 conditions, and closed them before taking this.
+
 `make fuzz`: fuzzers on libFuzzer, under ASan and UBSan, part of `make check` and of CI (I-10).
 
 - **A fuzzer is `test/fuzz/<name>_fuzz.cpp` or `<Class>Fuzz.cpp`,** defining

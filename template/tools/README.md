@@ -15,7 +15,7 @@ through.
 | `fuzz.sh` | `make fuzz`: every fuzzer of `test/fuzz/` side by side, `FUZZ_SECONDS` each, from the corpus of the last run |
 | `stack.sh` | `make stack`: the deepest stack of each program on each AVR target CMake builds, by `avr_stack.py` |
 | `avr_stack.py` | The deepest stack of one AVR program, from avr-gcc's call graphs and its disassembly, against the RAM it leaves |
-| `coverage.sh` | `make coverage`: the tests with --coverage |
+| `coverage.sh` | `make coverage`: the tests with --coverage, failing on a line, branch or condition of `src/` that no test reaches |
 | `tidy.sh` | `make tidy`: clang-tidy, and each target's compilation database |
 | `cppcheck.sh` | `make cppcheck` |
 | `self_contained_headers.py` | `make headers`: every header compiled on its own |

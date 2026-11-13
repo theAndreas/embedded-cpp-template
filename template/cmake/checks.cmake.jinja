@@ -26,6 +26,15 @@ set(CHECK_WARNINGS -Wall -Wextra -Wconversion -Wsign-conversion -Wshadow)
 set(CHECK_INSTRUMENT)
 if({{ macro_prefix }}_COVERAGE)
   list(APPEND CHECK_INSTRUMENT --coverage)
+  # And whether each condition of a decision alone turns its outcome, MC/DC, which gcovr reads
+  # beside the lines and branches (docs/Testing.md TS-4): GCC from 14. Without it,
+  # tools/coverage.sh checks no condition and would not say so, so the configuration does.
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14)
+    list(APPEND CHECK_INSTRUMENT -fcondition-coverage)
+  else()
+    message(WARNING "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION} measures no condition: "
+                    "tools/coverage.sh checks the lines and branches alone. GCC 14 and later do.")
+  endif()
 endif()
 if({{ macro_prefix }}_SANITIZE)
   list(APPEND CHECK_INSTRUMENT -fsanitize=address,undefined
