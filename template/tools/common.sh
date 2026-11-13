@@ -9,8 +9,9 @@
 # template and is brought up to date with `copier update`; what is the project's goes into
 # tools/project.sh.
 #
-# A target is a board or chip the project is compiled for, by one build system: arduino-cli or
-# cmake, whose functions are in tools/lib/arduino_cli.sh and tools/lib/cmake.sh. A script that
+# A target is a board or chip the project is compiled for, by one build system: arduino-cli,
+# cmake or platformio, whose functions are in tools/lib/arduino_cli.sh, cmake.sh and
+# platformio.sh. A script that
 # works on the targets walks TARGETS and calls select_target() for each, which sets the settings
 # of TARGET_SETTINGS to that target's; a project of one target need not name it. It then calls
 # the target_ functions below, which call those of the target's build system.
@@ -27,6 +28,8 @@ readonly BUILD_DIR="${ROOT_DIR}/build"
   BUILD_SYSTEM="arduino-cli"
   CMAKE_TOOLCHAIN=""
   CMAKE_DEFINES=()
+  PIO_DIR=""
+  PIO_ENV=""
   FQBN="arduino:avr:uno"
   ARDUINO_CORE="arduino:avr"
   ARDUINO_BOARD_URLS=""
@@ -68,8 +71,8 @@ source "${ROOT_DIR}/tools/project.sh"
 # The settings a target may have of its own, through target_settings() in tools/project.sh; what
 # tools/project.sh sets for them is each target's starting point. Kept as declarations, with -g,
 # so that select_target() restores them as globals although it is a function.
-readonly TARGET_SETTINGS=(BUILD_SYSTEM CMAKE_TOOLCHAIN CMAKE_DEFINES FQBN ARDUINO_CORE
-  ARDUINO_BOARD_URLS SIMAVR_MCU SIMAVR_FREQUENCY DATABASE_EXAMPLE SELF_CHECK_EXAMPLE)
+readonly TARGET_SETTINGS=(BUILD_SYSTEM CMAKE_TOOLCHAIN CMAKE_DEFINES PIO_DIR PIO_ENV FQBN
+  ARDUINO_CORE ARDUINO_BOARD_URLS SIMAVR_MCU SIMAVR_FREQUENCY DATABASE_EXAMPLE SELF_CHECK_EXAMPLE)
 PROJECT_SETTINGS="$(declare -p "${TARGET_SETTINGS[@]}" | sed 's/^declare /declare -g /')"
 readonly PROJECT_SETTINGS
 
@@ -77,6 +80,8 @@ readonly PROJECT_SETTINGS
 source "${ROOT_DIR}/tools/lib/arduino_cli.sh"
 # shellcheck source=tools/lib/cmake.sh
 source "${ROOT_DIR}/tools/lib/cmake.sh"
+# shellcheck source=tools/lib/platformio.sh
+source "${ROOT_DIR}/tools/lib/platformio.sh"
 
 err() {
   echo "$*" >&2
@@ -102,17 +107,17 @@ select_target() {
   TARGET="${target}"
   target_settings "${target}"
   case "${BUILD_SYSTEM}" in
-    arduino-cli | cmake) ;;
+    arduino-cli | cmake | platformio) ;;
     *)
       err "Target ${target}: BUILD_SYSTEM=${BUILD_SYSTEM}, which the template does not know;" \
-        "it knows arduino-cli and cmake."
+        "it knows arduino-cli, cmake and platformio."
       return 1
       ;;
   esac
 }
 
 # What a script does to the selected target, each by the functions of its build system,
-# <system>_setup and so on, with - as _: arduino_cli_setup, cmake_setup.
+# <system>_setup and so on, with - as _: arduino_cli_setup, cmake_setup, platformio_setup.
 
 # Installs or checks what building the target needs, as its core or its compiler.
 target_setup() {

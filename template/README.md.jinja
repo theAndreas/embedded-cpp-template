@@ -5,14 +5,15 @@
 {%- if kind == 'firmware' %}
 ## Building
 
-The image for each target of `tools/project.sh` is built by CMake with the toolchain file it
-names, its portable code from `src/` and what the target needs from `platform/<name>/`:
+The image for each target of `tools/project.sh` is built by {% if platformio %}PlatformIO, through
+`platform/avr/platformio.ini`{% else %}CMake with the toolchain file it names{% endif %}, its portable
+code from `src/` and what the target needs from `platform/<name>/`:
 
 ```bash
 make examples    # the image for each target, its flash and RAM as a table
 ```
 
-The image of the first target lies in `build/targets/{{ mcu }}/default/programs/{{ project_name }}.elf`.
+The image of the first target lies in `build/targets/{{ mcu }}/default/{% if platformio %}avr/firmware.elf{% else %}programs/{{ project_name }}.elf{% endif %}`.
 {% else %}
 ## Installing
 {% if arduino %}

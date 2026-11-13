@@ -98,6 +98,14 @@ kind:
     - firmware
   default: library
 
+platformio:
+  type: bool
+  help: >-
+    Build the image with PlatformIO, through platform/avr/platformio.ini, rather than with CMake
+    and the toolchain file; its platform, board and framework are then the platformio.ini's
+  default: false
+  when: "{{ kind == 'firmware' }}"
+
 arduino:
   type: bool
   help: >-

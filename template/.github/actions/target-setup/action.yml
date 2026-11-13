@@ -1,6 +1,8 @@
 # What the targets of tools/project.sh need, for a CI job: arduino-cli at the dev container's
-# version where a target is built by arduino-cli, then `make setup`, which installs each target's
-# core and checks a CMake target's toolchain file. The apt packages a CMake target needs, as
+# version where a target is built by arduino-cli, the Python tools with PlatformIO where one is
+# built by PlatformIO, then `make setup`, which installs each target's core or platform and checks
+# a CMake target's toolchain file. PlatformIO's platforms and toolchains are kept between runs
+# as the cores are, keyed by every platformio.ini. The apt packages a CMake target needs, as
 # gcc-avr, come from .devcontainer/apt-packages.txt through the action apt-install, as in the dev
 # container.
 #
@@ -39,6 +41,17 @@ runs:
         path: ~/.arduino15
         key: arduino-${{ runner.os }}-${{ hashFiles('tools/project.sh') }}
         restore-keys: arduino-${{ runner.os }}-
+
+    - if: contains(steps.read.outputs.systems, 'platformio')
+      uses: ./.github/actions/uv-sync
+
+    - name: Cache PlatformIO's platforms
+      if: contains(steps.read.outputs.systems, 'platformio')
+      uses: actions/cache@v6
+      with:
+        path: ~/.platformio
+        key: platformio-${{ runner.os }}-${{ hashFiles('**/platformio.ini') }}
+        restore-keys: platformio-${{ runner.os }}-
 
     - name: Set up the targets
       shell: bash

@@ -78,6 +78,14 @@ jobs:
       - name: Make a firmware for two targets and check it
         run: tests/check.sh --firmware --targets tidy cppcheck headers examples self-check stack
 
+      # A firmware built by PlatformIO, platformio=true: every check, and with a second target
+      # built by CMake, two build systems in one project.
+      - name: Make a firmware of PlatformIO and check it
+        run: tests/check.sh --platformio
+
+      - name: Make a firmware of PlatformIO and CMake and check it
+        run: tests/check.sh --platformio --targets tidy cppcheck headers examples self-check stack
+
       # The Arduino library built for two targets, an Uno and a Mega: the checks that walk
       # TARGETS.
       - name: Make a project of two targets and check it

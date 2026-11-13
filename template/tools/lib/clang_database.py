@@ -17,7 +17,9 @@ declared in a header it did not read is "infinite", branches whose types it neve
 - a relative include folder is made absolute, as a header known by a relative path escapes the
   HeaderFilterRegex of .clang-tidy;
 - -Wno-unknown-attributes, as clang does not know avr-gcc's __progmem__ and takes such a table
-  as in RAM, which changes nothing clang-tidy checks.
+  as in RAM, which changes nothing clang-tidy checks;
+- a define no source reads, which only a build system passes on, is dropped;
+- each file is named by its whole path, as a build system may name it relative to its own.
 
 Out of Wordclock's tools/cross-clang-tidy.py, which reads the same three kinds of build.
 
@@ -32,6 +34,13 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
+
+# Defines no source reads, which only a build system passes on: PICO_PLATFORM=rp2350-arm-s is the
+# Pico SDK's CMake variable as a macro, an unparenthesised subtraction that
+# bugprone-macro-parentheses reports against every translation unit, with no file to answer in.
+UNREAD_DEFINES = {
+    'PICO_PLATFORM',
+}
 
 GCC_ONLY_FLAGS = {
     '-fcallgraph-info=su',
@@ -94,7 +103,8 @@ def absolute_includes(arguments, directory):
 def clang_arguments(arguments, target, includes):
     """-nostdlibinc rather than -nostdinc: it drops the host's /usr/include and keeps clang's own
     builtin headers, which GCC's include folders rely on for stdarg and the like as clang's do."""
-    kept = [argument for argument in arguments[1:] if argument not in GCC_ONLY_FLAGS]
+    kept = [argument for argument in arguments[1:] if argument not in GCC_ONLY_FLAGS
+            and not (argument.startswith('-D') and argument[2:].split('=')[0] in UNREAD_DEFINES)]
     flags = [flag for directory in includes for flag in ('-isystem', directory)]
     return ([arguments[0], f'--target={target}', '-nostdlibinc', '-nostdinc++'] + flags + kept
             + ['-Wno-unknown-attributes'])
@@ -115,6 +125,9 @@ def main():
         entry['arguments'] = clang_arguments(
             absolute_includes(arguments_of(entry), entry['directory']), target, includes)
         entry.pop('command', None)
+        # By its whole path, as tools/tidy.sh finds a file's entry: PlatformIO names one relative
+        # to its project, as ../../src/Blinker/Blinker.cpp.
+        entry['file'] = os.path.normpath(os.path.join(entry['directory'], entry['file']))
     arguments.output.mkdir(parents=True, exist_ok=True)
     (arguments.output / 'compile_commands.json').write_text(json.dumps(database, indent=1))
     return 0
