@@ -77,7 +77,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
 | C-5 | Fixed-width integer types (MISRA C:2012 Dir 4.6, AUTOSAR A3-9-1): no `int`, `unsigned` in `src/`, but `char` for text, `bool`, `size_t`, and what the Arduino core's signatures give, as the `int` of `analogRead()`. `google-runtime-int`, which is on, reports only `short` and `long`. Utl keeps to it already | idea |
 | C-6 | Braced initialization outside the member initializer list (CodingStyle.md T-3): a variable and a data member's default, `auto` as well, with a fix-it where braces keep the meaning | done: `house-braced-var-init` |
-| C-7 | MC/DC, idea I-12 before: each condition of a decision shown to turn its outcome alone, GCC's `-fcondition-coverage` from GCC 14, as gcovr reads it; and `make coverage` fails below every line, branch and condition of `src/`, which TS-4 asked for and only review checked | done |
+| C-7 | MC/DC, idea I-12 before: each condition of a decision shown to turn its outcome alone, GCC's `-fcondition-coverage` from GCC 14, as gcovr reads it; and `make coverage` fails below every line, branch and condition of `src/`, which TS-4 asked for and only review checked | done, #40 |
 
 ### M5 - A generic embedded library on the ETL
 
