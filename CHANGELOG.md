@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.7.5
 
 - **`make lint` reads every shell script with shellcheck,** not those of `tools/` alone:
   `.devcontainer/llvm-headers.sh` failed the SC2312 that `.shellcheckrc` turns on, and nothing
