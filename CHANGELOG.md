@@ -13,6 +13,11 @@ brings it.
   `tools/cppcheck.sh`, as include folders, a `--suppressions-list` or a later `--std`. A firmware
   made from the template gives `--std=c++17` there, as it is compiled as gnu++17 and cppcheck read
   it as C++11.
+- **A build of PlatformIO fails on the project's own warnings, not on a library's.** It was
+  given `-Werror` on the project's sources, which a header of a library or of the framework
+  that such a source includes failed as well: Wordclock's RP2350 on `ESPAsyncWebServer`. The log
+  is read for warnings in the project's own files instead, those of a hidden folder as `.pio/`
+  not among them.
 
 On the update: nothing; a firmware made before may add the `--std=c++17` of a new one.
 
