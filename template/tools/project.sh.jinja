@@ -46,6 +46,9 @@
 #
 #   target_settings TARGET  sets what differs for a target, as its FQBN; TARGET is set as well
 #   variant_flags VARIANT   prints the compiler flags of a variant, one per line
+#   cppcheck_flags          prints further flags of cppcheck, one per line, after those of
+#                           tools/cppcheck.sh: an include folder, a --suppressions-list, a later
+#                           --std
 #   prepare                 builds what compiling needs beyond the core, such as a plugin
 #   check_elf VARIANT ELF   fails if a compiled example is wrong in a way no warning says
 #   coverage_suites         runs the project's tests that CMakeLists.txt does not build, with
@@ -139,3 +142,10 @@ SIMAVR_FREQUENCY="{{ simavr_frequency }}"
 #   }
 VARIANTS=(default)
 TIDY_VARIANTS=(default)
+{%- if kind == 'firmware' %}
+
+# A firmware is gnu++17, as CMakeLists.txt compiles it; cppcheck reads C++11 unless told.
+cppcheck_flags() {
+  echo "--std=c++17"
+}
+{%- endif %}
