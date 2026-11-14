@@ -1,0 +1,34 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+//
+// Fuzzes Blinker with any period and any time: a whole period later, below
+// the overflow of the clock, the light is as it was. libFuzzer's input is cut
+// into the period, two bytes, and the time, four.
+
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+
+#include "Blinker/Blinker.h"
+
+extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size) {
+  uint16_t period_ms{0};
+  uint32_t now_ms{0};
+  if (size < sizeof period_ms + sizeof now_ms) {
+    return 0;
+  }
+  std::memcpy(&period_ms, data, sizeof period_ms);
+  std::memcpy(&now_ms, data + sizeof period_ms, sizeof now_ms);
+  // An odd period blinks in halves one millisecond short of it: whole periods
+  // of the halves, two of them, are what repeats.
+  uint32_t const repeat{2u * (period_ms / 2u)};
+  if ((repeat == 0u) || (now_ms > UINT32_MAX - repeat)) {
+    return 0;
+  }
+  Blinker const blinker{period_ms};
+  if (blinker.IsOnAt(now_ms) != blinker.IsOnAt(now_ms + repeat)) {
+    std::abort();
+  }
+  return 0;
+}

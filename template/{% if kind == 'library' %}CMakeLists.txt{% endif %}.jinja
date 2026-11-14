@@ -1,0 +1,137 @@
+# Copyright {{ copyright_year }} {{ author }}
+# SPDX-License-Identifier: {{ license }}
+#
+{%- if arduino %}
+# The tests on the host: the library against a mock of the Arduino core, on GoogleTest. The
+# library is built as gnu++11, as avr-gcc builds it for Arduino; only the tests are C++17,
+# which GoogleTest needs. The warnings and the presets' instrumentation come from
+# cmake/checks.cmake.
+{%- else %}
+# The tests on the host, on GoogleTest, and the library and its examples for a target. The
+# library is built as gnu++11, as avr-gcc builds it; only the tests are C++17, which GoogleTest
+# needs. The warnings and the presets' instrumentation come from cmake/checks.cmake.
+#
+# A build for a target is one with a toolchain file, as tools/ configure it for a target of
+# tools/project.sh with BUILD_SYSTEM=cmake: every example of examples/<Name>/<Name>.cpp becomes
+# <Name>.elf in programs/ of the build, with the library compiled into it, and programs.txt there
+# names them for tools/lib/cmake.sh.
+{%- endif %}
+#
+#   cmake --workflow --preset default    # the tests
+#   cmake --workflow --preset sanitize   # under ASan and UBSan
+#   tools/coverage.sh                    # the tests, and what they reach
+
+cmake_minimum_required(VERSION 3.25)
+{%- if arduino %}
+project({{ project_name }} LANGUAGES CXX)
+{%- else %}
+# The version a release is tagged with: release.yml compares the tag with it.
+project({{ project_name }} VERSION 0.1.0 LANGUAGES CXX)
+{%- endif %}
+enable_testing()
+# For clangd, which reads it through .clangd.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(cmake/checks.cmake)
+
+# Recursive, as a module has a folder of its own (docs/CodingStyle.md F-12). A test is named as
+# the class it tests and Test, or a family of functions and _test (Testing.md TS-5); the mock
+# and the cases of what must not compile are no tests of their own.
+file(GLOB_RECURSE library_sources CONFIGURE_DEPENDS src/{{ namespace }}/*.cpp)
+{%- if not arduino %}
+
+if(CMAKE_CROSSCOMPILING)
+  # The flags of the variant tools/ build, as variant_flags() of tools/project.sh prints them, on
+  # every file: the library's, as its switches are what a variant changes.
+  set(VARIANT_FLAGS "" CACHE STRING "The flags of a variant, as variant_flags() prints them")
+  separate_arguments(variant_flags UNIX_COMMAND "${VARIANT_FLAGS}")
+  add_compile_options(${variant_flags})
+
+  # Each folder of examples/, not its files, as .clang-tidy and CPPLINT.cfg lie there as well.
+  file(GLOB examples LIST_DIRECTORIES true CONFIGURE_DEPENDS examples/*)
+  set(programs "")
+  foreach(dir IN LISTS examples)
+    if(NOT IS_DIRECTORY ${dir})
+      continue()
+    endif()
+    get_filename_component(name ${dir} NAME)
+    string(APPEND programs "${name}\n")
+    add_executable(${name} ${dir}/${name}.cpp ${library_sources})
+    target_include_directories(${name} PRIVATE src)
+    target_compile_options(${name} PRIVATE -std=gnu++11 ${CHECK_WARNINGS})
+    # .elf here rather than as CMAKE_EXECUTABLE_SUFFIX in the toolchain file, which CMake's
+    # platform file Generic sets back to nothing.
+    set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/programs
+                                             SUFFIX .elf)
+  endforeach()
+  file(WRITE ${CMAKE_BINARY_DIR}/programs.txt "${programs}")
+  return()
+endif()
+{%- endif %}
+
+find_package(GTest REQUIRED)
+include(GoogleTest)
+file(GLOB_RECURSE test_sources CONFIGURE_DEPENDS test/*Test.cpp test/*_test.cpp)
+list(FILTER test_sources EXCLUDE REGEX "/test/(mock|compile_fail|compile_warn|fuzz)/")
+
+# One library and one test program per variant: a switch that changes what is compiled makes
+# a build of its own. A variant is added with its defines, as add_variant(checked
+# {{ macro_prefix }}_CHECK_ACCESS=1), and in tools/project.sh for the examples.
+function(add_variant name)
+  set(defines ${ARGN})
+
+{%- if arduino %}
+  add_library({{ namespace }}_${name} STATIC ${library_sources} test/mock/Arduino.cpp)
+  target_include_directories({{ namespace }}_${name} PUBLIC src test/mock)
+  target_compile_definitions({{ namespace }}_${name} PUBLIC ${defines})
+  target_compile_options({{ namespace }}_${name} PRIVATE -std=gnu++11 ${CHECK_WARNINGS}
+                                                  ${CHECK_INSTRUMENT})
+  target_link_options({{ namespace }}_${name} PUBLIC ${CHECK_INSTRUMENT})
+{%- else %}
+  # An INTERFACE library while there is no source, as a library of templates has none: what it
+  # has is then compiled in the tests alone.
+  if(library_sources)
+    add_library({{ namespace }}_${name} STATIC ${library_sources})
+    target_compile_options({{ namespace }}_${name} PRIVATE -std=gnu++11 ${CHECK_WARNINGS}
+                                                    ${CHECK_INSTRUMENT})
+    set(scope PUBLIC)
+  else()
+    add_library({{ namespace }}_${name} INTERFACE)
+    set(scope INTERFACE)
+  endif()
+  target_include_directories({{ namespace }}_${name} ${scope} src)
+  target_compile_definitions({{ namespace }}_${name} ${scope} ${defines})
+  target_link_options({{ namespace }}_${name} ${scope} ${CHECK_INSTRUMENT})
+{%- endif %}
+
+  add_executable({{ namespace }}_test_${name} ${test_sources})
+  target_compile_features({{ namespace }}_test_${name} PRIVATE cxx_std_17)
+  # The root, so that a test includes its helpers as "test/...", as Google wants an include
+  # to name the directory.
+  target_include_directories({{ namespace }}_test_${name} PRIVATE ${CMAKE_SOURCE_DIR})
+  target_compile_options({{ namespace }}_test_${name} PRIVATE ${CHECK_WARNINGS}
+                                                       ${CHECK_INSTRUMENT})
+  target_link_libraries({{ namespace }}_test_${name} PRIVATE {{ namespace }}_${name}
+                                                      GTest::gtest_main)
+  gtest_discover_tests({{ namespace }}_test_${name} TEST_PREFIX ${name}/)
+endfunction()
+
+add_variant(default)
+
+# The fuzzers of test/fuzz/, against the library of the default variant, where the preset fuzz
+# turns {{ macro_prefix }}_FUZZ on.
+add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY {{ namespace }}_default)
+
+add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARD gnu++11
+{%- if arduino %}
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test/mock)
+{%- else %}
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src)
+{%- endif %}
+# In gnu++11, as a sketch is built, and in C++17, as the tests are.
+add_compile_warn_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_warn STANDARDS gnu++11 c++17
+{%- if arduino %}
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test/mock)
+{%- else %}
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src)
+{%- endif %}

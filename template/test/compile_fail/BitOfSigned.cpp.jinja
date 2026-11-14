@@ -8,6 +8,6 @@
 
 #include <stdint.h>
 
-#include "{{ namespace }}/Bit.h"
+#include "{% if kind == 'library' %}{{ namespace }}{% else %}Utility{% endif %}/Bit.h"
 
-int8_t Case() { return {{ namespace }}::Bit<int8_t>{}.value(); }
+int8_t Case() { return {% if kind == 'library' %}{{ namespace }}::{% endif %}Bit<int8_t>{}.value(); }

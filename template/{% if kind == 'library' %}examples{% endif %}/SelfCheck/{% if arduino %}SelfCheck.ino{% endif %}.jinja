@@ -41,7 +41,7 @@ void setup() {
 
   // Where the AVR differs from the host: an int of 16 bits, which the mask of
   // a uint16_t's top bit must not be shifted in, and a register as a target.
-  uint16_t const volatile top{0x8000U};
+  uint16_t const volatile top{0x8000u};
   Check(Bit<uint16_t>::ReadBit(top, 15), F("Bit reads the top bit of 16"));
   GPIOR0 = 0x81;
   Bit<uint8_t>::SetBits(GPIOR0, 0x0C);

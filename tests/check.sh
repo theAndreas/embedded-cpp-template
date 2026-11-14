@@ -8,11 +8,21 @@
 # only if a project made from it passes; this is that check, for a person and for CI alike.
 #
 # Usage:
-#   tests/check.sh [--keep] [CHECK...]
+#   tests/check.sh [--keep] [--targets] [--no-arduino | --firmware | --platformio] [CHECK...]
 #
 # CHECK is a target of the project's Makefile, as lint, tests, clang, tidy, headers or
 # self-check; all of what `make check` runs if none is given. With --keep the project is left in
-# build/Demo for a look, else it is removed. The folder is named after the project, as cpplint
+# build/Demo for a look, else it is removed. With --targets the project is built for two targets
+# rather than one, an Uno and a Mega, as tools/project.sh describes a second target: the same
+# core, so that it costs no download, and each run in simavr. With --no-arduino the project is
+# a library of CMake alone (arduino=false): built by avr-gcc from apt with the template's
+# toolchain file, its examples programs of their own; with --targets as well, for an ATmega328P
+# and an ATmega2560, both run in simavr, and an AVR128DA48, which takes the other branch of
+# SelfCheck and is compiled and read but not run. With --firmware the project is a firmware (kind=firmware): src/, test/ and
+# platform/avr/, its image built by CMake as well; with --targets for an ATmega328P and an
+# AVR128DA48, which simavr does not run and a firmware does not need it to. With --platformio the
+# firmware is built by PlatformIO (platformio=true), through platform/avr/platformio.ini; with
+# --targets as well, its AVR128DA48 by CMake, two build systems in one project. The folder is named after the project, as cpplint
 # takes the header guards from it. The url is the template's, as arduino-lint checks that it
 # answers.
 
@@ -21,7 +31,7 @@ set -euo pipefail
 TEMPLATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly TEMPLATE_DIR
 readonly ALL_CHECKS=(lint arduino-lint tests clang sanitize coverage tidy cppcheck headers docs
-  examples sizes self-check)
+  examples sizes self-check stack fuzz)
 # copier from PyPI through uvx, at a fixed version, like the tools of a project.
 readonly COPIER="copier==9.19.1"
 # Global, as the trap that removes it runs after main() has returned.
@@ -32,17 +42,93 @@ err() {
 }
 
 # Runs one check in the project's folder: a target of its Makefile, with warnings as errors, as
-# CI runs it.
+# CI runs it; the fuzzers 10 seconds each, which shows they run, not what they would find.
 run_check() {
-  STRICT=1 make "$1"
+  STRICT=1 FUZZ_SECONDS="${FUZZ_SECONDS:-10}" make "$1"
 }
+
+# What tools/project.sh of the project gets with --targets, after what the template wrote: the
+# text of a function, expanded by the project's shell, not this one.
+# shellcheck disable=SC2016
+readonly TWO_TARGETS='
+TARGETS=(uno mega)
+target_settings() {
+  case "$1" in
+    mega)
+      FQBN="arduino:avr:mega"
+      SIMAVR_MCU="atmega2560"
+      ;;
+  esac
+}'
+# The same for a firmware.
+# shellcheck disable=SC2016
+readonly TWO_FIRMWARE_TARGETS='
+TARGETS=(atmega328p avr128da48)
+target_settings() {
+  case "$1" in
+    avr128da48)
+      CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+      ;;
+  esac
+}'
+# The same for a firmware of --platformio: the second target built by CMake rather than by
+# PlatformIO, as Wordclock builds its AVR, so that one project mixes two build systems.
+# shellcheck disable=SC2016
+readonly MIXED_TARGETS='
+TARGETS=(atmega328p avr128da48)
+target_settings() {
+  case "$1" in
+    avr128da48)
+      BUILD_SYSTEM="cmake"
+      CMAKE_TOOLCHAIN="cmake/toolchains/avr-gcc.cmake"
+      CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+      ;;
+  esac
+}'
+# The same for a project of --no-arduino, with a third target.
+# shellcheck disable=SC2016
+readonly TWO_CMAKE_TARGETS='
+TARGETS=(atmega328p atmega2560 avr128da48)
+target_settings() {
+  case "$1" in
+    atmega2560)
+      CMAKE_DEFINES=(-DAVR_MCU=atmega2560 -DAVR_F_CPU=16000000)
+      SIMAVR_MCU="atmega2560"
+      ;;
+    avr128da48)
+      CMAKE_DEFINES=(-DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+      SIMAVR_MCU=""
+      ;;
+  esac
+}'
 
 main() {
   local keep=0
-  if [[ "${1:-}" == "--keep" ]]; then
-    keep=1
+  local targets=0
+  local arduino=true
+  local kind=library
+  local platformio=false
+  while [[ "${1:-}" == --* ]]; do
+    case "$1" in
+      --keep) keep=1 ;;
+      --targets) targets=1 ;;
+      --no-arduino) arduino=false ;;
+      --firmware)
+        kind=firmware
+        arduino=false
+        ;;
+      --platformio)
+        kind=firmware
+        arduino=false
+        platformio=true
+        ;;
+      *)
+        err "Usage: $0 [--keep] [--targets] [--no-arduino | --firmware | --platformio] [CHECK...]"
+        exit 2
+        ;;
+    esac
     shift
-  fi
+  done
   local checks=("$@")
   if ((${#checks[@]} == 0)); then
     checks=("${ALL_CHECKS[@]}")
@@ -52,6 +138,9 @@ main() {
   mkdir -p "$(dirname "${PROJECT_DIR}")"
   uvx "${COPIER}" copy --quiet --defaults --vcs-ref HEAD \
     --data project_name=Demo \
+    --data "kind=${kind}" \
+    --data "platformio=${platformio}" \
+    --data "arduino=${arduino}" \
     --data "description=A library made from the template, to check it." \
     --data "url=https://github.com/theAndreas/embedded-cpp-template" \
     "${TEMPLATE_DIR}" "${PROJECT_DIR}"
@@ -61,6 +150,17 @@ main() {
 
   # A project is a repository: the tools list its files with git.
   cd "${PROJECT_DIR}"
+  if ((targets)); then
+    if [[ "${platformio}" == true ]]; then
+      echo "${MIXED_TARGETS}" >> tools/project.sh
+    elif [[ "${kind}" == firmware ]]; then
+      echo "${TWO_FIRMWARE_TARGETS}" >> tools/project.sh
+    elif [[ "${arduino}" == true ]]; then
+      echo "${TWO_TARGETS}" >> tools/project.sh
+    else
+      echo "${TWO_CMAKE_TARGETS}" >> tools/project.sh
+    fi
+  fi
   git init --quiet
   git add --all
   git -c user.name=template -c user.email=template@localhost commit --quiet \

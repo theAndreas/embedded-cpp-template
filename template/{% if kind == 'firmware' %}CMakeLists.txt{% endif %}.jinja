@@ -1,0 +1,104 @@
+# Copyright {{ copyright_year }} {{ author }}
+# SPDX-License-Identifier: {{ license }}
+#
+# The tests on the host, on GoogleTest, and the image for a target. The code of src/ is built for
+# both: on the host into a library the tests link, for a target with platform/<PLATFORM>/ into
+# the image. gnu++17, which avr-gcc 14 knows, as a firmware is built only by compilers it names;
+# a library keeps C++11 for its users'. The warnings and the presets' instrumentation come from
+# cmake/checks.cmake.
+#
+# A build for a target is one with a toolchain file, as tools/ configure it for a target of
+# tools/project.sh with BUILD_SYSTEM=cmake, PLATFORM among its CMAKE_DEFINES: the image becomes
+# {{ project_name }}.elf in programs/ of the build, and programs.txt there names it for
+# tools/lib/cmake.sh.
+#
+#   cmake --workflow --preset default    # the tests
+#   cmake --workflow --preset sanitize   # under ASan and UBSan
+#   tools/coverage.sh                    # the tests, and what they reach
+
+cmake_minimum_required(VERSION 3.25)
+# The version a release is tagged with: release.yml compares the tag with it.
+project({{ project_name }} VERSION 0.1.0 LANGUAGES CXX)
+enable_testing()
+# For clangd, which reads it through .clangd.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+include(cmake/checks.cmake)
+
+# Recursive, as a module has a folder of its own (docs/CodingStyle.md F-12).
+file(GLOB_RECURSE firmware_sources CONFIGURE_DEPENDS src/*.cpp)
+
+if(CMAKE_CROSSCOMPILING)
+  set(PLATFORM "" CACHE STRING "The folder of platform/ the image is built with")
+  if(PLATFORM STREQUAL "" OR NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/platform/${PLATFORM})
+    message(FATAL_ERROR "PLATFORM names no folder of platform/: '${PLATFORM}'. tools/project.sh "
+                        "gives it in CMAKE_DEFINES, as -DPLATFORM=avr.")
+  endif()
+  # The flags of the variant tools/ build, as variant_flags() of tools/project.sh prints them, on
+  # every file.
+  set(VARIANT_FLAGS "" CACHE STRING "The flags of a variant, as variant_flags() prints them")
+  separate_arguments(variant_flags UNIX_COMMAND "${VARIANT_FLAGS}")
+  add_compile_options(${variant_flags})
+
+  file(GLOB_RECURSE platform_sources CONFIGURE_DEPENDS platform/${PLATFORM}/*.cpp)
+  add_executable({{ project_name }} ${firmware_sources} ${platform_sources})
+  target_include_directories({{ project_name }} PRIVATE src platform/${PLATFORM})
+  target_compile_options({{ project_name }} PRIVATE -std=gnu++17 ${CHECK_WARNINGS})
+  # .elf here rather than as CMAKE_EXECUTABLE_SUFFIX in the toolchain file, which CMake's
+  # platform file Generic sets back to nothing.
+  set_target_properties({{ project_name }} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                                      ${CMAKE_BINARY_DIR}/programs SUFFIX .elf)
+  file(WRITE ${CMAKE_BINARY_DIR}/programs.txt "{{ project_name }}\n")
+  return()
+endif()
+
+find_package(GTest REQUIRED)
+include(GoogleTest)
+
+# A test is named as the class it tests and Test, or a family of functions and _test (Testing.md
+# TS-5); the cases of what must not compile are no tests of their own.
+file(GLOB_RECURSE test_sources CONFIGURE_DEPENDS test/*Test.cpp test/*_test.cpp)
+list(FILTER test_sources EXCLUDE REGEX "/test/(compile_fail|compile_warn|fuzz)/")
+
+# One library of src/ and one test program per variant: a switch that changes what is compiled
+# makes a build of its own. A variant is added with its defines, as add_variant(checked
+# {{ macro_prefix }}_CHECK=1), and in tools/project.sh for the image.
+function(add_variant name)
+  set(defines ${ARGN})
+
+  # An INTERFACE library while src/ has no source, as before its first module.
+  if(firmware_sources)
+    add_library({{ namespace }}_${name} STATIC ${firmware_sources})
+    target_compile_options({{ namespace }}_${name} PRIVATE -std=gnu++17 ${CHECK_WARNINGS}
+                                                    ${CHECK_INSTRUMENT})
+    set(scope PUBLIC)
+  else()
+    add_library({{ namespace }}_${name} INTERFACE)
+    set(scope INTERFACE)
+  endif()
+  target_include_directories({{ namespace }}_${name} ${scope} src)
+  target_compile_definitions({{ namespace }}_${name} ${scope} ${defines})
+  target_link_options({{ namespace }}_${name} ${scope} ${CHECK_INSTRUMENT})
+
+  add_executable({{ namespace }}_test_${name} ${test_sources})
+  target_compile_features({{ namespace }}_test_${name} PRIVATE cxx_std_17)
+  # The root, so that a test includes its helpers as "test/...", as Google wants an include
+  # to name the directory.
+  target_include_directories({{ namespace }}_test_${name} PRIVATE ${CMAKE_SOURCE_DIR})
+  target_compile_options({{ namespace }}_test_${name} PRIVATE ${CHECK_WARNINGS}
+                                                       ${CHECK_INSTRUMENT})
+  target_link_libraries({{ namespace }}_test_${name} PRIVATE {{ namespace }}_${name}
+                                                      GTest::gtest_main)
+  gtest_discover_tests({{ namespace }}_test_${name} TEST_PREFIX ${name}/)
+endfunction()
+
+add_variant(default)
+
+# The fuzzers of test/fuzz/, against the library of the default variant, where the preset fuzz
+# turns {{ macro_prefix }}_FUZZ on.
+add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY {{ namespace }}_default)
+
+add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARD gnu++17
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src)
+add_compile_warn_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_warn STANDARDS gnu++17
+                       INCLUDES ${CMAKE_SOURCE_DIR}/src)

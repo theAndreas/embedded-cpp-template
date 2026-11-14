@@ -1,0 +1,137 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+//
+// Checks the library on the board, or in simavr through tools/self_check.sh,
+// and prints one line per check and the number of checks that failed on the
+// first UART. SelfCheck.expected is what a correct run prints; a variant that
+// prints otherwise has a SelfCheck.<variant>.expected.
+
+#include <{{ project_name }}.h>
+#include <avr/interrupt.h>
+#include <avr/io.h>
+#include <stdint.h>
+
+#ifdef UDR0
+// sleep_cpu() ends simavr, which runs a classic AVR only.
+#include <avr/sleep.h>
+#endif
+
+using {{ namespace }}::Clamp;
+
+// The registers' bits, through the library's class (CodingStyle H-9).
+using Bits = {{ namespace }}::Bit<uint8_t>;
+
+namespace {
+
+constexpr uint32_t kBaud{115200};
+
+uint8_t failed{0};
+
+#ifdef UDR0
+// The USART of a classic AVR, as the ATmega328P's, which simavr runs: double
+// speed, as 115200 baud at 16 MHz is far off without it.
+void Begin() {
+  UCSR0A = Bits::ToMask(U2X0);
+  UBRR0 = static_cast<uint16_t>((F_CPU / 8u / kBaud) - 1u);
+  UCSR0B = Bits::ToMask(TXEN0);
+}
+
+void Put(char character) {
+  while (!Bits::ReadBit(UCSR0A, UDRE0)) {
+  }
+  // Cleared by writing it one, before the last byte, so that End() waits for
+  // the last byte rather than for one before it.
+  Bits::SetBits(UCSR0A, Bits::ToMask(TXC0));
+  UDR0 = static_cast<uint8_t>(character);
+}
+
+// Waits for the last byte, then sleeps with interrupts off, which ends simavr;
+// on a board it just stops.
+void End() {
+  while (!Bits::ReadBit(UCSR0A, TXC0)) {
+  }
+  cli();
+  sleep_cpu();
+}
+#elif defined(USART0_TXDATAL)
+// The USART of an AVR of the megaAVR 0 series or the Dx series, whose BAUD
+// counts in 64ths of a bit.
+void Begin() {
+  // USART0_BAUD rather than USART0.BAUD, which avr-libc declares as a union of
+  // the word and its bytes.
+  USART0_BAUD = static_cast<uint16_t>(4u * F_CPU / kBaud);
+  USART0.CTRLB = USART_TXEN_bm;
+}
+
+void Put(char character) {
+  while (Bits::ReadBitGroup(USART0.STATUS, USART_DREIF_bm) == 0u) {
+  }
+  USART0.STATUS = USART_TXCIF_bm;
+  USART0.TXDATAL = static_cast<uint8_t>(character);
+}
+
+// Waits for the last byte, then stops, as simavr does not run the part.
+[[noreturn]] void End() {
+  while (Bits::ReadBitGroup(USART0.STATUS, USART_TXCIF_bm) == 0u) {
+  }
+  cli();
+  for (;;) {
+  }
+}
+#else
+// Give it a Begin(), Put() and End() for the USART of the part.
+#error "SelfCheck knows no USART of this part."
+#endif
+
+void Print(char const* text) {
+  // A C string, which without a standard library has no other way to be walked.
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+  for (char const* next{text}; *next != '\0'; ++next) {
+    Put(*next);
+  }
+}
+
+// Prints a text and the end of a line, CR LF as a terminal expects.
+void PrintLine(char const* text) {
+  Print(text);
+  Print("\r\n");
+}
+
+// Prints "pass" or "FAIL" and what was checked, and counts a failure.
+void Check(bool passed, char const* what) {
+  if (!passed) {
+    ++failed;
+  }
+  Print(passed ? "pass " : "FAIL ");
+  PrintLine(what);
+}
+
+}  // namespace
+
+int main() {
+  Begin();
+
+  // volatile, so that the checks run on the board rather than in the compiler.
+  int16_t const volatile value{42};
+  int16_t const volatile negative{-42};
+  Check(Clamp<int16_t>(value, 0, 10) == 10, "Clamp limits a value above");
+  Check(Clamp<int16_t>(negative, 0, 10) == 0, "Clamp limits a value below");
+  Check(Clamp<int16_t>(value, 0, 100) == 42, "Clamp keeps a value in range");
+
+  // Where the AVR differs from the host: an int of 16 bits, which the mask of
+  // a uint16_t's top bit must not be shifted in, and a register as a target.
+  uint16_t const volatile top{0x8000u};
+  Check({{ namespace }}::Bit<uint16_t>::ReadBit(top, 15),
+        "Bit reads the top bit of 16");
+  GPIOR0 = 0x81;
+  Bits::SetBits(GPIOR0, 0x0C);
+  bool const set{GPIOR0 == 0x8D};
+  Bits::ClearBits(GPIOR0, 0x81);
+  Check(set && GPIOR0 == 0x0C, "Bit sets and clears bits of a register");
+
+  // Fewer than ten checks, so one digit says how many failed.
+  Print("failed: ");
+  Put(static_cast<char>('0' + failed));
+  PrintLine("");
+  End();
+}

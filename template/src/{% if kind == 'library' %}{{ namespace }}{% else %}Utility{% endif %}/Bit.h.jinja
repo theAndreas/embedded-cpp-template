@@ -1,3 +1,5 @@
+{%- set bit_dir = namespace if kind == 'library' else 'Utility' -%}
+{%- set bit_ns = namespace ~ '::' if kind == 'library' else '' -%}
 // Copyright {{ copyright_year }} {{ author }}
 // SPDX-License-Identifier: {{ license }}
 
@@ -13,14 +15,14 @@
  * format, goes through the static functions: `Bit<uint8_t>::ReadBit(value, 3)`.
  */
 
-#ifndef {{ project_name|upper }}_SRC_{{ namespace|upper }}_BIT_H_
-#define {{ project_name|upper }}_SRC_{{ namespace|upper }}_BIT_H_
+#ifndef {{ project_name|upper }}_SRC_{{ bit_dir|upper }}_BIT_H_
+#define {{ project_name|upper }}_SRC_{{ bit_dir|upper }}_BIT_H_
 
 #include <stdint.h>
 
-namespace {{ namespace }} {
+{% if kind == 'library' %}namespace {{ namespace }} {
 
-/*!
+{% endif %}/*!
  * \brief An unsigned integer read and written bit by bit, kept as a value or
  *        passed through the static functions.
  *
@@ -35,13 +37,13 @@ namespace {{ namespace }} {
  * datasheet gives a field.
  *
  * \code{.cpp}
- * {{ namespace }}::Bit<uint8_t> row;
+ * {{ bit_ns }}Bit<uint8_t> row;
  * row[3] = true;  // row.value() is 0x08
  *
  * // Bits 4 and 5 of a byte read from a sensor, as 0 to 3.
- * uint8_t const mode{ {{- namespace }}::Bit<uint8_t>::ReadBitGroup(reading, 0x03, 4)};
+ * uint8_t const mode{ {{- bit_ns }}Bit<uint8_t>::ReadBitGroup(reading, 0x03, 4)};
  *
- * {{ namespace }}::Bit<uint8_t>::SetBits(DDRB, _BV(DDB5));  // pin 13 an output
+ * {{ bit_ns }}Bit<uint8_t>::SetBits(DDRB, _BV(DDB5));  // pin 13 an output
  * \endcode
  *
  * A register is changed in place by SetBits(), ClearBits() and
@@ -184,7 +186,7 @@ class Bit {
    * \return An integer with that bit set and every other bit cleared.
    */
   static constexpr Integer ToMask(uint8_t position) {
-    return static_cast<Integer>(static_cast<ShiftType>(1U) << position);
+    return static_cast<Integer>(static_cast<ShiftType>(1u) << position);
   }
 
   /*!
@@ -205,8 +207,8 @@ class Bit {
    * \return Every bit that is set in one of the masks.
    */
   static constexpr Integer Combine(Integer first, Integer second,
-                                   Integer third = Integer{0U},
-                                   Integer fourth = Integer{0U}) {
+                                   Integer third = Integer{0u},
+                                   Integer fourth = Integer{0u}) {
     return static_cast<Integer>(first | second | third | fourth);
   }
 
@@ -263,7 +265,7 @@ class Bit {
    * \return True if the bit is set.
    */
   static constexpr bool ReadBit(Integer value, uint8_t position) {
-    return ReadBitGroup(value, ToMask(position)) != Integer{0U};
+    return ReadBitGroup(value, ToMask(position)) != Integer{0u};
   }
 
   /*!
@@ -347,7 +349,7 @@ class Bit {
    * unsigned int, unsigned int otherwise. Shifting a uint8_t or a uint16_t
    * as it is would promote it to int, which on the AVR has 16 bits and a sign.
    */
-  using ShiftType = decltype(Integer{} | 0U);
+  using ShiftType = decltype(Integer{} | 0u);
 
   // ~ of an Integer narrower than int is a negative int, so cast back.
   static constexpr Integer Invert(Integer mask) {
@@ -358,9 +360,9 @@ class Bit {
     return static_cast<Integer>(static_cast<ShiftType>(value) >> position);
   }
 
-  Integer value_{0U};
+  Integer value_{0u};
 };
-
+{% if kind == 'library' %}
 }  // namespace {{ namespace }}
-
-#endif  // {{ project_name|upper }}_SRC_{{ namespace|upper }}_BIT_H_
+{% endif %}
+#endif  // {{ project_name|upper }}_SRC_{{ bit_dir|upper }}_BIT_H_

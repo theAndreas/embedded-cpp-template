@@ -9,39 +9,132 @@
 #
 #   NAMESPACE            the library's namespace; tools/docs.sh lets gaps in
 #                        NAMESPACE::internal pass
-#   FQBN                 the board the examples are compiled for
-#   ARDUINO_CORE         the core, pinned, as arduino-cli installs it
-#   ARDUINO_BOARD_URLS   the index of a third-party core, for arduino-cli core update-index
+#   TARGETS              the targets the project is built for, each a name of lower case,
+#                        digits and -, which names its folders of build/; one, board, if not
+#                        set. Each takes the settings below, from BUILD_SYSTEM to
+#                        SELF_CHECK_EXAMPLE, as they are set here, and target_settings()
+#                        changes them for a target
+#   BUILD_SYSTEM         what builds a target: arduino-cli, or cmake with a toolchain file
+#   CMAKE_TOOLCHAIN      for cmake: the toolchain file, as cmake/toolchains/avr-gcc.cmake
+#   CMAKE_DEFINES        for cmake: what the toolchain file is told, as the part and its clock,
+#                        an array of -D options
+#   PIO_DIR              for platformio: the folder of the platformio.ini, as platform/avr
+#   PIO_ENV              for platformio: its environment the target is
+#   FQBN                 for arduino-cli: the board the examples are compiled for
+#   ARDUINO_CORE         for arduino-cli: the core, pinned, as arduino-cli installs it
+#   ARDUINO_BOARD_URLS   for arduino-cli: the index of a third-party core, for update-index
 #   SIMAVR_MCU           what simavr runs examples/SelfCheck as; empty: no run in simavr
 #   SIMAVR_FREQUENCY     its clock, in Hz
-#   DATABASE_EXAMPLE     the example whose compiler flags tools/tidy.sh takes for the rest
+#   DATABASE_EXAMPLE     for arduino-cli: the example whose flags tools/tidy.sh takes for all
 #   SELF_CHECK_EXAMPLE   the example tools/self_check.sh runs
 #   VARIANTS             the builds every example is compiled in, see variant_flags()
 #   TIDY_VARIANTS        the variants clang-tidy and cppcheck read: those whose defines change
-#                        the code. The first is named default: clangd reads its database
+#                        the code. clangd reads the database of the first, on the first target
 #   DOCS_INTERNAL_API    a regex of the files in NAMESPACE::internal that are API after all,
 #                        such as a base a public class takes members from
 #   CPPCHECK             0 if cppcheck cannot parse the library, with the reason; else 1
+#   COVERAGE_MINIMUM     the percentages of lines, branches and conditions of src/ the tests
+#                        have to reach, in that order; 100 100 100 if not set. Lower only for
+#                        a project brought in below them, at what it reaches, and raised as
+#                        it reaches more (Testing.md TS-4)
 #   HOST_CODE            folders of code that runs on the host beside the library, as a
 #                        simulator, built by CMakeLists.txt: tools/lint.sh formats and checks
 #                        them as src/, tools/tidy.sh reads them with the tests
+#   TIDY_SKIP            folders tools/tidy.sh leaves out, as a backend's tests built by a
+#                        script of their own: a target of tools/project.mk reads them with
+#                        clang-tidy and the database that script writes
 #
+#   target_settings TARGET  sets what differs for a target, as its FQBN; TARGET is set as well
 #   variant_flags VARIANT   prints the compiler flags of a variant, one per line
+#   cppcheck_flags          prints further flags of cppcheck, one per line, after those of
+#                           tools/cppcheck.sh: an include folder, a --suppressions-list, a later
+#                           --std
+#   docs_inputs             prints the input folders of each run of Doxygen, one line a run,
+#                           where one run over all would merge classes of the same name, as a
+#                           firmware's backends each have a Pixels; none, one run over INPUT
 #   prepare                 builds what compiling needs beyond the core, such as a plugin
 #   check_elf VARIANT ELF   fails if a compiled example is wrong in a way no warning says
+#   coverage_suites         runs the project's tests that CMakeLists.txt does not build, with
+#                           --coverage, and prints the folders their counts lie in, one per line:
+#                           tools/coverage.sh reads them with the tests', and COVERAGE_MINIMUM is
+#                           what all of them reach together. It removes their counts of an
+#                           earlier run first, as these would add to this one
 
 # shellcheck disable=SC2034  # read by the scripts that source this file
 
+# A second target is a name in TARGETS and what differs for it in target_settings():
+#
+{%- if kind == 'firmware' %}
+#   TARGETS=({{ mcu }} avr128da48)
+#   target_settings() {
+#     case "$1" in
+#       avr128da48)
+#         CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU=avr128da48 -DAVR_F_CPU=24000000)
+#         ;;
+#     esac
+#   }
+{%- elif arduino %}
+#   TARGETS=(uno mega)
+#   target_settings() {
+#     case "$1" in
+#       mega)
+#         FQBN="arduino:avr:mega"
+#         SIMAVR_MCU="atmega2560"
+#         ;;
+#     esac
+#   }
+{%- else %}
+#   TARGETS=({{ mcu }} atmega2560)
+#   target_settings() {
+#     case "$1" in
+#       atmega2560)
+#         CMAKE_DEFINES=(-DAVR_MCU=atmega2560 -DAVR_F_CPU=16000000)
+#         SIMAVR_MCU="atmega2560"
+#         ;;
+#     esac
+#   }
+{%- endif %}
+
 NAMESPACE="{{ namespace }}"
+{%- if arduino %}
 FQBN="{{ fqbn }}"
 ARDUINO_CORE="{{ arduino_core }}"
 ARDUINO_BOARD_URLS=""
+{%- elif platformio %}
+TARGETS=({{ mcu }})
+BUILD_SYSTEM="platformio"
+# The image of platform/avr/platformio.ini's environment avr, whose platform, board and framework
+# it names, pinned.
+PIO_DIR="platform/avr"
+PIO_ENV="avr"
+{%- else %}
+TARGETS=({{ mcu }})
+BUILD_SYSTEM="cmake"
+CMAKE_TOOLCHAIN="cmake/toolchains/avr-gcc.cmake"
+{%- if kind == 'firmware' %}
+# PLATFORM names the folder of platform/ the image is built with, beside src/.
+CMAKE_DEFINES=(-DPLATFORM=avr -DAVR_MCU={{ mcu }} -DAVR_F_CPU={{ f_cpu }})
+{%- else %}
+CMAKE_DEFINES=(-DAVR_MCU={{ mcu }} -DAVR_F_CPU={{ f_cpu }})
+{%- endif %}
+{%- endif %}
+{%- if kind == 'firmware' %}
+# An image runs as long as the part has power; there is no SelfCheck that ends for simavr.
+SIMAVR_MCU=""
+{%- else %}
 SIMAVR_MCU="{{ simavr_mcu }}"
 SIMAVR_FREQUENCY="{{ simavr_frequency }}"
+{%- endif %}
 
+{%- if kind == 'firmware' %}
+# One build of the image, as avr-gcc builds it by default. A variant whose defines take other
+# branches of #if, a switch for checks the firmware makes only on request, is added here and in
+# TIDY_VARIANTS, its flags in variant_flags():
+{%- else %}
 # One build of each example, as avr-gcc builds it by default. A variant whose defines take
 # other branches of #if, a switch for checks the library makes only on request, is added here
 # and in TIDY_VARIANTS, its flags in variant_flags():
+{%- endif %}
 #
 #   VARIANTS=(default checked)
 #   TIDY_VARIANTS=(default checked)
@@ -52,3 +145,10 @@ SIMAVR_FREQUENCY="{{ simavr_frequency }}"
 #   }
 VARIANTS=(default)
 TIDY_VARIANTS=(default)
+{%- if kind == 'firmware' %}
+
+# A firmware is gnu++17, as CMakeLists.txt compiles it; cppcheck reads C++11 unless told.
+cppcheck_flags() {
+  echo "--std=c++17"
+}
+{%- endif %}

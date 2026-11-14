@@ -8,6 +8,7 @@
 
 #include "bitwise_in_bit_class_check.h"
 #include "braced_member_init_check.h"
+#include "braced_var_init_check.h"
 #include "clang-tidy/ClangTidyModule.h"
 #include "no_friend_check.h"
 #include "operator_form_check.h"
@@ -22,6 +23,7 @@ class HouseModule : public clang::tidy::ClangTidyModule {
     factories.registerCheck<BitwiseInBitClassCheck>(
         "house-bitwise-in-bit-class");
     factories.registerCheck<BracedMemberInitCheck>("house-braced-member-init");
+    factories.registerCheck<BracedVarInitCheck>("house-braced-var-init");
     factories.registerCheck<NoFriendCheck>("house-no-friend");
     factories.registerCheck<OperatorFormCheck>("house-operator-form");
   }

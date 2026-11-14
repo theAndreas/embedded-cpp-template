@@ -2,8 +2,21 @@
 
 {{ description }}
 
-## Installing
+{%- if kind == 'firmware' %}
+## Building
 
+The image for each target of `tools/project.sh` is built by {% if platformio %}PlatformIO, through
+`platform/avr/platformio.ini`{% else %}CMake with the toolchain file it names{% endif %}, its portable
+code from `src/` and what the target needs from `platform/<name>/`:
+
+```bash
+make examples    # the image for each target, its flash and RAM as a table
+```
+
+The image of the first target lies in `build/targets/{{ mcu }}/default/{% if platformio %}avr/firmware.elf{% else %}programs/{{ project_name }}.elf{% endif %}`.
+{% else %}
+## Installing
+{% if arduino %}
 Clone it into the `libraries` folder of your sketchbook, under the name `{{ project_name }}`:
 
 ```bash
@@ -24,23 +37,45 @@ void loop() {
   delay(1000);
 }
 ```
+{% else %}
+Its headers lie in `src/`; a program puts that folder on its include path, or takes the library
+with CMake:
 
+```cmake
+add_subdirectory({{ project_name }})
+```
+
+It is built and checked for the `{{ mcu }}` by avr-gcc, without the Arduino core.
+
+## Using it
+
+```cpp
+#include <{{ project_name }}.h>
+#include <stdint.h>
+
+int16_t Limited(int16_t reading) { return {{ namespace }}::Clamp<int16_t>(reading, 100, 900); }
+```
+{% endif %}
 The examples in [examples/](examples) show more; the reference is built from the Doxygen blocks
 of `src/`, see [docs/Documentation.md](docs/Documentation.md).
-
+{% endif %}
 ## Developing
 
 The dev container in [.devcontainer/](.devcontainer/README.md) carries every tool. `make` lists
 every build and check, the same CI runs:
 
 ```bash
+{%- if kind == 'library' and arduino %}
 make setup    # the pinned Arduino core, once
+{%- else %}
+make setup    # checks the toolchain file of each target, once
+{%- endif %}
 make lint     # the checks of seconds; make fmt formats
 make tests    # the tests on the host
 make check    # all of it, warnings as errors, as CI
 ```
 
-A table of the examples' flash and RAM in this README, between the lines `<!-- sizes -->` and
+A table of the {% if kind == 'firmware' %}image's{% else %}examples'{% endif %} flash and RAM in this README, between the lines `<!-- sizes -->` and
 `<!-- /sizes -->`, is checked against the build: `make check` fails where it differs from what
 `make examples` measures, and `make sizes FIX=1` writes the measured table in.
 

@@ -6,8 +6,20 @@ brings it.
 ## Unreleased
 
 Three rules of CodingStyle.md that clang-tidy now checks, by checks of our own: bits through one
-class, no `friend`, and one form per operator.
+class, no `friend`, and one form per operator; and a literal's suffix in lower case.
 
+- **A literal's suffix is `u` and `L`: `192u`, `1000uL`, `1LL`** (CodingStyle T-22).
+  `readability-uppercase-literal-suffix` asked for `192U`, which a hexadecimal value reads on as
+  a digit; `NewSuffixes` keeps the `L` upper case, as MISRA 5.13.5 asks, and turns the `u` to
+  lower case. The template's own code follows.
+
+- **`docs_inputs()` in `tools/project.sh`:** the input folders of each run of Doxygen, one line a
+  run, each into `build/docs/<n>/`, for a firmware whose backends each define a class of the same
+  name, which one run would merge; a warning the runs share counts once. Without it, one run as
+  before (#62).
+- **`make docs` counts warnings, not lines:** one that goes on over lines of its own was counted
+  once per line, and the gaps let pass could come out negative. And with no `NAMESPACE` it no
+  longer speaks of `::internal`.
 - **Bits through one class, H-9:** no `&`, `|`, `^`, `~`, `<<` or `>>` on an integer outside the
   bit class, nor `&=` and its like; `Bit<uint8_t>::SetBits(DDRB, _BV(DDB5))`, not
   `DDRB |= _BV(DDB5)`. The class holds once what such an expression gets wrong: the promotion to
@@ -15,9 +27,10 @@ class, no `friend`, and one form per operator.
   may still be or'ed in a `constexpr`. `house-bitwise-in-bit-class` checks it; it takes any class
   named `Bit` as the bit class, and leaves out the macros of a system header, as avr-libc's
   `_BV()`, and the body of a type's own bitwise operator, as a `byte`'s.
-- **`Bit` in the skeleton:** `src/<namespace>/Bit.h`, Utl's class, with its tests, its cases of
-  what must not compile and two checks in SelfCheck; new is `Combine()`, the mask of up to four
-  masks.
+- **`Bit` in the skeleton:** Utl's class, in `src/<namespace>/Bit.h` of a library and in
+  `src/Utility/Bit.h` of a firmware, with its tests and its cases of what must not compile; new
+  is `Combine()`, the mask of up to four masks. SelfCheck checks it on the AVR, and SelfCheck and
+  the firmware's `platform/avr/main.cpp` write their registers through it.
 - **No `friend`, C-12:** but an operator defined in the class, a hidden friend.
   `house-no-friend` checks it.
 - **One form per operator, C-15:** a member where it changes its operand or is unary, as `+=`,
@@ -33,6 +46,354 @@ of its functions; a project with a bit class of another name sets
 and each operator a member or a hidden friend as C-15 says. A project not ready yet turns a
 check off in `.clang-tidy`, with the reason, until it is (S-3). `src/` stays as it is: the
 skeleton's `Bit.h` comes only with `copier copy`.
+
+And a `U` in a suffix is a finding of `make tidy` now; clang-tidy's `--fix`
+writes it as `u`, or `sed -E 's/\b(0[xX][0-9a-fA-F]+|[0-9]+)U(L{0,2})\b/\1u\2/g'` over the sources.
+
+## v0.7.5
+
+- **`make lint` reads every shell script with shellcheck,** not those of `tools/` alone:
+  `.devcontainer/llvm-headers.sh` failed the SC2312 that `.shellcheckrc` turns on, and nothing
+  noticed until Wordclock's lint, which reads them all. Its last line takes the version into a
+  variable first.
+- **`cppcheck_flags()` in `tools/project.sh`:** further flags of cppcheck, after those of
+  `tools/cppcheck.sh`, as include folders, a `--suppressions-list` or a later `--std`. A firmware
+  made from the template gives `--std=c++17` there, as it is compiled as gnu++17 and cppcheck read
+  it as C++11.
+- **`make stack` reads a firmware linked with `-flto`, and one whose image a subfolder adds.**
+  `cmake_graphs()` takes the call graphs of the link where it finds them beside the ELF,
+  `<program>.elf.ltrans<N>.ltrans.ci` of `-save-temps=obj`, as the frames of the compile are those
+  before LTO inlined across sources; else `CMakeFiles/<program>.dir`, wherever in the build it
+  lies.
+- **A build of PlatformIO fails on the project's own warnings, not on a library's.** It was
+  given `-Werror` on the project's sources, which a header of a library or of the framework
+  that such a source includes failed as well: Wordclock's RP2350 on `ESPAsyncWebServer`. The log
+  is read for warnings in the project's own files instead, those of a hidden folder as `.pio/`
+  not among them.
+
+On the update: nothing; a firmware made before may add the `--std=c++17` of a new one.
+
+## v0.7.4
+
+- **The Doxygen blocks are wrapped to the project's `ColumnLimit`.** `tools/lib/doc_indent.py`
+  rewrapped a command's paragraph to 80 columns whatever `.clang-format` said, and so fought
+  clang-format in a project with a limit of its own: Wordclock's 100 columns turned into 160
+  findings of `make lint` on blocks clang-format had left alone. It reads `ColumnLimit` from
+  `.clang-format` now, 80 where it sets none.
+- **`make tidy` reads a firmware of several platforms.** A target's database holds the sources
+  of its own folder of `platform/`, not the others', and `tools/tidy.sh` failed on the first source
+  of another target's folder. A source of `platform/` is read with the targets that compile it
+  now, and one that none compiles fails, rather than going unread. `HOST_CODE` is read with the
+  tests only, and `TIDY_SKIP` in `tools/project.sh` names folders a target of the project's own
+  reads, as a backend's tests built by a script of their own.
+- **`make headers` compiles the headers of `platform/` too.** A header of `platform/<name>/` is
+  compiled on its own by each target that compiles a source of that folder, with that source's
+  flags, where it lies under one of their include folders and not in a hidden one, as `.pio/`: a
+  firmware's backends are compiled by their own compilers, and their headers were checked by
+  none. A header of `src/` takes its flags from a source of the project's `src/`, no longer from
+  any path with `/src/` in it.
+- **A GCC warning or optimisation clang does not know is no error of `make tidy`.** A build that
+  asks GCC for `-Wduplicated-cond`, or ESP-IDF's `-freorder-blocks`, had clang-tidy report each
+  as an error of every file of the target: 373 and 56 on Wordclock. `tools/lib/clang_database.py`
+  passes `-Wno-unknown-warning-option` and `-Wno-ignored-optimization-argument` now.
+
+On the update: nothing; a project that sets no `ColumnLimit` is wrapped at 80 as before, and one
+of one platform is read as before.
+
+## v0.7.3
+
+- **`coverage_suites()` in `tools/project.sh`:** a project's tests that `CMakeLists.txt` does not
+  build, as a backend's suite compiled by a script of its own, run with `--coverage` and count
+  in `make coverage` with the tests', against `COVERAGE_MINIMUM` together. Wordclock's two host
+  suites reach 4.6 % of its lines that its core tests do not.
+- **`make coverage` keeps the notes of a source outside its `CMakeLists.txt`'s folder.** CMake
+  writes each `..` of such a path as `__`, `__/__/src/Display.cpp.gcno`, and the check for notes
+  whose source is gone took them all for stale: gcov then read counts without notes and failed.
+
+On the update: nothing.
+
+## v0.7.2
+
+- **`COVERAGE_MINIMUM` in `tools/project.sh`:** the percentages of lines, branches and conditions
+  of `src/` that `make coverage` demands, `100 100 100` unless set. For a project brought in below
+  them, as Wordclock is at 94 % of its lines: it states what it reaches and raises it as it
+  reaches more, where the only choice was to leave `make coverage` out of `make check`. A
+  value that is no percentage, or a fourth, fails rather than being read as 0.
+
+On the update: nothing; a project without the setting demands 100 % as before.
+
+## v0.7.1
+
+Four faults of v0.7.0, found on MaxMatrix's update to it.
+
+- **`make fuzz` links in the dev container:** it installs `libclang-rt-dev`, libFuzzer and the
+  sanitizers of clang, which `clang` only recommends; CI passed, as its runner has them already.
+- **`AGENTS.md` has the blank line below its title again,** which v0.7.0 dropped.
+- **`make tidy` no longer warns** `could not open directory 'test/fuzz/'` in a project without
+  fuzzers.
+- **`make arduino-lint` passes with a file deleted and not yet staged,** as after a
+  `copier update` that removes one, where `tar` failed on it.
+
+On the update: rebuild the dev container.
+
+## v0.7.0
+
+`platformio`, the third build system, and a firmware built by it: the first half of E-1's step 4.
+
+- **A target with `BUILD_SYSTEM=platformio`** is the environment `PIO_ENV` of the `platformio.ini`
+  in `PIO_DIR` of `tools/project.sh`; its platform, board and framework, the Arduino core or none,
+  are the `platformio.ini`'s to name and pin. `tools/lib/platformio.sh` builds it with the
+  PlatformIO `uv.lock` pins, and gives it what the tools need in PlatformIO's own variables: the
+  build folder per variant, the variant's flags, and `-Werror` on the project's own sources only,
+  as a framework's warnings are not the project's to fix. The sizes are what pio reports; the
+  database is `pio run -t compiledb`'s, moved out of the sources and rewritten for clang.
+- **PlatformIO 6.2.0 in `pyproject.toml` and `uv.lock`,** pinned, as an unpinned one became 6.2.0
+  under Wordclock without anybody asking. CI's `target-setup` syncs the tools and caches
+  PlatformIO's platforms where a target is built by it.
+- **`platformio`, a question of `copier copy` for a firmware:** yes builds the image through
+  `platform/avr/platformio.ini`, `platformio/atmelavr@5.3.0` without a framework, rather than with
+  CMake; the host tests stay CMake's.
+- **Build systems mix in one project:** `tests/check.sh --platformio --targets` builds the
+  ATmega328P by PlatformIO and the AVR128DA48 by CMake, each read by clang-tidy and its headers
+  compiled by its own compiler. `make stack` adds up the second and says why not the first.
+- `clang_database.py` names each file by its whole path, as PlatformIO names them relative to its
+  project, and drops `PICO_PLATFORM`, a CMake variable of the Pico SDK passed on as a macro.
+- `platform/avr/main.cpp` is free of warnings under avr-gcc 7 as well, which PlatformIO's
+  atmelavr brings, and which warns under `-Wconversion` of `|=` on a register.
+
+On the update: `uv sync` installs PlatformIO into the tools' environment; nothing else changes
+until a target names it.
+
+What the compiler has to warn of is tested as what it must not compile is:
+`add_compile_warn_tests()` in `cmake/checks.cmake`, the cases in `test/compile_warn/`.
+
+- **A case** does what compiles but is a mistake, as dropping a result `_NODISCARD` marks, and
+  names the warning in its line `// Expected: ...`. Its test passes only if the compiler gives
+  that warning, in each standard the call names: the macro may be another attribute in each.
+  The case is compiled to an object with the build's warnings, as GCC reports
+  `warn_unused_result` only when it generates code.
+- **clang-tidy leaves the folder out,** as it does `test/compile_fail/`: a case warns on purpose
+  and is in no database. MaxMatrix had to write its case into the build folder for that.
+- **A new library** gets one case, a dropped `Clamp()`, in gnu++11 and C++17; a firmware the
+  call, in gnu++17, and no case.
+
+On the update: `CMakeLists.txt` is the project's, so a project that wants such tests adds the
+call itself, as the template's `CMakeLists.txt` has it, and puts its cases in
+`test/compile_warn/`.
+
+`_NODISCARD` is `[[nodiscard]]` wherever the compiler has it, chosen by `__has_cpp_attribute`
+rather than by `__cplusplus` (CodingStyle FN-10).
+
+- **Why:** GCC, clang and avr-gcc 7.3 have `[[nodiscard]]` in C++11 already, and GCC's
+  `warn_unused_result`, which the macro was before C++17, made every example of MaxMatrix 10 to
+  30 bytes of flash larger on the Uno; with `[[nodiscard]]` they are as without the marks, to
+  the byte. clang reports the attribute before C++17 only under `-Wpedantic`, which the template
+  does not turn on.
+- **A cast to `void`** now silences the warning on every compiler the template builds with, so
+  none reports one any more; FN-10 keeps `Discard()` all the same, as a cast does not say that
+  the drop is meant, and the macro still falls back to `warn_unused_result` where a compiler
+  lacks the attribute.
+
+On the update: nothing to do; a result dropped through a cast that avr-gcc reported before no
+longer fails, so review looks for one (ROADMAP C-3).
+
+`make coverage` fails unless the tests reach every line, branch and condition of `src/` (C-7, idea
+I-12 before).
+
+- **Conditions, MC/DC:** with GCC 14 and later the coverage build adds `-fcondition-coverage`,
+  which shows whether each condition of a decision turns its outcome alone; gcovr counts them
+  beside the lines and branches. Another compiler gets a warning when CMake configures: the
+  conditions are then not checked.
+- **A figure that fails:** TS-4 of `docs/Testing.md` asked for every line and branch, and review
+  checked it; now gcovr fails below 100 % of each. An exclusion stays as it was,
+  `GCOVR_EXCL_LINE: ` and its reason, and `GCOVR_EXCL_BR_LINE: ` takes the conditions of its
+  line along with the branches.
+- **What was missed:** the terminal lists the lines of each file, and of the branches; gcovr
+  names no line for a condition, as it counts one as reached once either of its outcomes is, so
+  the HTML report in `build/coverage/html/` marks those.
+
+On the update: `make coverage`, and so `make check`, fails where the tests miss something they
+missed before without a word. MaxMatrix, measured first, missed 6 lines, 9 branches and 11 of
+394 conditions, and closed them before taking this.
+
+`make fuzz`: fuzzers on libFuzzer, under ASan and UBSan, part of `make check` and of CI (I-10).
+
+- **A fuzzer is `test/fuzz/<name>_fuzz.cpp` or `<Class>Fuzz.cpp`,** defining
+  `LLVMFuzzerTestOneInput()`. `add_fuzzers()` of `cmake/checks.cmake` builds each against the
+  library of the default variant when `<PREFIX>_FUZZ` is on, which the new preset `fuzz` turns on,
+  by clang into `build/fuzz/`; the library is instrumented as well, as libFuzzer steers by the
+  coverage of what it reaches.
+- **`tools/fuzz.sh` runs them side by side, `FUZZ_SECONDS` each, 60 if not set,** each in a folder
+  of its own below `build/fuzz/work/`, going on from the corpus the last run left, and starting
+  from the seeds in `test/fuzz/corpus/<Name>/`, with `<Name>.dict` and `<Name>.options` beside the
+  source where there are. What failed is named with the file that replays it.
+- **CI:** a job `fuzz` in `static-analysis.yml`, which keeps the corpus between runs and uploads
+  what failed; clang-tidy reads the fuzzers with the database of the preset `fuzz`.
+- **The skeleton has one:** `clamp_fuzz.cpp` for a library, `BlinkerFuzz.cpp` for a firmware, with
+  a `test/fuzz/.clang-tidy` that lets a fuzzer cut its input by offsets. Testing.md has the rules
+  TS-24 to TS-27.
+
+On the update: `make check` runs `make fuzz`, which has nothing to run until the project adds
+`add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY <namespace>_default)` to its
+`CMakeLists.txt`, which the update does not touch, and a fuzzer to `test/fuzz/`, with the
+`.clang-tidy` of the skeleton's beside it.
+
+`make stack`: the deepest stack of every program on an AVR, against the RAM it leaves free (W-11).
+
+- **`tools/avr_stack.py`, out of Wordclock's `avr-stack.py`:** the deepest path from `main()` and
+  the static constructors, plus the deepest interrupt handlers that can be on the stack at once,
+  from the call graphs avr-gcc writes beside each object, and library code by its disassembly;
+  against the part's RAM less `.data` and `.bss`. It refuses recursion, a call through a pointer,
+  a frame of dynamic size and `malloc()`, each of which would make the sum a lower bound.
+- **Made general for any AVR:** a return address of three bytes on a part with more than 128 KiB
+  of flash, as the ATmega2560; one handler at a time on a classic AVR, and a handler that sets
+  the interrupt flag refused, two on the megaAVR 0 and Dx series; the RAM from `RAMSTART` and
+  `RAMEND`, which every part's header defines.
+- **A call into libgcc the graph does not list is counted:** avr-gcc calls its helpers, as
+  `__udivmodsi4` for a division of 32 bits, after it wrote the graph, so each function's own
+  instructions are read for them. Wordclock's tool, which lacks this, comes out one byte short on
+  its own image: 628 bytes against 629, through `__udivmodqi4` below `SetPixel`.
+- **`cmake/toolchains/avr-gcc.cmake` compiles with `-fstack-usage -fcallgraph-info=su`,** which
+  change no byte of the code; `tools/lib/clang_database.py` drops the second for clang.
+- `tools/stack.sh` walks every program of every AVR target CMake builds, in each variant, and
+  says so where there is none: arduino:avr's avr-gcc 7.3 writes no call graph.
+
+On the update: `make check` runs `make stack` as well; for an Arduino library it has nothing to
+add up and says so.
+
+A project can be a firmware: `kind: firmware` makes an image of its own for each target rather
+than a library with examples, the third step of E-1.
+
+- **`kind`, a question of `copier copy`:** library, the default, or firmware. A firmware has its
+  portable code in `src/`, a folder per module, tested on the host, and what each target needs
+  beside it in `platform/<name>/`; `PLATFORM` in `CMAKE_DEFINES` of `tools/project.sh` says
+  which. It is built by CMake with a toolchain file as gnu++17, as `arduino` is a library's
+  question; its skeleton is a module, `Blinker`, its test, and `platform/avr/main.cpp`, which
+  counts milliseconds with a timer of a classic AVR or of the megaAVR 0 and Dx series. No
+  SelfCheck: an image runs as long as the part has power.
+- **What a target builds is named by its build system:** `target_programs` prints the examples
+  of a library or the image of a firmware; CMake writes them into `programs.txt` of its build
+  folder, and the ELF files go into `programs/` rather than `examples/`. The table of sizes is
+  headed `Image` for a firmware, still `Example` for a library.
+- **`platform/` is read as `examples/` is:** formatted and checked by `make lint`, read by
+  clang-tidy with the target's flags and by clangd through `build/tidy/clangd`, with a
+  `.clang-tidy` of its own that lets an interrupt routine share a global and a register take the
+  datasheet's numbers.
+- copier refuses `arduino=true` for a firmware.
+- **The SelfCheck of a library of CMake alone passes clang-tidy on a Dx part:** #37's compiled
+  there, but clang-tidy reported `<avr/sleep.h>`, which clang does not know for a Dx part, a
+  register read through avr-libc's union, and `<avr/sfr_defs.h>` unused. It now sleeps only where
+  simavr runs it, on a classic AVR, writes the flat `USART0_BAUD` and its bits without `_BV`.
+  `tests/check.sh --no-arduino --targets` builds and reads it for an AVR128DA48 as a third target.
+
+On the update: nothing for a library.
+
+A library need not be an Arduino library: `arduino: no` makes one of C++ and CMake alone, built for
+its targets by avr-gcc with a toolchain file, the second step of E-1.
+
+- **`arduino`, a question of `copier copy`:** yes, the default, makes the Arduino library it always
+  made. No makes a library without `library.properties`, without the mock of the core in
+  `test/mock/`, and with its examples as programs, `examples/<Name>/<Name>.cpp` with a `main()`;
+  SelfCheck writes to the first USART itself, of a classic AVR as simavr runs it or of the
+  megaAVR 0 and Dx series. copier then asks for the part and its clock, `mcu` and `f_cpu`, in
+  place of the board and the core.
+- **`cmake`, the second build system:** a target with `BUILD_SYSTEM=cmake` is `CMakeLists.txt`
+  configured with the toolchain file `CMAKE_TOOLCHAIN` and the definitions `CMAKE_DEFINES` of
+  `tools/project.sh`, one build folder per variant, the variant's flags in `VARIANT_FLAGS`, as
+  MinSizeRel and with warnings as errors. Cross-compiled, `CMakeLists.txt` builds each example as
+  `examples/<Name>.elf`, the library compiled into it. The template brings
+  `cmake/toolchains/avr-gcc.cmake`, for avr-gcc and avr-libc from apt, which
+  `.devcontainer/apt-packages.txt` names for such a library.
+- **clang-tidy reads a CMake target as the target:** `tools/lib/clang_database.py`, out of
+  Wordclock's `cross-clang-tidy.py`, rewrites GCC's database for clang, with the target, the
+  compiler's own include folders and without GCC's own flags. `make headers` compiles each header
+  with the target's own compiler, from the database CMake wrote.
+- **What a build system does is a function of its own:** `target_setup`, `target_build`,
+  `target_elf`, `target_sizes` and `target_database` in `tools/common.sh` call those of
+  `tools/lib/arduino_cli.sh` or `tools/lib/cmake.sh`; `make examples` fails as well where a build
+  that passed left no ELF file of an example.
+- **CI follows the build systems:** the action `arduino-setup` is now `target-setup`, which
+  installs arduino-cli only where a target is built by it (`tools/setup.sh --systems`).
+  arduino-lint runs where there is a `library.properties`, and `release.yml` takes the version
+  from `project()` of `CMakeLists.txt` where there is none.
+
+On the update: an Arduino library has nothing to do; its workflows name `target-setup` after the
+update, and `.github/actions/arduino-setup/` goes.
+
+A project is built for one target or several, each with its build system: the first step of E-1,
+which brings CMake and PlatformIO as build systems beside arduino-cli, and firmware beside the
+library.
+
+- **`TARGETS` in `tools/project.sh`:** the targets a project is built for, each with its own
+  board, core and simavr MCU through `target_settings()`, and its `BUILD_SYSTEM`, of which
+  arduino-cli is the first. `make setup`, `examples`, `self-check`, `tidy`, `cppcheck` and
+  `headers` walk them all. A project that names no target has one, `board`, with the settings it
+  always had, and nothing changes for it: its table of sizes keeps its columns, and a target
+  name joins them only where there are two.
+- **The arduino-cli functions in `tools/lib/arduino_cli.sh`:** `compile_example`, `elf_of`,
+  `avr_gcc_bin_dir` and `list_examples` keep their names, so a `check_elf()` that calls them, as
+  Utl's does, works as before; `select_target()` has set FQBN and the rest for the target.
+- **New places in `build/`:** a target's builds in `build/targets/<target>/<variant>/`, its
+  compilation database in `build/tidy/targets/<target>/<variant>/`. clangd reads the examples'
+  through `build/tidy/clangd`, which points to the first target's, and `make headers` takes the
+  list of databases from `build/tidy/databases`.
+- **`tests/check.sh --targets`** makes the project for an Uno and a Mega, one core and both run
+  in simavr, and the template's CI checks it beside the project of one target.
+
+On the update: nothing to do. A script of the project's own that reads `build/<variant>/` or
+`build/tidy/default/` reads the new places; one that sources `tools/common.sh` finds the first
+target selected.
+
+## v0.6.1
+
+- **`house-braced-var-init` leaves a text in a C array alone:** `char const kName[] = "font";`
+  keeps its `=`, as T-20 writes it. v0.6.0 reported it, and its fix-it, `kName[]{"font"}`, was
+  then reported by `modernize-avoid-c-arrays`, whose `AllowStringArrays` lets only the `=` form
+  through.
+
+On the update: a project that took v0.6.0's fix-its for such arrays writes them with `=` again,
+or `make tidy` reports them under `modernize-avoid-c-arrays`.
+
+## v0.6.0
+
+Braced initialization (CodingStyle.md T-3) is checked everywhere, not only in a constructor's
+member initializer list.
+
+- **`house-braced-var-init`, a second check of our own:** a variable or a data member's default
+  written with `=` or parentheses is reported: local, global, `static`, a static data member, the
+  variable of a `for` or of a condition, and with `auto` as well. Where braces keep the meaning,
+  its fix-it writes them: `int count = 0;` becomes `int count{0};`, `Point p = {1, 2};` and
+  `Point p = Point(1, 2);` become `Point p{1, 2};`. It reports without a fix-it where an argument
+  narrows, where the type is a template's parameter, and where `T x = value;` initializes a class
+  with an `explicit` constructor, which braces would consider; and not at all where braces would
+  choose a `std::initializer_list` constructor, or for `auto list = {1, 2};`. A parameter's
+  default, the variable of a range-based `for`, a structured binding and a lambda's capture are
+  left alone. It holds C++11 and C++17 alike, whose trees of the same initialization differ.
+
+On the update: `make tidy` reports every initialization with `=` or parentheses that a project
+has. Most have a fix-it, which `clang-tidy --fix` applies with the module loaded; the rest want
+the conversion written out, or a `NOLINT` naming T-3 and the reason.
+
+## v0.5.2
+
+`make check` takes minutes fewer: the tests run side by side, and clang-tidy reads one file per
+core.
+
+- **The tests run side by side:** the Makefile exports `CTEST_PARALLEL_LEVEL`, the number of
+  cores unless the environment sets it, so that ctest runs as many tests at a time as there are
+  cores, in every target that runs it. A project's tests wait on the clock and on ports as much
+  as on a core: MaxMatrix's 1646 took 10 s rather than 94, each time `make check` runs them. A
+  test that needs something to itself, as a port, says so with `RESOURCE_LOCK`.
+- **clang-tidy reads one file per core:** `tools/tidy.sh` runs it through `run-clang-tidy.py`,
+  which the pinned clang-tidy brings and which prints the findings of a file together. It reads
+  every file of the database it is given, so `tidy.sh` writes one of the files to read alone,
+  in `build/tidy/selected/`, and a file the database lacks still fails rather than going
+  unread. In MaxMatrix, `make tidy` took 387 s rather than 529: the rest was one test file of
+  2000 lines, which clang's static analyzer read for two minutes in each variant. Split into a
+  file per header, as TS-5 asks (MaxMatrix #83), it took 130 s.
+
+On the update: nothing to do, unless the tests of a project share something without saying so,
+as a port or a file: they get a `RESOURCE_LOCK` first, or fail now and then.
 
 ## v0.5.1
 

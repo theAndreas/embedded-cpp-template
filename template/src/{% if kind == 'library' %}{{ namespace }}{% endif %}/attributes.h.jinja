@@ -6,9 +6,9 @@
  * \brief Attributes of a later standard, as macros for every standard, and
  *        Discard() for a result one of them marks.
  *
- * The library is written for C++11 and later. Where a later standard has an
- * attribute, the macro is that attribute; before it, the compiler's own
- * where GCC and clang have one, else nothing.
+ * The library is written for C++11 and later. Where the compiler has an
+ * attribute of a later standard, the macro is that attribute; where not, the
+ * compiler's own where GCC and clang have one, else nothing.
  */
 
 #ifndef {{ project_name|upper }}_SRC_{{ namespace|upper }}_ATTRIBUTES_H_
@@ -22,18 +22,29 @@
  * that drops the result is a warning, and an error in CI.
  *
  * \note For a function only. On a type, as a class whose every result must be
- *       used, `[[nodiscard]]` of C++17 works, GCC's attribute before it does
- *       not.
+ *       used, `[[nodiscard]]` works, GCC's attribute, which the macro falls
+ *       back to, does not.
  */
-// By __cplusplus, not by __has_cpp_attribute: GCC and clang have
-// [[nodiscard]] in C++11 as well, as an extension that -Wpedantic reports.
-#if __cplusplus >= 201703L
+/*
+ * By __has_cpp_attribute, not by __cplusplus: GCC, clang and avr-gcc 7.3 have
+ * [[nodiscard]] in C++11 as well, and GCC's warn_unused_result made every
+ * example of MaxMatrix 10 to 30 bytes of flash larger on the Uno, where
+ * [[nodiscard]] cost nothing. clang reports [[nodiscard]] before C++17 only
+ * under -Wpedantic, which the template does not turn on. Two #if, as a
+ * preprocessor without __has_cpp_attribute cannot read it in a condition.
+ */
+#ifdef __has_cpp_attribute
+#if __has_cpp_attribute(nodiscard)
 #define {{ macro_prefix }}_NODISCARD [[nodiscard]]
-#elif defined(__GNUC__)
+#endif
+#endif
+#ifndef {{ macro_prefix }}_NODISCARD
+#ifdef __GNUC__
 // GCC, avr-gcc and clang, which defines __GNUC__ as well.
 #define {{ macro_prefix }}_NODISCARD __attribute__((warn_unused_result))
 #else
 #define {{ macro_prefix }}_NODISCARD
+#endif
 #endif
 
 namespace {{ namespace }} {
@@ -44,8 +55,9 @@ namespace {{ namespace }} {
  * For a result {{ macro_prefix }}_NODISCARD marks: the call says that it is
  * dropped on purpose, and a comment beside it why:
  * `Discard(Send(frame));  // sent again on the next tick`. Not a cast to
- * `void`: before C++17, GCC's `warn_unused_result` warns through one and clang
- * does not, so a cast that passes on the host fails the build for the target.
+ * `void`, which does not say that the drop is meant: and where the macro is
+ * GCC's `warn_unused_result`, GCC warns through one and clang does not, so a
+ * cast that passes on the host fails the build for the target.
  *
  * \tparam Value The type of the result.
  */

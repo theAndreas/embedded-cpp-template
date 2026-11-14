@@ -1,13 +1,17 @@
 # Template for embedded C++
 
-The template of an embedded C++ library, usable from Arduino as well: its style, its static
-analysis, its tests on the host and on the target, its CI and its dev container. A project is
+The template of an embedded C++ project, a library, an Arduino one or one of C++ and CMake
+alone, or a firmware: its style, its static analysis, its tests on the host and on its targets,
+its CI and its dev container. A project is
 made from it with [copier](https://copier.readthedocs.io) and kept up to date with it: every
 improvement made here reaches each project as a merge, not as a copy by hand.
 
 The library is C++11 without a standard library, so that avr-gcc compiles it as well as any
-other compiler. Today the template checks it on the host, by GCC and by clang, and on an AVR
-board through arduino-cli and simavr; other targets and standards are next, see
+other compiler. Today the template checks it on the host, by GCC and by clang, and for each of
+its targets, AVRs built by arduino-cli against an Arduino core or by CMake and avr-gcc alone, in
+simavr where simavr runs the part. A firmware is built by CMake, an image for each target from
+its portable `src/` and its `platform/<name>/`, or by PlatformIO through a `platformio.ini`
+there. A library for PlatformIO's registry and targets beyond the AVR are next, see
 [ROADMAP.md](ROADMAP.md).
 
 ## What a project gets
@@ -18,11 +22,12 @@ board through arduino-cli and simavr; other targets and standards are next, see
 | Style | The Google C++ style with `const` on the right, braced initialization, Doxygen blocks | `.clang-format`, `CPPLINT.cfg`, `docs/Documentation.md` |
 | Static analysis | clang-tidy with the C++ Core Guidelines, CERT, bugprone, the analyzer, Google's names and clang's warnings beyond `-Wall -Wextra`, every exception with its reason, and checks of our own (`house-*`) for the rules no check of clang-tidy's holds; cppcheck beside it; every header compiled on its own | `.clang-tidy`, `tools/`, `tools/lib/tidy_module/` |
 | Warnings | `-Wall -Wextra -Wconversion -Wsign-conversion -Wshadow`, errors in CI and under `make check` | `cmake/checks.cmake`, `CMakePresets.json` |
-| Tests | GoogleTest on the host, by GCC and by clang, against a mock of the Arduino core, also under ASan and UBSan, with coverage; tests of what must not compile; a self check on the board in simavr | `CMakeLists.txt`, `test/`, `examples/SelfCheck` |
+| Tests | GoogleTest on the host, by GCC and by clang, against a mock of the Arduino core for an Arduino library, also under ASan and UBSan, with coverage; tests of what must not compile; fuzzers on libFuzzer, going on from what the last run found; a self check on each target in simavr | `CMakeLists.txt`, `test/`, `examples/SelfCheck` |
+| Targets | One or several, each built by arduino-cli, by CMake with a toolchain file (`cmake/toolchains/avr-gcc.cmake`) or by PlatformIO, mixed in one project as it needs; every example compiled for each, without a warning, its flash and RAM in a table, and read by clang-tidy as the target compiles it; on an AVR that CMake builds, the deepest stack of each against the RAM it leaves | `tools/project.sh`, `tools/lib/`, `tools/avr_stack.py` |
 | Documentation | Doxygen, failing on a gap, published on GitHub Pages | `Doxyfile`, `tools/docs.sh` |
 | CI | Every target of `make check`, in `ci.yml` and `static-analysis.yml`, each with a badge; a release from a tag | `.github/` |
 | Tools | The Python tools pinned in `uv.lock`, the same in the container and in CI | `pyproject.toml`, `uv.lock` |
-| Dev container | Every tool, pinned with its checksum; clangd with the databases of the host and the board | `.devcontainer/` |
+| Dev container | Every tool, pinned with its checksum; clangd with the databases of the host and the first target | `.devcontainer/` |
 
 ## Making a project
 
@@ -34,8 +39,10 @@ cd LedMatrix && git init && git add -A && git commit -m "LedMatrix: from the tem
 make setup && make check
 ```
 
-copier asks for the name, the namespace, the board and the rest. The folder has to be named as
-the project: cpplint takes the header guards from it.
+copier asks for the name, the namespace, whether it is a library or a firmware, whether a library
+is an Arduino library, the board or the part and the rest. The folder has to be named as the project: cpplint takes the header guards from
+it. A further target is a name in `TARGETS` of `tools/project.sh` and what differs for it in
+`target_settings()`; the file says how.
 
 ## Keeping it up to date
 
@@ -52,11 +59,11 @@ one. Commit before an update, review the diff after it, and run `make check`.
 ## What is the template's and what is the project's
 
 - **The template's**: the configuration, the `Makefile`, `tools/` except `project.sh` and
-  `project.mk`, `cmake/checks.cmake`, `pyproject.toml` and `uv.lock`, the workflows and actions
-  in `.github/`, the dev container and `docs/Documentation.md`. An update brings every change
-  to them. A project may still change one: add its own exceptions at the end of a list in
-  `.clang-tidy`, with the reason, and the merge keeps them. A job of its own goes into a
-  workflow of its own.
+  `project.mk`, `cmake/checks.cmake` and the toolchain files of `cmake/toolchains/`,
+  `pyproject.toml` and `uv.lock`, the workflows and actions in `.github/`, the dev container
+  and `docs/Documentation.md`. An update brings every change to them. A project may still
+  change one: add its own exceptions at the end of a list in `.clang-tidy`, with the reason, and
+  the merge keeps them. A job of its own goes into a workflow of its own.
 - **The project's**, never touched by an update: `README.md`, `CMakeLists.txt`,
   `library.properties`, `tools/project.sh` and `tools/project.mk`, written where they do not
   exist yet; and the starting point of a new library, `src/`, `test/` and the examples `Basics`

@@ -1,0 +1,43 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+
+/*!
+ * \file
+ * \brief A light that blinks with a period, told the time from outside.
+ */
+
+#ifndef {{ project_name|upper }}_SRC_BLINKER_BLINKER_H_
+#define {{ project_name|upper }}_SRC_BLINKER_BLINKER_H_
+
+#include <stdint.h>
+
+/*!
+ * \brief Says whether a light that blinks is on, from the time it is told.
+ *
+ * It reads no clock and drives no pin: the platform hands it the time and
+ * sets the pin from its answer, so that the host tests it with any time.
+ */
+class Blinker {
+ public:
+  /*!
+   * \brief Makes a light that is on for half of `period_ms`, off for the rest.
+   * \param[in] period_ms The time of one blink, in milliseconds.
+   */
+  explicit Blinker(uint16_t period_ms)
+      : half_period_ms_{static_cast<uint16_t>(period_ms / 2u)} {}
+
+  /*!
+   * \brief Says whether the light is on at `now_ms`.
+   *
+   * `now_ms` may overflow, as a counter of 32 bits does after 49 days.
+   *
+   * \param[in] now_ms The time in milliseconds.
+   * \return True while the light is on.
+   */
+  [[nodiscard]] bool IsOnAt(uint32_t now_ms) const;
+
+ private:
+  uint16_t half_period_ms_;
+};
+
+#endif  // {{ project_name|upper }}_SRC_BLINKER_BLINKER_H_

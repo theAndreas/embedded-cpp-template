@@ -25,6 +25,11 @@ main() {
   fi
 
   cd "${ROOT_DIR}"
+  # A library of CMake alone is no Arduino library, and the Library Manager's rules are not its.
+  if [[ ! -f library.properties ]]; then
+    echo "arduino_lint.sh: no library.properties, no Arduino library to check."
+    exit 0
+  fi
   local name
   name="$(sed -n 's/^name=//p' library.properties)"
   if [[ -z "${name}" ]]; then
@@ -34,7 +39,14 @@ main() {
   local copy="${BUILD_DIR}/arduino-lint/${name}"
   rm -rf "${BUILD_DIR}/arduino-lint"
   mkdir -p "${copy}"
+  # Without a file deleted and not yet staged, which git still lists and tar could not read.
+  local file
   git ls-files -z --cached --others --exclude-standard \
+    | while IFS= read -r -d '' file; do
+      if [[ -e "${file}" ]]; then
+        printf '%s\0' "${file}"
+      fi
+    done \
     | tar --null --files-from=- --create --file=- \
     | tar --extract --file=- --directory="${copy}"
   if ((copy_only)); then

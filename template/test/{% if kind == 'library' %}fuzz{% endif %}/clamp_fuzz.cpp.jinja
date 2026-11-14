@@ -1,0 +1,44 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+//
+// Fuzzes Clamp with any three values: what it returns lies in the range, and
+// is the value itself where that lies in it. libFuzzer's input is cut into
+// the three, as many bytes as an int16_t has each.
+
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+
+#include "{{ namespace }}/clamp.h"
+
+namespace {
+
+int16_t Take(uint8_t const* data, size_t index) {
+  int16_t value{0};
+  std::memcpy(&value, data + (index * sizeof value), sizeof value);
+  return value;
+}
+
+}  // namespace
+
+extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size) {
+  if (size < 3 * sizeof(int16_t)) {
+    return 0;
+  }
+  int16_t const value{Take(data, 0)};
+  int16_t low{Take(data, 1)};
+  int16_t high{Take(data, 2)};
+  if (high < low) {
+    int16_t const swapped{low};
+    low = high;
+    high = swapped;
+  }
+  int16_t const clamped{ {{- namespace }}::Clamp(value, low, high)};
+  bool const in_range{(low <= clamped) && (clamped <= high)};
+  bool const kept{(value < low) || (high < value) || (clamped == value)};
+  if (!in_range || !kept) {
+    std::abort();
+  }
+  return 0;
+}

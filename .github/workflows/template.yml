@@ -36,11 +36,14 @@ jobs:
           version: 1.5.1
 
       # As the Dockerfile of the template installs them, through the action a project's CI
-      # installs with, so that a change to it is tried here before a project gets it.
+      # installs with, so that a change to it is tried here before a project gets it; gcc-avr and
+      # avr-libc as apt-packages.txt names them for a library of CMake alone.
       - name: Install the tools from apt
         uses: ./template/.github/actions/apt-install
         with:
-          packages: cmake ninja-build libgtest-dev clang simavr jq doxygen cppcheck
+          packages: >-
+            cmake ninja-build libgtest-dev clang libclang-rt-dev simavr jq doxygen cppcheck gcc-avr
+            avr-libc
 
       # With the checks template/.shellcheckrc turns on, and the rules of template/pyproject.toml.
       - name: The template's own scripts
@@ -60,12 +63,42 @@ jobs:
       - name: The checks of our own against their cases
         run: tests/tidy_module.py
 
+      # A library of CMake alone, arduino=false: every check, and the checks that walk TARGETS for
+      # an ATmega328P and an ATmega2560. Before the Arduino library's steps, as each run makes
+      # build/Demo anew and the last one's is kept for arduino-lint.
+      - name: Make a library of CMake alone and check it
+        run: tests/check.sh --no-arduino
+
+      - name: Make a library of CMake alone for two targets and check it
+        run: tests/check.sh --no-arduino --targets tidy cppcheck headers examples self-check stack
+
+      # A firmware, kind=firmware: every check, and the checks that walk TARGETS for an
+      # ATmega328P and an AVR128DA48, which takes the other branch of platform/avr/main.cpp.
+      - name: Make a firmware and check it
+        run: tests/check.sh --firmware
+
+      - name: Make a firmware for two targets and check it
+        run: tests/check.sh --firmware --targets tidy cppcheck headers examples self-check stack
+
+      # A firmware built by PlatformIO, platformio=true: every check, and with a second target
+      # built by CMake, two build systems in one project.
+      - name: Make a firmware of PlatformIO and check it
+        run: tests/check.sh --platformio
+
+      - name: Make a firmware of PlatformIO and CMake and check it
+        run: tests/check.sh --platformio --targets tidy cppcheck headers examples self-check stack
+
+      # The Arduino library built for two targets, an Uno and a Mega: the checks that walk
+      # TARGETS.
+      - name: Make a project of two targets and check it
+        run: tests/check.sh --targets tidy cppcheck headers examples self-check
+
       # Every target of `make check` but arduino-lint, which the runner has not installed, with
       # warnings as errors.
       - name: Make a project and check it
         run: |
           tests/check.sh --keep lint tests clang sanitize coverage tidy cppcheck headers \
-            docs examples sizes self-check
+            docs examples sizes self-check stack fuzz
 
       # What git has of the project, without the .venv the checks made beside it, whose links
       # arduino-lint would report.
