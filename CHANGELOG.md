@@ -3,6 +3,16 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`make examples` lets the warnings of a third party's core pass,** as it does those of
+  Arduino's: it let only `cores/arduino/` pass, and XMegaForArduino's core warns in
+  `cores/xmega/`, so that XmegaTimer failed on warnings that are not its own (XmegaTimer OIL 2).
+  Any `cores/<name>/` passes now.
+
+On the update: a project that let a core's warnings pass in a copy of its own, as XmegaTimer
+does in `tools/lib/arduino_cli.sh`, takes the template's again.
+
 ## v0.8.0
 
 Three rules of CodingStyle.md that clang-tidy now checks, by checks of our own: bits through one
