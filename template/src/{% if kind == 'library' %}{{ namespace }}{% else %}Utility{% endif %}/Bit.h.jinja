@@ -1,5 +1,6 @@
 {%- set bit_dir = namespace if kind == 'library' else 'Utility' -%}
 {%- set bit_ns = namespace ~ '::' if kind == 'library' else '' -%}
+{%- set nodiscard = macro_prefix ~ '_NODISCARD' if kind == 'library' else '[[nodiscard]]' -%}
 // Copyright {{ copyright_year }} {{ author }}
 // SPDX-License-Identifier: {{ license }}
 
@@ -19,7 +20,9 @@
 #define {{ project_name|upper }}_SRC_{{ bit_dir|upper }}_BIT_H_
 
 #include <stdint.h>
-
+{% if kind == 'library' %}
+#include "{{ namespace }}/attributes.h"
+{% endif %}
 {% if kind == 'library' %}namespace {{ namespace }} {
 
 {% endif %}/*!
@@ -151,7 +154,7 @@ class Bit {
   constexpr explicit Bit(Integer value) : value_{value} {}
 
   /*! \brief Returns all the bits as one integer. */
-  constexpr Integer value() const { return value_; }
+  {{ nodiscard }} constexpr Integer value() const { return value_; }
 
   /*!
    * \brief Sets all the bits at once.
@@ -209,7 +212,10 @@ class Bit {
   static constexpr Integer Combine(Integer first, Integer second,
                                    Integer third = Integer{0u},
                                    Integer fourth = Integer{0u}) {
-    return static_cast<Integer>(first | second | third | fourth);
+    // In ShiftType from the first operand on: or'ed as they are, two uint8_t
+    // would give an int, a signed operand of the next |.
+    return static_cast<Integer>(static_cast<ShiftType>(first) | second | third |
+                                fourth);
   }
 
   /*!
