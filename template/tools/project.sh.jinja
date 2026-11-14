@@ -22,7 +22,10 @@
 #   PIO_DIR              for platformio: the folder of the platformio.ini, as platform/avr
 #   PIO_ENV              for platformio: its environment the target is
 #   FQBN                 for arduino-cli: the board the examples are compiled for
-#   ARDUINO_CORE         for arduino-cli: the core, pinned, as arduino-cli installs it
+#   ARDUINO_CORE         for arduino-cli: the cores, pinned, as arduino-cli installs them, an
+#                        array: the board's, and another whose tools it takes, as a third
+#                        party's that compiles with the avr-gcc of arduino:avr;
+#                        target_settings() sets it whole, ARDUINO_CORE=(...)
 #   ARDUINO_BOARD_URLS   for arduino-cli: the index of a third-party core, for update-index
 #   SIMAVR_MCU           what simavr runs examples/SelfCheck as; empty: no run in simavr
 #   SIMAVR_FREQUENCY     its clock, in Hz
@@ -99,7 +102,7 @@
 NAMESPACE="{{ namespace }}"
 {%- if arduino %}
 FQBN="{{ fqbn }}"
-ARDUINO_CORE="{{ arduino_core }}"
+ARDUINO_CORE=({{ arduino_core }})
 ARDUINO_BOARD_URLS=""
 {%- elif platformio %}
 TARGETS=({{ mcu }})

@@ -17,9 +17,18 @@ brings it.
   (XmegaTimer OIL 2). `tools/coverage.sh` takes the preset as its argument, `coverage` unless
   given.
 
+- **`ARDUINO_CORE` is an array, of one core or more:** `make setup` installs them all, as a
+  third party's core needs where it compiles with another's tools: XMegaForArduino's takes the
+  avr-gcc of `arduino:avr`, which XmegaTimer installed in `prepare()` (XmegaTimer OIL 2).
+  `ARDUINO_CORE=(XMegaForArduino:avr@0.9.2 arduino:avr@1.8.8)`. A new project writes its core as
+  an array of one; `target_settings()` sets it whole, as an assignment of a text would replace
+  only the first.
+
 On the update: a project that let a core's warnings pass in a copy of its own, as XmegaTimer
 does in `tools/lib/arduino_cli.sh`, takes the template's again. And `make check` and CI fail
-where an instrumented build warns; fix the warning as in any other build.
+where an instrumented build warns; fix the warning as in any other build. A core written as a
+text in `tools/project.sh` is an array of one to the tools; a project that installs a second
+core in `prepare()` names it in `ARDUINO_CORE` instead.
 
 ## v0.8.0
 
