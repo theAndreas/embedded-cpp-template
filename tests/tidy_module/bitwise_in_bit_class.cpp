@@ -115,9 +115,30 @@ inline bool operator==(Byte a, unsigned char b) {
   return (static_cast<unsigned char>(a) & b) != 0U;  // house: bitwise
 }
 
+// A shift of the type by a count that gives the type back, and `~` of it:
+// its own as well.
+constexpr Byte operator<<(Byte a, int count) {
+  return static_cast<Byte>(static_cast<unsigned char>(a) << count);
+}
+
+constexpr Byte operator~(Byte a) {
+  return static_cast<Byte>(~static_cast<unsigned char>(a));
+}
+
 Byte Merge(Byte a, Byte b) {
   a |= b;
-  return a | b;
+  return ~(a | b) << 1;
 }
+
+// A stream's `<<`, which gives its stream back, is no such type's: an integer
+// shifted in its body is reported as anywhere.
+struct Log {
+  unsigned total;
+
+  friend Log& operator<<(Log& log, Byte byte) {
+    log.total = static_cast<unsigned char>(byte) >> 4;  // house: bitwise
+    return log;
+  }
+};
 
 }  // namespace own_type

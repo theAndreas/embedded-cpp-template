@@ -5,11 +5,13 @@
 
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Decl.h"
+#include "clang/AST/DeclCXX.h"
 #include "clang/AST/Expr.h"
 #include "clang/AST/ParentMapContext.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/Basic/SourceManager.h"
+#include "llvm/ADT/SmallVector.h"
 
 namespace house {
 namespace {
@@ -17,6 +19,8 @@ namespace {
 using clang::ASTContext;
 using clang::BinaryOperator;
 using clang::Expr;
+using clang::FunctionDecl;
+using clang::QualType;
 using clang::SourceManager;
 
 // Whether `expr` is a named mask: a constant, an enumerator, a system header's
@@ -72,6 +76,54 @@ bool InConstexprInitializer(Expr const& expr, ASTContext& context) {
   }
 }
 
+// Whether `function` is a bitwise operator of a type of its own, as
+// std::byte's: `&`, `|` or `^` of two of the type, `~` of one, a shift of one
+// by a count that gives the type back by value, or the `=` form of any of
+// them. Not a stream's `<<`, which gives its stream back by reference, nor an
+// operator of an integer and the type.
+bool IsOwnOperator(FunctionDecl const& function) {
+  llvm::SmallVector<QualType, 2> operands;
+  auto const* const method = llvm::dyn_cast<clang::CXXMethodDecl>(&function);
+  if (method != nullptr && method->isInstance()) {
+    operands.push_back(method->getThisType()->getPointeeType());
+  }
+  for (clang::ParmVarDecl const* const parameter : function.parameters()) {
+    operands.push_back(parameter->getType());
+  }
+  auto const bare = [](QualType type) {
+    return type.getNonReferenceType().getUnqualifiedType().getCanonicalType();
+  };
+  if (operands.empty()) {
+    return false;
+  }
+  QualType const type{bare(operands.front())};
+  if (!type->isRecordType() && !type->isEnumeralType()) {
+    return false;
+  }
+  bool const two_of_type{operands.size() == 2 && bare(operands[1]) == type};
+  switch (function.getOverloadedOperator()) {
+    case clang::OO_Amp:
+    case clang::OO_Pipe:
+    case clang::OO_Caret:
+    case clang::OO_AmpEqual:
+    case clang::OO_PipeEqual:
+    case clang::OO_CaretEqual:
+      return two_of_type;
+    case clang::OO_Tilde:
+      return operands.size() == 1;
+    case clang::OO_LessLess:
+    case clang::OO_GreaterGreater:
+      return operands.size() == 2 &&
+             !function.getReturnType()->isReferenceType() &&
+             bare(function.getReturnType()) == type;
+    case clang::OO_LessLessEqual:
+    case clang::OO_GreaterGreaterEqual:
+      return operands.size() == 2;
+    default:
+      return false;
+  }
+}
+
 }  // namespace
 
 BitwiseInBitClassCheck::BitwiseInBitClassCheck(
@@ -93,6 +145,7 @@ void BitwiseInBitClassCheck::storeOptions(
 void BitwiseInBitClassCheck::registerMatchers(
     clang::ast_matchers::MatchFinder* finder) {
   using clang::ast_matchers::anyOf;
+  using clang::ast_matchers::anything;
   using clang::ast_matchers::binaryOperator;
   using clang::ast_matchers::cxxMethodDecl;
   using clang::ast_matchers::cxxRecordDecl;
@@ -101,28 +154,28 @@ void BitwiseInBitClassCheck::registerMatchers(
   using clang::ast_matchers::hasAncestor;
   using clang::ast_matchers::hasAnyName;
   using clang::ast_matchers::hasAnyOperatorName;
-  using clang::ast_matchers::hasAnyOverloadedOperatorName;
   using clang::ast_matchers::hasOperatorName;
   using clang::ast_matchers::ofClass;
   using clang::ast_matchers::unaryOperator;
   using clang::ast_matchers::unless;
   auto const bit_class = cxxRecordDecl(hasAnyName(names_));
-  // In the class, a class nested in it, or a member defined outside it; or in
-  // a bitwise operator of a type of its own, which says what its bits mean.
-  auto const in_bit_class = anyOf(
-      hasAncestor(bit_class),
-      forFunction(
-          cxxMethodDecl(ofClass(anyOf(bit_class, hasAncestor(bit_class))))),
-      forFunction(functionDecl(hasAnyOverloadedOperatorName(
-          "&", "|", "^", "~", "<<", ">>", "&=", "|=", "^=", "<<=", ">>="))));
+  // In the class, a class nested in it, or a member defined outside it.
+  auto const in_bit_class =
+      anyOf(hasAncestor(bit_class), forFunction(cxxMethodDecl(ofClass(anyOf(
+                                        bit_class, hasAncestor(bit_class))))));
+  // The function the operator stands in, if any: check() leaves out the body
+  // of a bitwise operator of a type of its own, which says what its bits mean.
+  auto const in_function =
+      anyOf(forFunction(functionDecl().bind("function")), anything());
   finder->addMatcher(
       binaryOperator(hasAnyOperatorName("&", "|", "^", "<<", ">>",
                                         "&=", "|=", "^=", "<<=", ">>="),
-                     unless(in_bit_class))
+                     unless(in_bit_class), in_function)
           .bind("op"),
       this);
   finder->addMatcher(
-      unaryOperator(hasOperatorName("~"), unless(in_bit_class)).bind("op"),
+      unaryOperator(hasOperatorName("~"), unless(in_bit_class), in_function)
+          .bind("op"),
       this);
 }
 
@@ -133,6 +186,10 @@ void BitwiseInBitClassCheck::check(
   // As written in a template: reported in the instantiation, which knows the
   // types.
   if (expr->isTypeDependent() || expr->isValueDependent()) {
+    return;
+  }
+  auto const* const function = result.Nodes.getNodeAs<FunctionDecl>("function");
+  if (function != nullptr && IsOwnOperator(*function)) {
     return;
   }
   clang::SourceLocation location;

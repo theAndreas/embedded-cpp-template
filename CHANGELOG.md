@@ -79,8 +79,11 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
 - **`house-braced-var-init` fixes `char kName[] = {"font"}` to `= "font"`,** the form T-20 writes
   and `modernize-avoid-c-arrays` accepts; it wrote `{"font"}`, which that check reports.
   `house-bitwise-in-bit-class` names the project's bit class in its message, where
-  `BitClasses` sets one. `house-operator-form` has `<<` and a class of another file among its
-  cases, and C-15 names that exemption.
+  `BitClasses` sets one, and leaves out the body of an operator only where it is a type's own,
+  as `std::byte`'s: `&`, `|` or `^` of two of the type, `~` of one, a shift of one by a count
+  that gives the type back; it left out the body of any bitwise operator, a stream's `<<`
+  among them, where an integer shifted went unreported. `house-operator-form` has `<<` and a
+  class of another file among its cases, and C-15 names that exemption.
 
 On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
 fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one

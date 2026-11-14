@@ -29,7 +29,11 @@ namespace house {
  *   initializer of a `constexpr` variable: `constexpr uint8_t kFault{kHot |
  *   kLow};`.
  * - An overloaded operator, as those of `std::byte`, nor the builtin one in its
- *   body: a type of its own that says what its bits mean.
+ *   body, where the operator is a type's own, which says what its bits mean:
+ *   `&`, `|` or `^` of two of the type, `~` of one, a shift of one by a count
+ *   that gives the type back by value, or the `=` form of any of them. The
+ *   body of a stream's `<<`, which gives its stream back by reference, is
+ *   read as any other.
  *
  * In a template, the operator is reported in an instantiation, where the types
  * of its operands are known.
