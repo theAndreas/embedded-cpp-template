@@ -156,9 +156,9 @@ void BitwiseInBitClassCheck::check(
   }
   diag(location,
        "bitwise operator '%0' outside the bit class; use its functions, as "
-       "Bit<uint8_t>::SetBits(), or a constexpr of named masks or'ed "
+       "%1<uint8_t>::SetBits(), or a constexpr of named masks or'ed "
        "(CodingStyle H-9)")
-      << spelling;
+      << spelling << names_.front();
 }
 
 }  // namespace house
