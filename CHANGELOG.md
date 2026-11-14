@@ -24,7 +24,10 @@ headers of any core as what `Arduino.h` provides.
   reason, the `extern` declaration in a header of an object identified by its address, whose
   definition lies in a `.cpp`. A project made from the template has no such object, and
   MaxMatrix has one, which carries its NOLINT. Utl keeps the exception as its own (Utl #59).
-
+- **`make tidy` reads every header of `src/`,** through `build/tidy/headers.cpp`, which
+  includes them all, with each target's flags: a header was read only where a source of `src/`
+  or `examples/` included it, so one of templates alone, which the tests include, was never
+  read. Utl had four findings in three such headers (Utl #61, #62); MaxMatrix none.
 - **`misc-include-cleaner` takes the headers of any core as what `Arduino.h` provides,** as
   `make examples` takes their warnings since v0.9.0: it took those of `cores/arduino/` alone, so
   that a sketch on XMegaForArduino's core was told that no header provides `Serial`, which comes
@@ -36,7 +39,8 @@ each class that deletes its copy constructor for a reference or a `const`. Run `
 before the update merges `.clang-tidy`: where `bugprone-dynamic-static-initializers` reports a
 declaration that is right, give the line a NOLINT with its reason, or, for a pattern of the
 project's, add the exception at the end of the list as the project's own, with its reason. A
-sketch on a third party's core loses findings of `misc-include-cleaner` it could not fix.
+sketch on a third party's core loses findings of `misc-include-cleaner` it could not fix. And
+`make tidy` may report a header that no source includes: fix it as any finding.
 
 ## v0.9.0
 
