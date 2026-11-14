@@ -41,6 +41,35 @@ bool Same(Box<long> const& a, Box<long> const& b) { return a == b; }
 
 }  // namespace hidden
 
+namespace crtp {
+
+// A CRTP base befriends its derived class, its own type parameter, so that
+// only that class makes one, as bugprone-crtp-constructor-accessibility asks.
+template <typename Self>
+class Countable {
+ public:
+  int count() const { return count_; }
+
+ private:
+  Countable() = default;
+  friend Self;
+
+  int count_{0};
+};
+
+class Apples : public Countable<Apples> {};
+
+// A type parameter of an enclosing class template is no CRTP base's own.
+template <typename Outer>
+class Holder {
+  template <typename Inner>
+  class Part {
+    friend Outer;  // house: friend
+  };
+};
+
+}  // namespace crtp
+
 namespace reported {
 
 class Helper;
