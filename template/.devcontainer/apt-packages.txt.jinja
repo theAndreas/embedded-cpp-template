@@ -7,8 +7,12 @@
 #       file: .devcontainer/apt-packages.txt
 #
 # The template wrote this file once; it is the project's, and `copier update` leaves it alone.
-{%- if not arduino and not platformio %}
+{%- if not arduino %}
 
-# avr-gcc and avr-libc, which cmake/toolchains/avr-gcc.cmake builds the targets with.
+# avr-gcc and avr-libc, which cmake/toolchains/avr-gcc.cmake builds a target with
+{%- if platformio %}: a target
+# of BUILD_SYSTEM="cmake" beside those PlatformIO builds, which brings its own compiler. A
+# project whose every target PlatformIO builds may drop the line
+{%- endif %}.
 gcc-avr avr-libc
 {%- endif %}

@@ -7,8 +7,9 @@
 ;
 ;   uv run --frozen pio run -d platform/avr -e avr
 ;
-; and give it PLATFORMIO_BUILD_DIR, the variant's flags in PLATFORMIO_BUILD_FLAGS and -Werror in
-; PLATFORMIO_BUILD_SRC_FLAGS, see tools/lib/platformio.sh.
+; and give it PLATFORMIO_BUILD_DIR and the variant's flags in PLATFORMIO_BUILD_FLAGS; not -Werror,
+; which a header of a library would fail as well: the log is read for warnings in the project's
+; own files instead, see tools/lib/platformio.sh.
 
 [platformio]
 src_dir = .
