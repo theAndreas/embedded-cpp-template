@@ -42,7 +42,7 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   other way round; 16.5.1 is Required. Checks that find only some cases of a rule are marked
   *in part*; `google-runtime-operator` does not cover 16.5.1, nor the pointer arithmetic check
   8.9.1, which are now *Review*. New in *Covered by*: `cert-err34-c`, `cert-env33-c`,
-  `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and two more, all on already.
+  `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and three more, all on already.
   The deviation from Rule 4.1.1 names `-fno-exceptions -fno-rtti` on the AVR.
 - **The action target-setup asks for `ARG ARDUINO_CLI_VERSION` only where a target uses
   arduino-cli.** It asked always, and a firmware of CMake and PlatformIO whose Dockerfile installs
@@ -52,6 +52,26 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   there is one, as before, and nothing where there is none. The template's repository builds the
   same Dockerfile for its own container and has the list only as a template, so its container
   no longer built.
+- **Testing.md: the rules of fuzzing are TS-28 to TS-31.** TS-24 to TS-26 named the sanitizers,
+  the test outside the contract and the calls in the wrong order as well as the fuzzers.
+- **The docs for every kind of project:** Testing.md, CodingStyle.md FN-10 and M-3, Misra.md
+  Rule 6.0.4, AGENTS.md and the dev container's README spoke of SelfCheck, the mock,
+  `_NODISCARD`, `Discard()` and `test/compile_warn/` to a firmware, or of the mock and a sketch
+  to a library of CMake alone, which have none; each says now what that kind has.
+- **`make tidy` reads the headers of `platform/`:** `HeaderFilterRegex` of `.clang-tidy` named
+  `src/` and `examples/` only, so a header of a firmware's backend was compiled and its findings
+  dropped.
+- **arduino-lint in CI as `make arduino-lint` runs it,** `--compliance strict`: `ci.yml` left the
+  action at its default, so `make check` could fail where CI passed.
+- **`apt-packages.txt` of a firmware of PlatformIO names `gcc-avr avr-libc`,** for a target that
+  CMake builds beside those PlatformIO builds, as `tests/check.sh --platformio --targets` makes
+  one; it had them for a project of CMake alone only. `platformio.ini` no longer speaks of a
+  `-Werror` that `tools/lib/platformio.sh` does not pass.
+- **`house-braced-var-init` fixes `char kName[] = {"font"}` to `= "font"`,** the form T-20 writes
+  and `modernize-avoid-c-arrays` accepts; it wrote `{"font"}`, which that check reports.
+  `house-bitwise-in-bit-class` names the project's bit class in its message, where
+  `BitClasses` sets one. `house-operator-form` has `<<` and a class of another file among its
+  cases, and C-15 names that exemption.
 
 On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
 fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
