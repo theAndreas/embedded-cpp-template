@@ -11,9 +11,15 @@ brings it.
   stops by calling one that is not, is tested as a `static_assert` is. No `static_assert` can
   test a function's argument; MaxMatrix ran such cases with a loop of its own for that (OIL 41).
   A case that compiles, or stops with another error, still fails.
+- **FN-15 names where its check stops:** `cppcoreguidelines-avoid-const-or-ref-data-members`
+  leaves out a class that can be neither copied nor moved, as one whose copy constructor is
+  deleted, while the rule allows a reference or a `const` member nowhere. Review covers that
+  case. MaxMatrix's `Batch` held its `Matrix` by reference like this, and no check reported it
+  (OIL 41).
 
 On the update: nothing to do. A project that runs such cases itself can hand them to
-`add_compile_fail_tests()`, its `// Expected: ...` line naming the function.
+`add_compile_fail_tests()`, its `// Expected: ...` line naming the function. Read the members of
+each class that deletes its copy constructor for a reference or a `const`.
 
 ## v0.9.0
 
