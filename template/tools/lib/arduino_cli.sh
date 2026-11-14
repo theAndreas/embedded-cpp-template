@@ -17,7 +17,7 @@ list_examples() {
   done
 }
 
-# Installs the core of the selected target, pinned, from the index of ARDUINO_BOARD_URLS as well
+# Installs the cores of the selected target, pinned, from the index of ARDUINO_BOARD_URLS as well
 # if it names one.
 arduino_cli_setup() {
   local urls=()
@@ -25,7 +25,7 @@ arduino_cli_setup() {
     urls=(--additional-urls "${ARDUINO_BOARD_URLS}")
   fi
   arduino-cli core update-index "${urls[@]}"
-  arduino-cli core install "${ARDUINO_CORE}" "${urls[@]}"
+  arduino-cli core install "${ARDUINO_CORE[@]}" "${urls[@]}"
 }
 
 # Prints the bin directory of the avr-gcc that arduino-cli uses for FQBN.
