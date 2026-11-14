@@ -3,6 +3,17 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **C-12 lets a CRTP base befriend its derived class:** `bugprone-crtp-constructor-accessibility`
+  asks a CRTP base for private constructors and `friend Self;`, so that only the derived class
+  makes one, and `house-no-friend` reported that friend, so that a CRTP base failed one check or
+  the other. Utl's three in `internal/fluent.h` carried a NOLINT for it (Utl #63). The friend of
+  a type parameter of the class template it lies in passes now; one of an enclosing template's
+  is still reported.
+
+On the update: a NOLINT(house-no-friend) on a CRTP base's `friend Self;` can go.
+
 ## v0.10.1
 
 What came after v0.10.0 was tagged: `make tidy` reads a header that no source includes. It was
