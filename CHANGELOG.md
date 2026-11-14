@@ -245,7 +245,7 @@ missed before without a word. MaxMatrix, measured first, missed 6 lines, 9 branc
   what failed; clang-tidy reads the fuzzers with the database of the preset `fuzz`.
 - **The skeleton has one:** `clamp_fuzz.cpp` for a library, `BlinkerFuzz.cpp` for a firmware, with
   a `test/fuzz/.clang-tidy` that lets a fuzzer cut its input by offsets. Testing.md has the rules
-  TS-24 to TS-27.
+  TS-28 to TS-31 (TS-24 to TS-27 until the next version, where three of them were taken).
 
 On the update: `make check` runs `make fuzz`, which has nothing to run until the project adds
 `add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY <namespace>_default)` to its

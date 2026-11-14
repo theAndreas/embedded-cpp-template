@@ -91,7 +91,7 @@ what catches it:
 
 | Id | Rule | Checked by |
 |---|---|---|
-| TS-24 | Code that reads bytes or text from outside, a parser, a protocol, a stored blob, has a fuzzer: `test/fuzz/<name>_fuzz.cpp` for a family of functions, `<Class>Fuzz.cpp` for a class, defining `LLVMFuzzerTestOneInput()`. | Review |
-| TS-25 | A fuzzer states what must hold for every input and calls `std::abort()` where it does not; a crash, a read out of bounds and undefined behaviour are found by ASan and UBSan without a word of its own. | Review, `make fuzz` |
-| TS-26 | A fuzzer starts each input from the same state: what one input leaves behind makes a crash that its own file does not replay. | Review |
-| TS-27 | An input a fuzzer found to fail becomes a test on the host before it is fixed, and its file goes into `test/fuzz/corpus/<name>/`, so that the fuzzer starts from it. | Review |
+| TS-28 | Code that reads bytes or text from outside, a parser, a protocol, a stored blob, has a fuzzer: `test/fuzz/<name>_fuzz.cpp` for a family of functions, `<Class>Fuzz.cpp` for a class, defining `LLVMFuzzerTestOneInput()`. | Review |
+| TS-29 | A fuzzer states what must hold for every input and calls `std::abort()` where it does not; a crash, a read out of bounds and undefined behaviour are found by ASan and UBSan without a word of its own. | Review, `make fuzz` |
+| TS-30 | A fuzzer starts each input from the same state: what one input leaves behind makes a crash that its own file does not replay. | Review |
+| TS-31 | An input a fuzzer found to fail becomes a test on the host before it is fixed, and its file goes into `test/fuzz/corpus/<name>/`, so that the fuzzer starts from it. | Review |
