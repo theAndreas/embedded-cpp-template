@@ -20,6 +20,7 @@ using {{ namespace }}::Clamp;
 
 // The registers' bits, through the library's class (CodingStyle H-9).
 using Bits = {{ namespace }}::Bit<uint8_t>;
+using Bits16 = {{ namespace }}::Bit<uint16_t>;
 
 namespace {
 
@@ -121,8 +122,7 @@ int main() {
   // Where the AVR differs from the host: an int of 16 bits, which the mask of
   // a uint16_t's top bit must not be shifted in, and a register as a target.
   uint16_t const volatile top{0x8000u};
-  Check({{ namespace }}::Bit<uint16_t>::ReadBit(top, 15),
-        "Bit reads the top bit of 16");
+  Check(Bits16::ReadBit(top, 15), "Bit reads the top bit of 16");
   GPIOR0 = 0x81;
   Bits::SetBits(GPIOR0, 0x0C);
   bool const set{GPIOR0 == 0x8D};
