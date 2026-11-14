@@ -30,6 +30,7 @@ int Locals(int value, double ratio, long wide, int const *pointer) {
   int const &reference = same; // house: fix
   char text[] = "abc";
   char listed_text[] = {"abc"}; // house: fix
+  char braced_text[]{"abc"};  // house: fix
   int numbers[2] = {1, 2};  // house: fix
   static int calls = 0;     // house: fix
   int braced{value};
@@ -41,7 +42,8 @@ int Locals(int value, double ratio, long wide, int const *pointer) {
   }
   return same + static_cast<int>(widened) + parenthesized + listed + nested +
          static_cast<int>(constant) + fits + big + truncated + narrowed +
-         is_set + reference + text[0] + listed_text[0] + numbers[0] + calls + braced;
+         is_set + reference + text[0] + listed_text[0] + braced_text[0] + numbers[0] + calls +
+         braced;
 }
 
 int Defaults(int value = 0) { return value; }
@@ -166,6 +168,8 @@ struct Defaults {
   classes::Point point = classes::Point(1, 2); // house: fix
   int braced{3};
   char name[8] = "abc";
+  char listed_name[8] = {"abc"};  // house: fix
+  char braced_name[8]{"abc"};   // house: fix
   static int const kStatic = 4; // house: fix
   static int shared;
 };

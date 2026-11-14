@@ -64,8 +64,7 @@ jobs:
         run: tests/tidy_module.py
 
       # A library of CMake alone, arduino=false: every check, and the checks that walk TARGETS for
-      # an ATmega328P and an ATmega2560. Before the Arduino library's steps, as each run makes
-      # build/Demo anew and the last one's is kept for arduino-lint.
+      # an ATmega328P and an ATmega2560.
       - name: Make a library of CMake alone and check it
         run: tests/check.sh --no-arduino
 
@@ -93,22 +92,12 @@ jobs:
       - name: Make a project of two targets and check it
         run: tests/check.sh --targets tidy cppcheck headers examples self-check
 
-      # Every target of `make check` but arduino-lint, which the runner has not installed, with
-      # warnings as errors.
-      - name: Make a project and check it
-        run: |
-          tests/check.sh --keep lint tests clang sanitize coverage tidy cppcheck headers \
-            docs examples sizes self-check stack fuzz
-
-      # What git has of the project, without the .venv the checks made beside it, whose links
-      # arduino-lint would report.
-      - name: Copy the library as git has it
-        run: build/Demo/tools/arduino_lint.sh --copy-only
-
-      - name: arduino-lint
-        uses: arduino/arduino-lint-action@v3
+      # For `make arduino-lint` of the project, at the version the template's Dockerfile pins,
+      # through the action a project's CI installs with.
+      - uses: ./template/.github/actions/arduino-lint-setup
         with:
-          path: build/Demo/build/arduino-lint/Demo
-          project-type: library
-          library-manager: submit
-          compliance: strict
+          root: template
+
+      # Every target of `make check`, with warnings as errors.
+      - name: Make a project and check it
+        run: tests/check.sh

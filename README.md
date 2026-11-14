@@ -60,15 +60,16 @@ one. Commit before an update, review the diff after it, and run `make check`.
 
 - **The template's**: the configuration, the `Makefile`, `tools/` except `project.sh` and
   `project.mk`, `cmake/checks.cmake` and the toolchain files of `cmake/toolchains/`,
-  `pyproject.toml` and `uv.lock`, the workflows and actions in `.github/`, the dev container
-  and `docs/Documentation.md`. An update brings every change to them. A project may still
+  `pyproject.toml` and `uv.lock`, the workflows and actions in `.github/`, the dev container,
+  `AGENTS.md` and `docs/`. An update brings every change to them. A project may still
   change one: add its own exceptions at the end of a list in `.clang-tidy`, with the reason, and
   the merge keeps them. A job of its own goes into a workflow of its own.
 - **The project's**, never touched by an update: `README.md`, `CMakeLists.txt`,
-  `library.properties`, `tools/project.sh` and `tools/project.mk`, written where they do not
-  exist yet; and the starting point of a new library, `src/`, `test/` and the examples `Basics`
-  and `SelfCheck`, written only by `copier copy` with the answer `skeleton`. An update neither
-  brings back what a project deleted of it nor merges into what it changed.
+  `library.properties`, `Doxyfile.project`, `.devcontainer/apt-packages.txt`, `tools/project.sh`
+  and `tools/project.mk`, written where they do not exist yet; and the starting point of a new
+  project, `src/` and `test/`, the examples `Basics` and `SelfCheck` of a library or
+  `platform/avr/` of a firmware, written only by `copier copy` with the answer `skeleton`. An
+  update neither brings back what a project deleted of it nor merges into what it changed.
 
 `tools/project.sh` is how the template's tools learn about the project: the board, the core, the
 build variants and their flags, and hooks such as `prepare()`, which builds what compiling needs

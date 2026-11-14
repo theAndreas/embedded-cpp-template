@@ -42,7 +42,7 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   other way round; 16.5.1 is Required. Checks that find only some cases of a rule are marked
   *in part*; `google-runtime-operator` does not cover 16.5.1, nor the pointer arithmetic check
   8.9.1, which are now *Review*. New in *Covered by*: `cert-err34-c`, `cert-env33-c`,
-  `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and two more, all on already.
+  `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and three more, all on already.
   The deviation from Rule 4.1.1 names `-fno-exceptions -fno-rtti` on the AVR.
 - **The action target-setup asks for `ARG ARDUINO_CLI_VERSION` only where a target uses
   arduino-cli.** It asked always, and a firmware of CMake and PlatformIO whose Dockerfile installs
@@ -52,6 +52,38 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   there is one, as before, and nothing where there is none. The template's repository builds the
   same Dockerfile for its own container and has the list only as a template, so its container
   no longer built.
+- **Testing.md: the rules of fuzzing are TS-28 to TS-31.** TS-24 to TS-26 named the sanitizers,
+  the test outside the contract and the calls in the wrong order as well as the fuzzers.
+- **The docs for every kind of project:** Testing.md, CodingStyle.md FN-10 and M-3, Misra.md
+  Rule 6.0.4, AGENTS.md and the dev container's README spoke of SelfCheck, the mock,
+  `_NODISCARD`, `Discard()` and `test/compile_warn/` to a firmware, or of the mock and a sketch
+  to a library of CMake alone, which have none; each says now what that kind has.
+- **`make tidy` reads the headers of `platform/`:** `HeaderFilterRegex` of `.clang-tidy` named
+  `src/` and `examples/` only, so a header of a firmware's backend was compiled and its findings
+  dropped.
+- **CI runs `make arduino-lint`,** as a developer does, with arduino-lint installed by the new
+  action `arduino-lint-setup` at the version `.devcontainer/Dockerfile` pins, in place of
+  arduino-lint's own action with flags of its own: it ran without `--compliance strict`, so
+  `make check` could fail where CI passed. `tools/arduino_lint.sh` loses `--copy-only`, which
+  only that action needed.
+- **`apt-packages.txt` of a firmware of PlatformIO names `gcc-avr avr-libc`,** for a target that
+  CMake builds beside those PlatformIO builds, as `tests/check.sh --platformio --targets` makes
+  one; it had them for a project of CMake alone only. `platformio.ini` no longer speaks of a
+  `-Werror` that `tools/lib/platformio.sh` does not pass.
+- **The skeleton's tests mirror `src/`, as TS-5 asks:** `test/<namespace>/BitTest.cpp`,
+  `clamp_test.cpp` and `attributes_test.cpp` of a library, `test/Blinker/BlinkerTest.cpp` and
+  `test/Utility/BitTest.cpp` of a firmware; they lay in `test/` itself. A project made before
+  keeps its files where they are: `src/` and `test/` come with `copier copy` only.
+- **CodingStyle M-7 is M-6:** the cost of an entity in its block; M-6 had become H-6 and left a
+  gap. A comment or a review that names M-7 means M-6 now.
+- **`house-braced-var-init` fixes `char kName[] = {"font"}` to `= "font"`,** the form T-20 writes
+  and `modernize-avoid-c-arrays` accepts; it wrote `{"font"}`, which that check reports.
+  `house-bitwise-in-bit-class` names the project's bit class in its message, where
+  `BitClasses` sets one, and leaves out the body of an operator only where it is a type's own,
+  as `std::byte`'s: `&`, `|` or `^` of two of the type, `~` of one, a shift of one by a count
+  that gives the type back; it left out the body of any bitwise operator, a stream's `<<`
+  among them, where an integer shifted went unreported. `house-operator-form` has `<<` and a
+  class of another file among its cases, and C-15 names that exemption.
 
 On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
 fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
@@ -245,7 +277,7 @@ missed before without a word. MaxMatrix, measured first, missed 6 lines, 9 branc
   what failed; clang-tidy reads the fuzzers with the database of the preset `fuzz`.
 - **The skeleton has one:** `clamp_fuzz.cpp` for a library, `BlinkerFuzz.cpp` for a firmware, with
   a `test/fuzz/.clang-tidy` that lets a fuzzer cut its input by offsets. Testing.md has the rules
-  TS-24 to TS-27.
+  TS-28 to TS-31 (TS-24 to TS-27 until the next version, where three of them were taken).
 
 On the update: `make check` runs `make fuzz`, which has nothing to run until the project adds
 `add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY <namespace>_default)` to its

@@ -4,6 +4,8 @@
 // reported. tests/tidy_module.py runs the check on this file and compiles it as
 // C++11.
 
+#include <printer.h>
+
 namespace right {
 
 // Every operator in its form: a member where it changes its operand, is unary
@@ -52,6 +54,24 @@ class Duration {
   unsigned milliseconds_;
 };
 
+// Binary and leaving its operands, as a stream's `<<`: a hidden friend.
+class Log {
+ public:
+  friend Log& operator<<(Log& log, Duration duration) {
+    log.total_ += duration();
+    return log;
+  }
+
+ private:
+  unsigned total_{0};
+};
+
+// A class of another file, as a type of the library a test prints: it cannot
+// be its friend, so the operator is a free function, and not reported.
+bool operator==(library::Printer const& a, library::Printer const& b) {
+  return a.width == b.width;
+}
+
 // In a class template the same, as written.
 template <typename Value>
 class Box {
@@ -91,6 +111,7 @@ class Fixed {
   bool operator==(Fixed const& other) const { return raw_ == other.raw_; }  // house: hidden
   bool operator<(Fixed const& other) const;  // house: hidden
   Fixed operator-(Fixed const& other) const { return Fixed{raw_ - other.raw_}; }  // house: hidden
+  Fixed operator<<(Fixed const& other) const { return Fixed{raw_ + other.raw_}; }  // house: hidden
 
   // Changing its operand, or unary: a friend, but to be a member.
   friend Fixed& operator*=(Fixed& a, Fixed const& b) {  // house: member

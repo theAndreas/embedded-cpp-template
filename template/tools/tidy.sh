@@ -173,10 +173,12 @@ main() {
 
   # The tests on the host, against the mock, with the database CMake writes. Only what lies in
   # test/: the tests are C++17, and the headers of the library, checked above as the gnu++11
-  # they are, would be held to C++17. Not the mock in test/mock/, which stands in for the
-  # Arduino core and follows it, not the Google style. Nor what lies in test/compile_fail/,
-  # which must not compile, and in test/compile_warn/, which warns on purpose: neither is in a
-  # database. And the code of HOST_CODE, which CMake builds beside the tests, and its headers.
+  # they are, would be held to C++17. Not the sources of the mock in test/mock/, which stands in
+  # for the Arduino core and follows it, not the Google style; its headers are read through the
+  # tests that include them, as the filter below takes all of test/. Nor what lies in
+  # test/compile_fail/, which must not compile, and in test/compile_warn/, which warns on
+  # purpose: neither is in a database. And the code of HOST_CODE, which CMake builds beside
+  # the tests, and its headers.
   local paths=('test/*' ':!test/mock/*' ':!test/compile_fail/*' ':!test/compile_warn/*'
     ':!test/fuzz/*')
   local filter='test'

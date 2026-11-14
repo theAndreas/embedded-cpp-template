@@ -121,8 +121,9 @@ ExtraArgs:
   - -Wdocumentation-unknown-command
   - -fcomment-block-commands=stddiff
 # (^|/), as tools/tidy.sh names the files relative to the repository, and a
-# header beside an example is found as examples/.../font_error.h.
-HeaderFilterRegex: '(^|/)(src|examples)/'
+# header beside an example is found as examples/.../font_error.h. platform/ for a firmware's
+# backends, whose headers tools/tidy.sh reads with the target that compiles them.
+HeaderFilterRegex: '(^|/)(src|examples|platform)/'
 CheckOptions:
   # The size of a function, docs/CodingStyle.md FN-2 to FN-5: 40 lines of body,
   # 4 parameters, 3 levels within the body (the body itself is level 1 to the

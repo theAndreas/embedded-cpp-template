@@ -1,3 +1,4 @@
+{%- set user = 'a sketch' if arduino else 'a program' if kind == 'library' else 'a platform' -%}
 # {{ project_name }}: for a coding agent
 
 {% if kind == 'firmware' -%}
@@ -17,7 +18,7 @@ the host by GCC and clang, and for each target of `tools/project.sh`
 - [docs/CodingStyle.md](docs/CodingStyle.md): how the code is written. Every rule has an id;
   name it where you deviate, in the `NOLINT` or in the comment that gives the reason.
 - [docs/Documentation.md](docs/Documentation.md): how a comment and a Doxygen block are written.
-  Everything a sketch can use is documented.
+  Everything {{ user }} can use is documented.
 - [docs/Testing.md](docs/Testing.md): which kind of test proves what, and how a test is named
   and written.
 - [docs/targets/avr.md](docs/targets/avr.md): what holds on the AVR only, beyond the rules
@@ -63,8 +64,8 @@ make tests     # GoogleTest on the host
 - **No blocking and no `float` without its reason**: no busy wait in the library, no `double`
   at all (H-1, H-7). An interrupt's shared data is read atomically (H-6).
 - **No long expressions**: split a computation or a condition into named steps (T-18).
-- **No invented API.** A function of the Arduino core or of a library is used only if you have
-  seen its declaration; `test/mock/` shows what the tests can call.
+- **No invented API.** A function of {% if arduino %}the Arduino core or of {% endif %}a library is used only if you have
+  seen its declaration{% if arduino %}; `test/mock/` shows what the tests can call{% endif %}.
 - **No code for later**: no unused parameter, function, overload or option "in case", no
   `TODO`, no commented-out code.
 - **No comment that repeats the code.** A comment says why, Documentation.md says how.
@@ -83,7 +84,7 @@ A change is done when all of these hold, not when it compiles:
 - `make check` passes: it is what CI runs, all of it.
 - Every line, branch and condition the change adds is reached by a test: `make coverage` fails
   otherwise and lists the lines missed per file.
-- What a sketch can use is documented (Documentation.md), and `make docs` passes.
+- What {{ user }} can use is documented (Documentation.md), and `make docs` passes.
 - The README's table of flash and RAM, if it has one, is what the build measures: after a change
   that moves them, `make examples` and `make sizes FIX=1`.
 - What a user of the library notices is in `CHANGELOG.md`, if the project keeps one.
