@@ -1,0 +1,10 @@
+// Copyright {{ copyright_year }} {{ author }}
+// SPDX-License-Identifier: {{ license }}
+//
+// A Bit of a bool, which has one bit and no mask but itself.
+//
+// Expected: Bit: Integer is an unsigned integer other than bool
+
+#include "{{ namespace }}/Bit.h"
+
+bool Case() { return {{ namespace }}::Bit<bool>{}.value(); }

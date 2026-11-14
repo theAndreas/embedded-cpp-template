@@ -1,4 +1,6 @@
 pass Clamp limits a value above
 pass Clamp limits a value below
 pass Clamp keeps a value in range
+pass Bit reads the top bit of 16
+pass Bit sets and clears bits of a register
 failed: 0
