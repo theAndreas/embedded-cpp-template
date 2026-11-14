@@ -4,7 +4,11 @@
     // container never differs from theirs. Extensions, settings and volumes live in ../shared.
     "build": {
         "dockerfile": "../../template/.devcontainer/Dockerfile",
-        "context": "../../template/.devcontainer"
+        "context": "../../template/.devcontainer",
+        // The repository's own Ubuntu packages, as it has no project's apt-packages.txt.
+        "args": {
+            "APT_PACKAGES": "apt-packages.repo.txt"
+        }
     },
     "features": {
         "./../shared": {}

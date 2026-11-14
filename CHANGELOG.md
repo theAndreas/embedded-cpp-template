@@ -45,6 +45,12 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and two more, all on already.
   The deviation from Rule 4.1.1 names `-fno-exceptions -fno-rtti` on the AVR.
 
+- **`ARG APT_PACKAGES` in `.devcontainer/Dockerfile`:** the name of the list of the project's
+  own Ubuntu packages, `apt-packages.txt` as before. The template's repository names a list of
+  its own, with gcc-avr and avr-libc, for its dev container: it had none, as its
+  `apt-packages.txt` is a template, and so could neither build its container nor a library of
+  CMake alone or a firmware in it.
+
 On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
 fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
 of its functions; a project with a bit class of another name sets

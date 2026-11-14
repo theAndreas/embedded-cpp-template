@@ -175,8 +175,11 @@ RUN printf '# SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU\n%s %s\n%s %s\n
 
 # The project's own packages, from apt-packages.txt beside this file, which the project's
 # workflows install as well. Last, so that a change to the list builds this layer alone and none
-# of the downloads above. Nothing to do for an empty list.
-COPY apt-packages.txt /tmp/apt-packages.txt
+# of the downloads above. Nothing to do for an empty list. APT_PACKAGES names another list: the
+# template's repository, which builds this Dockerfile for its own container and has no project's
+# list, names apt-packages.repo.txt.
+ARG APT_PACKAGES=apt-packages.txt
+COPY ${APT_PACKAGES} /tmp/apt-packages.txt
 RUN packages="$(sed -e 's/#.*//' /tmp/apt-packages.txt | xargs)" && \
     if [ -n "${packages}" ]; then \
         apt-get update && \

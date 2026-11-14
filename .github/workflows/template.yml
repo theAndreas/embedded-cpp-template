@@ -36,14 +36,14 @@ jobs:
           version: 1.5.1
 
       # As the Dockerfile of the template installs them, through the action a project's CI
-      # installs with, so that a change to it is tried here before a project gets it; gcc-avr and
-      # avr-libc as apt-packages.txt names them for a library of CMake alone.
+      # installs with, so that a change to it is tried here before a project gets it; and the
+      # repository's own packages, as its dev container installs them.
       - name: Install the tools from apt
         uses: ./template/.github/actions/apt-install
         with:
           packages: >-
-            cmake ninja-build libgtest-dev clang libclang-rt-dev simavr jq doxygen cppcheck gcc-avr
-            avr-libc
+            cmake ninja-build libgtest-dev clang libclang-rt-dev simavr jq doxygen cppcheck
+          file: template/.devcontainer/apt-packages.repo.txt
 
       # With the checks template/.shellcheckrc turns on, and the rules of template/pyproject.toml.
       - name: The template's own scripts
