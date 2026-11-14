@@ -9,9 +9,17 @@ brings it.
   Arduino's: it let only `cores/arduino/` pass, and XMegaForArduino's core warns in
   `cores/xmega/`, so that XmegaTimer failed on warnings that are not its own (XmegaTimer OIL 2).
   Any `cores/<name>/` passes now.
+- **A warning fails `make sanitize`, `make coverage` and `make fuzz` under `make check` as
+  well:** the presets `ci-sanitize`, `ci-coverage` and `ci-fuzz` are their twins with warnings
+  as errors, as `ci-default` and `ci-clang` are of the tests, and the Makefile takes them where
+  `STRICT` is set. A warning that only an instrumented build gives passed before: XmegaTimer's
+  `-Wconversion` in `toMicroseconds()` came under the sanitizers alone, and `make check` passed
+  (XmegaTimer OIL 2). `tools/coverage.sh` takes the preset as its argument, `coverage` unless
+  given.
 
 On the update: a project that let a core's warnings pass in a copy of its own, as XmegaTimer
-does in `tools/lib/arduino_cli.sh`, takes the template's again.
+does in `tools/lib/arduino_cli.sh`, takes the template's again. And `make check` and CI fail
+where an instrumented build warns; fix the warning as in any other build.
 
 ## v0.8.0
 
