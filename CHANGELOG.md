@@ -38,6 +38,12 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   `house-operator-form` checks it. Misra.md names the two checks at Rules 7.0.4 and 16.6.1.
 - **`tests/tidy_module/system/`:** a folder of system headers for the module's cases, as
   avr-libc's are to a project.
+- **Misra.md corrected:** Rule 9.5.1 is Advisory and 9.5.2 Required, not the
+  other way round; 16.5.1 is Required. Checks that find only some cases of a rule are marked
+  *in part*; `google-runtime-operator` does not cover 16.5.1, nor the pointer arithmetic check
+  8.9.1, which are now *Review*. New in *Covered by*: `cert-err34-c`, `cert-env33-c`,
+  `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and two more, all on already.
+  The deviation from Rule 4.1.1 names `-fno-exceptions -fno-rtti` on the AVR.
 
 On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
 fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
