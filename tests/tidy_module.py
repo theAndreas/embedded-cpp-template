@@ -7,7 +7,8 @@
 Each file there marks the lines a check reports with a comment `house: <how>`; how is `fix`
 for a report with a fix-it, or a word that the message contains for one without. Every other
 line must not be reported. Then the fix-its are applied to a copy, which has to compile as
-C++11 and, checked again, to keep only the reports without a fix-it.
+C++11 and, checked again, to keep only the reports without a fix-it. tests/tidy_module/system/
+is a folder of system headers to them, as avr-libc's are to a project.
 
 Usage:
   tests/tidy_module.py
@@ -28,6 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "template"
 CASES = ROOT / "tests" / "tidy_module"
 STANDARD = "-std=c++11"
+SYSTEM = ["-isystem", str(CASES / "system")]
 MARK = re.compile(r"//\s*house:\s*(\w+)")
 REPORT = re.compile(
     r"^(?P<file>[^:\s]+):(?P<line>\d+):\d+: warning: (?P<message>.*) \[house-[\w-]+\]$"
@@ -67,6 +69,7 @@ def clang_tidy(module: Path, source: Path, *extra: str) -> dict[int, str]:
             str(source),
             "--",
             STANDARD,
+            *SYSTEM,
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -123,7 +126,7 @@ def check_fixed(
     errors = []
     compiler = os.environ.get("CXX", "c++")
     compiled = subprocess.run(
-        [compiler, STANDARD, "-fsyntax-only", str(copy)],
+        [compiler, STANDARD, *SYSTEM, "-fsyntax-only", str(copy)],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
