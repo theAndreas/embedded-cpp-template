@@ -13,8 +13,14 @@ another container is lost with that container.
 
 | Tool | What for |
 |---|---|
+{%- if arduino %}
 | `arduino-cli` with the core of `tools/project.sh` | the library and its examples with the real toolchain, pinned as in CI |
+{%- else %}
+| `avr-gcc`, `avr-libc`, from `apt-packages.txt` | {% if kind == 'firmware' %}the image{% else %}the library and its examples{% endif %} with the real toolchain, by CMake{% if platformio %} or PlatformIO, which brings a toolchain of its own{% endif %} |
+{%- endif %}
+{%- if kind == 'library' %}
 | `simavr` | `examples/SelfCheck` as the board runs it: `tools/self_check.sh` |
+{%- endif %}
 | `g++`, `gdb` (from the base image) | the tests on the host, and what `tools/project.sh` prepares |
 | `cmake`, `ninja`, GoogleTest | the tests on the host: `cmake --workflow --preset default` |
 | `uv` | the Python tools that `uv.lock` pins, in `.venv`: clang-format, clang-tidy, cpplint, gcovr, shellcheck, actionlint, ruff, copier |
@@ -48,14 +54,14 @@ IntelliSense off, so that the two do not answer twice.
 clangd reads the compilation database that `.clangd` names for a path, as no single one covers
 everything:
 
-- `src/` and `test/` from CMake, against the mock of the core, in `build/host/`.
+- `src/` and `test/` from CMake{% if arduino %}, against the mock of the core{% endif %}, in `build/host/`.
 - `examples/` and a firmware's `platform/` from `tools/tidy.sh --database-only`, in
   `build/tidy/clangd/`, with the flags the first target is compiled with: only that one has them,
   an `.ino` as C++ with `Arduino.h` included first.
 
 Both are written when the container is created. After adding a file, run `cmake --preset default`
-or `tools/tidy.sh --database-only` again. clangd inserts no includes: a sketch includes
-`<{{ project_name }}.h>` first, which an include put in by the editor would not know.
+or `tools/tidy.sh --database-only` again.{% if kind == 'library' %} clangd inserts no includes: {% if arduino %}a sketch{% else %}an example{% endif %} includes
+`<{{ project_name }}.h>` first, which an include put in by the editor would not know.{% endif %}
 
 clangd does not load the module of the checks of our own, `house-*`: those findings come from
 `make tidy` alone. The module's own sources in `tools/lib/tidy_module/` are read against LLVM's

@@ -80,7 +80,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 | Rule 6.0.1 | Required | Block declarations not ambiguous | `-Wvexing-parse`, in part |  |
 | Rule 6.0.2 | Advisory | External arrays with a size | Review |  |
 | Rule 6.0.3 | Advisory | Few declarations in the global namespace | CodingStyle F-9 |  |
-| Rule 6.0.4 | Required | `main` only as the global function | n/a: a sketch has no `main`, the library none either |  |
+| Rule 6.0.4 | Required | `main` only as the global function | {% if arduino %}n/a: a sketch has no `main`, the library none either{% else %}Review{% endif %} | {% if kind == 'firmware' %}The one `main` of each target in `platform/<name>/`{% elif not arduino %}The one `main` of an example in its own file; the library has none{% endif %} |
 | Rule 6.2.1 | Required | One definition rule | Review |  |
 | Rule 6.2.2 | Required | Same types across declarations | the compiler and linker |  |
 | Rule 6.2.3 | Required | An entity defined once | Review |  |
