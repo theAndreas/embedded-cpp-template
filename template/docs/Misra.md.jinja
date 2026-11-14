@@ -111,7 +111,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 | Rule 7.0.1 | Required | No conversion from `bool` | `readability-implicit-bool-conversion` |  |
 | Rule 7.0.2 | Required | No conversion to `bool` | `readability-implicit-bool-conversion` |  |
 | Rule 7.0.3 | Required | No numeric value of a character | Review |  |
-| Rule 7.0.4 | Required | Operands of bitwise and shift operators | CodingStyle H-8, Review |  |
+| Rule 7.0.4 | Required | Operands of bitwise and shift operators | CodingStyle H-8 and H-9: only in the bit class, `house-bitwise-in-bit-class`; there by review |  |
 | Rule 7.0.5 | Required | Promotions keep signedness | `-Wconversion`, `-Wsign-conversion`, CodingStyle T-19 |  |
 | Rule 7.0.6 | Required | Numeric assignments appropriate | `-Wconversion`, `bugprone-narrowing-conversions` |  |
 | Rule 7.11.1 | Required | `nullptr` the only null pointer | `modernize-use-nullptr`, `-Wzero-as-null-pointer-constant` |  |
@@ -230,7 +230,7 @@ Premium or PC-lint Plus fills the rows marked *Review* (ROADMAP I-4).
 |---|---|---|---|---|
 | Rule 16.5.1 | Required? | No overloaded `&&` or `\|\|` | `google-runtime-operator`, in part |  |
 | Rule 16.5.2 | Required | No overloaded address-of | `google-runtime-operator` |  |
-| Rule 16.6.1 | Advisory | Symmetric operators as non-members | Review |  |
+| Rule 16.6.1 | Advisory | Symmetric operators as non-members | CodingStyle C-15, as hidden friends: `house-operator-form` |  |
 
 ### Rules of chapter 17
 

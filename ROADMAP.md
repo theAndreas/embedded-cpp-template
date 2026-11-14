@@ -76,6 +76,9 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | C-3 | Further candidates: a NOLINT names its check and its reason; the rules of `cpp-braced-initialization` that no check covers; an `if … else if` ends with `else` (MISRA 9.4.1, `hicpp-multiway-paths-covered` is gone in clang-tidy 23); a template parameter is not a single letter (CodingStyle.md); an expression of too many steps, to split (CodingStyle.md T-18); a cast to `void` of a result `_NODISCARD` marks, which only avr-gcc reports (CodingStyle.md FN-10) | idea |
 | C-4 | Rule of six: a class that declares one special member declares all six, the default constructor too; `cppcoreguidelines-special-member-functions` checks the five, nothing the sixth | idea |
 | C-5 | Fixed-width integer types (MISRA C:2012 Dir 4.6, AUTOSAR A3-9-1): no `int`, `unsigned` in `src/`, but `char` for text, `bool`, `size_t`, and what the Arduino core's signatures give, as the `int` of `analogRead()`. `google-runtime-int`, which is on, reports only `short` and `long`. Utl keeps to it already | idea |
+| C-6 | Bits through one class (CodingStyle H-9): `house-bitwise-in-bit-class` reports a bitwise operator on an integer outside the class, `Bit` by default; but for a `\|` of named masks in a `constexpr`, a macro of a system header as `_BV()`, and the body of a type's own bitwise operator. `Bit` comes into the skeleton from Utl, with `Combine()` for a mask of masks | done |
+| C-7 | No `friend` but a hidden friend (CodingStyle C-12): `house-no-friend` | done |
+| C-8 | One form per operator (CodingStyle C-15): a member where it changes its operand or is unary, a hidden friend where it is binary; `house-operator-form` | done |
 
 ### M5 - A generic embedded library on the ETL
 
@@ -116,6 +119,11 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
   `cppcoreguidelines-virtual-class-destructor`), together with the default member initializer
   and `= default` that `-Weffc++` does not know. Clang ignores the flag. The items are those of
   the 1998 edition, and the flag is known for warnings on correct code.
+- **Operators as hidden friends** (CodingStyle C-15), not as free functions on the public
+  interface nor as members: both operands convert alike, which a member's left one does not,
+  and a hidden friend is found only through its class, so the compiler does not weigh it for
+  every other `operator==`, nor lists it in their error messages. It is the one `friend` left
+  (C-12), and needs no accessor that exists only for the operator.
 - **copier, not a GitHub template**: a GitHub template is copied once and then drifts; copier
   updates a project as a three-way merge.
 - **The template's files under GPL-3.0-or-later**, as Utl's were; a project picks its own licence.

@@ -3,6 +3,37 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+Three rules of CodingStyle.md that clang-tidy now checks, by checks of our own: bits through one
+class, no `friend`, and one form per operator.
+
+- **Bits through one class, H-9:** no `&`, `|`, `^`, `~`, `<<` or `>>` on an integer outside the
+  bit class, nor `&=` and its like; `Bit<uint8_t>::SetBits(DDRB, _BV(DDB5))`, not
+  `DDRB |= _BV(DDB5)`. The class holds once what such an expression gets wrong: the promotion to
+  `int`, a shift as wide as the type, the read-modify-write of a register. A mask of named masks
+  may still be or'ed in a `constexpr`. `house-bitwise-in-bit-class` checks it; it takes any class
+  named `Bit` as the bit class, and leaves out the macros of a system header, as avr-libc's
+  `_BV()`, and the body of a type's own bitwise operator, as a `byte`'s.
+- **`Bit` in the skeleton:** `src/<namespace>/Bit.h`, Utl's class, with its tests, its cases of
+  what must not compile and two checks in SelfCheck; new is `Combine()`, the mask of up to four
+  masks.
+- **No `friend`, C-12:** but an operator defined in the class, a hidden friend.
+  `house-no-friend` checks it.
+- **One form per operator, C-15:** a member where it changes its operand or is unary, as `+=`,
+  `++` or `-x`; a hidden friend where it is binary and leaves its operands, as `+`, `==` or `<`.
+  `house-operator-form` checks it. Misra.md names the two checks at Rules 7.0.4 and 16.6.1.
+- **`tests/tidy_module/system/`:** a folder of system headers for the module's cases, as
+  avr-libc's are to a project.
+
+On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
+fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
+of its functions; a project with a bit class of another name sets
+`house-bitwise-in-bit-class.BitClasses` in `.clang-tidy`. Make each `friend` a public function,
+and each operator a member or a hidden friend as C-15 says. A project not ready yet turns a
+check off in `.clang-tidy`, with the reason, until it is (S-3). `src/` stays as it is: the
+skeleton's `Bit.h` comes only with `copier copy`.
+
 ## v0.5.1
 
 A project's CI gets its Ubuntu packages when the runners' mirrors do not answer: on 2026-11-11
