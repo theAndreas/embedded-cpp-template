@@ -5,6 +5,16 @@ brings it.
 
 ## Unreleased
 
+- **`make coverage` takes a function that each variant defines on another line,** as one under
+  an `#if` of the variant: the call that writes the tracefile merged the counts of the variants
+  without `--merge-mode-functions=separate`, which the reports pass, and gcovr stopped with an
+  error. Utl met it with `internal::Check()`, defined in two lines under `UTL_CHECK_ACCESS`
+  (Utl #63). In the template since v0.7.0.
+- **cpplint lets a NOLINT of a check of our own pass:** it reported `// NOLINT(house-...)` as
+  an unknown category, as it knows only the prefixes of clang-tidy's own checks, and T-3 asks
+  for such a NOLINT where a test checks the `=` itself. `tools/lint.sh` runs cpplint through
+  `tools/lib/cpplint_house.py`, which adds `house-` to them; a misspelled category of cpplint's
+  own is still reported. Utl turned `readability/nolint` off for it (Utl #63).
 - **C-12 lets a CRTP base befriend its derived class:** `bugprone-crtp-constructor-accessibility`
   asks a CRTP base for private constructors and `friend Self;`, so that only the derived class
   makes one, and `house-no-friend` reported that friend, so that a CRTP base failed one check or
@@ -12,7 +22,10 @@ brings it.
   a type parameter of the class template it lies in passes now; one of an enclosing template's
   is still reported.
 
-On the update: a NOLINT(house-no-friend) on a CRTP base's `friend Self;` can go.
+On the update: a project that fixed its copy of `tools/coverage.sh` as Utl did meets the same
+lines. A project that turned `readability/nolint` off for cpplint, as Utl did in `CPPLINT.cfg`,
+can take that line out again, and a NOLINT(house-no-friend) on a CRTP base's `friend Self;` can
+go.
 
 ## v0.10.1
 
