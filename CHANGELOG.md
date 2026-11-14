@@ -20,13 +20,18 @@ brings it.
   reason, the `extern` declaration in a header of an object identified by its address, whose
   definition lies in a `.cpp`. A project made from the template has no such object, and
   MaxMatrix has one, which carries its NOLINT. Utl keeps the exception as its own (Utl #59).
+- **`make tidy` reads every header of `src/`,** through `build/tidy/headers.cpp`, which
+  includes them all, with each target's flags: a header was read only where a source of `src/`
+  or `examples/` included it, so one of templates alone, which the tests include, was never
+  read. Utl had four findings in three such headers (Utl #61, #62); MaxMatrix none.
 
 On the update: a project that runs such cases itself can hand them to
 `add_compile_fail_tests()`, its `// Expected: ...` line naming the function. Read the members of
 each class that deletes its copy constructor for a reference or a `const`. Run `make tidy`
 before the update merges `.clang-tidy`: where `bugprone-dynamic-static-initializers` reports a
 declaration that is right, give the line a NOLINT with its reason, or, for a pattern of the
-project's, add the exception at the end of the list as the project's own, with its reason.
+project's, add the exception at the end of the list as the project's own, with its reason. `make tidy` may
+report a header that no source includes: fix it as any finding.
 
 ## v0.9.0
 
