@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.10.0
+
+What MaxMatrix, Utl and XmegaTimer found: cases of what must not compile stopped by a constant
+evaluation as well, where FN-15's check stops, `bugprone-dynamic-static-initializers` on, and the
+headers of any core as what `Arduino.h` provides.
 
 - **`add_compile_fail_tests()` takes a stop of a constant evaluation as well as a
   `static_assert`:** a case passes when an error, or a note on it, names what its
