@@ -3,6 +3,18 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`add_compile_fail_tests()` takes a stop of a constant evaluation as well as a
+  `static_assert`:** a case passes when an error, or a note on it, names what its
+  `// Expected: ...` line names, so a value that does not fit, which a `constexpr` function
+  stops by calling one that is not, is tested as a `static_assert` is. No `static_assert` can
+  test a function's argument; MaxMatrix ran such cases with a loop of its own for that (OIL 41).
+  A case that compiles, or stops with another error, still fails.
+
+On the update: nothing to do. A project that runs such cases itself can hand them to
+`add_compile_fail_tests()`, its `// Expected: ...` line naming the function.
+
 ## v0.9.0
 
 What bringing in XmegaTimer, on a third party's core, found in the template: the warnings of
