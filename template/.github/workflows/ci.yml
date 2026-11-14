@@ -137,10 +137,12 @@ jobs:
       - uses: actions/checkout@v7
 
       # "submit" while the library is not in the Library Manager; once it is, "update" adds the
-      # checks for a new release. Only for an Arduino library: one of CMake alone has no
-      # library.properties, and the Library Manager's rules are not its.
+      # checks for a new release, and "strict" as tools/arduino_lint.sh runs it, so that CI and
+      # `make arduino-lint` apply the same rules. Only for an Arduino library: one of CMake alone
+      # has no library.properties, and the Library Manager's rules are not its.
       - if: hashFiles('library.properties') != ''
         uses: arduino/arduino-lint-action@v3
         with:
           project-type: library
           library-manager: submit
+          compliance: strict
