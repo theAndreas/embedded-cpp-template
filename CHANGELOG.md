@@ -44,6 +44,9 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   8.9.1, which are now *Review*. New in *Covered by*: `cert-err34-c`, `cert-env33-c`,
   `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and two more, all on already.
   The deviation from Rule 4.1.1 names `-fno-exceptions -fno-rtti` on the AVR.
+- **The action target-setup asks for `ARG ARDUINO_CLI_VERSION` only where a target uses
+  arduino-cli.** It asked always, and a firmware of CMake and PlatformIO whose Dockerfile installs
+  no arduino-cli, as Wordclock's, failed every job that sets up its targets.
 
 On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
 fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
