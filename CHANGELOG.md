@@ -48,6 +48,11 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   arduino-cli.** It asked always, and a firmware of CMake and PlatformIO whose Dockerfile installs
   no arduino-cli, as Wordclock's, failed every job that sets up its targets.
 
+- **`.devcontainer/Dockerfile` builds without an `apt-packages.txt`:** it installs the list where
+  there is one, as before, and nothing where there is none. The template's repository builds the
+  same Dockerfile for its own container and has the list only as a template, so its container
+  no longer built.
+
 On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
 fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
 of its functions; a project with a bit class of another name sets

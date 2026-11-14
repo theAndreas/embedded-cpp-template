@@ -37,7 +37,7 @@ jobs:
 
       # As the Dockerfile of the template installs them, through the action a project's CI
       # installs with, so that a change to it is tried here before a project gets it; gcc-avr and
-      # avr-libc as apt-packages.txt names them for a library of CMake alone.
+      # avr-libc as .devcontainer/shared/install.sh installs them for the repository's container.
       - name: Install the tools from apt
         uses: ./template/.github/actions/apt-install
         with:
