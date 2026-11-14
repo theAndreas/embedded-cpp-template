@@ -21,6 +21,15 @@ On the update: nothing to do. A project that runs such cases itself can hand the
 `add_compile_fail_tests()`, its `// Expected: ...` line naming the function. Read the members of
 each class that deletes its copy constructor for a reference or a `const`.
 
+## Unreleased
+
+- **`misc-include-cleaner` takes the headers of any core as what `Arduino.h` provides,** as
+  `make examples` takes their warnings since v0.9.0: it took those of `cores/arduino/` alone, so
+  that a sketch on XMegaForArduino's core was told that no header provides `Serial`, which comes
+  from `cores/xmega/` (XmegaTimer OIL 2).
+
+On the update: nothing; a sketch on a third party's core loses findings it could not fix.
+
 ## v0.9.0
 
 What bringing in XmegaTimer, on a third party's core, found in the template: the warnings of
