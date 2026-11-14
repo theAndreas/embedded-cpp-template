@@ -3,6 +3,17 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **FN-15 names where its check stops:** `cppcoreguidelines-avoid-const-or-ref-data-members`
+  leaves out a class that can be neither copied nor moved, as one whose copy constructor is
+  deleted, while the rule allows a reference or a `const` member nowhere. Review covers that
+  case. MaxMatrix's `Batch` held its `Matrix` by reference like this, and no check reported it
+  (OIL 41).
+
+On the update: nothing to do. Read the members of each class that deletes its copy constructor
+for a reference or a `const`.
+
 ## v0.9.0
 
 What bringing in XmegaTimer, on a third party's core, found in the template: the warnings of
