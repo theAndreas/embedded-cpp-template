@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.8.0
 
 Three rules of CodingStyle.md that clang-tidy now checks, by checks of our own: bits through one
 class, no `friend`, and one form per operator; and a literal's suffix in lower case.
