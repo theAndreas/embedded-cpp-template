@@ -3,7 +3,7 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.8.0
 
 Three rules of CodingStyle.md that clang-tidy now checks, by checks of our own: bits through one
 class, no `friend`, and one form per operator; and a literal's suffix in lower case.
@@ -95,6 +95,18 @@ skeleton's `Bit.h` comes only with `copier copy`.
 
 And a `U` in a suffix is a finding of `make tidy` now; clang-tidy's `--fix`
 writes it as `u`, or `sed -E 's/\b(0[xX][0-9a-fA-F]+|[0-9]+)U(L{0,2})\b/\1u\2/g'` over the sources.
+
+And four things that came with the review of the repository:
+
+- `make tidy` reads the headers of `platform/` now and may find what it dropped before; fix it
+  as in any other file.
+- A `NOLINT`, a comment or a review that names TS-24 to TS-27 of the fuzzing names TS-28 to
+  TS-31 now, and one that names M-7 names M-6.
+- A firmware of PlatformIO with a target of `BUILD_SYSTEM="cmake"` adds `gcc-avr avr-libc` to
+  its `.devcontainer/apt-packages.txt`, which is the project's and which the update leaves
+  alone.
+- CI runs `make arduino-lint` with `--compliance strict`, which the action did not: an Arduino
+  library that passed CI before may fail there now, as `make check` failed it already.
 
 ## v0.7.5
 
