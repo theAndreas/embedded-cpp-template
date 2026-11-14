@@ -98,7 +98,7 @@ add_variant(default)
 # turns {{ macro_prefix }}_FUZZ on.
 add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY {{ namespace }}_default)
 
-add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARD gnu++17
+add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARDS gnu++17
                        INCLUDES ${CMAKE_SOURCE_DIR}/src)
 add_compile_warn_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_warn STANDARDS gnu++17
                        INCLUDES ${CMAKE_SOURCE_DIR}/src)
