@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.9.0
+
+What bringing in XmegaTimer, on a third party's core, found in the template: the warnings of
+such a core, the cores it needs beside its own, and warnings that only an instrumented build
+gives.
 
 - **`make examples` lets the warnings of a third party's core pass,** as it does those of
   Arduino's: it let only `cores/arduino/` pass, and XMegaForArduino's core warns in
