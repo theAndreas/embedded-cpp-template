@@ -18,6 +18,9 @@
 
 using {{ namespace }}::Clamp;
 
+// The registers' bits, through the library's class (CodingStyle H-9).
+using Bits = {{ namespace }}::Bit<uint8_t>;
+
 namespace {
 
 constexpr uint32_t kBaud{115200};
@@ -25,32 +28,27 @@ constexpr uint32_t kBaud{115200};
 uint8_t failed{0};
 
 #ifdef UDR0
-// The bit of a register, as avr-libc's _BV, typed as the 8 bits it is.
-constexpr uint8_t Bit(uint8_t number) {
-  return static_cast<uint8_t>(1u << number);
-}
-
 // The USART of a classic AVR, as the ATmega328P's, which simavr runs: double
 // speed, as 115200 baud at 16 MHz is far off without it.
 void Begin() {
-  UCSR0A = Bit(U2X0);
+  UCSR0A = Bits::ToMask(U2X0);
   UBRR0 = static_cast<uint16_t>((F_CPU / 8u / kBaud) - 1u);
-  UCSR0B = Bit(TXEN0);
+  UCSR0B = Bits::ToMask(TXEN0);
 }
 
 void Put(char character) {
-  while ((UCSR0A & Bit(UDRE0)) == 0u) {
+  while (!Bits::ReadBit(UCSR0A, UDRE0)) {
   }
   // Cleared by writing it one, before the last byte, so that End() waits for
   // the last byte rather than for one before it.
-  UCSR0A |= Bit(TXC0);
+  Bits::SetBits(UCSR0A, Bits::ToMask(TXC0));
   UDR0 = static_cast<uint8_t>(character);
 }
 
 // Waits for the last byte, then sleeps with interrupts off, which ends simavr;
 // on a board it just stops.
 void End() {
-  while ((UCSR0A & Bit(TXC0)) == 0u) {
+  while (!Bits::ReadBit(UCSR0A, TXC0)) {
   }
   cli();
   sleep_cpu();
@@ -66,7 +64,7 @@ void Begin() {
 }
 
 void Put(char character) {
-  while ((USART0.STATUS & USART_DREIF_bm) == 0u) {
+  while (Bits::ReadBitGroup(USART0.STATUS, USART_DREIF_bm) == 0u) {
   }
   USART0.STATUS = USART_TXCIF_bm;
   USART0.TXDATAL = static_cast<uint8_t>(character);
@@ -74,7 +72,7 @@ void Put(char character) {
 
 // Waits for the last byte, then stops, as simavr does not run the part.
 [[noreturn]] void End() {
-  while ((USART0.STATUS & USART_TXCIF_bm) == 0u) {
+  while (Bits::ReadBitGroup(USART0.STATUS, USART_TXCIF_bm) == 0u) {
   }
   cli();
   for (;;) {
@@ -119,6 +117,17 @@ int main() {
   Check(Clamp<int16_t>(value, 0, 10) == 10, "Clamp limits a value above");
   Check(Clamp<int16_t>(negative, 0, 10) == 0, "Clamp limits a value below");
   Check(Clamp<int16_t>(value, 0, 100) == 42, "Clamp keeps a value in range");
+
+  // Where the AVR differs from the host: an int of 16 bits, which the mask of
+  // a uint16_t's top bit must not be shifted in, and a register as a target.
+  uint16_t const volatile top{0x8000u};
+  Check({{ namespace }}::Bit<uint16_t>::ReadBit(top, 15),
+        "Bit reads the top bit of 16");
+  GPIOR0 = 0x81;
+  Bits::SetBits(GPIOR0, 0x0C);
+  bool const set{GPIOR0 == 0x8D};
+  Bits::ClearBits(GPIOR0, 0x81);
+  Check(set && GPIOR0 == 0x0C, "Bit sets and clears bits of a register");
 
   // Fewer than ten checks, so one digit says how many failed.
   Print("failed: ");

@@ -81,6 +81,9 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | C-8 | A source file is ASCII (CodingStyle.md F-10): a step of `make lint` that fails on a byte above 0x7F in a source, an example or a test, and names the file and the line. MaxMatrix had umlauts in its font, an example, a test script and a comment, found only by asking whether every rule of review was kept (its OIL 41) | open |
 | C-9 | Never Arduino's `byte` (CodingStyle.md T-17): a check of the house module that reports the type, not the word, so that a comment or a name that contains it passes; with C-5 it closes the integer types to review. MaxMatrix had it in 248 lines of `src/`, and its AGENTS.md asked for it | open |
 | C-10 | A project's notes in `AGENTS.md` depart from `docs/` only as a `NOLINT` departs from a check (S-1): naming the rule's id and the reason; a note without an id is no exception, and the template's rule holds. The template's `AGENTS.md` says so above "The project's own notes". MaxMatrix's notes asked for `byte` and UTF-8, against T-17 and F-10, and no one held them against the rules | open |
+| C-11 | Bits through one class (CodingStyle H-9): `house-bitwise-in-bit-class` reports a bitwise operator on an integer outside the class, `Bit` by default; but for a `\|` of named masks in a `constexpr`, a macro of a system header as `_BV()`, and the body of a type's own bitwise operator. `Bit` comes into the skeleton from Utl, with `Combine()` for a mask of masks | done |
+| C-12 | No `friend` but a hidden friend (CodingStyle C-12): `house-no-friend` | done |
+| C-13 | One form per operator (CodingStyle C-15): a member where it changes its operand or is unary, a hidden friend where it is binary; `house-operator-form` | done |
 
 ### M5 - A generic embedded library on the ETL
 
@@ -122,6 +125,11 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
   `cppcoreguidelines-virtual-class-destructor`), together with the default member initializer
   and `= default` that `-Weffc++` does not know. Clang ignores the flag. The items are those of
   the 1998 edition, and the flag is known for warnings on correct code.
+- **Operators as hidden friends** (CodingStyle C-15), not as free functions on the public
+  interface nor as members: both operands convert alike, which a member's left one does not,
+  and a hidden friend is found only through its class, so the compiler does not weigh it for
+  every other `operator==`, nor lists it in their error messages. It is the one `friend` left
+  (C-12), and needs no accessor that exists only for the operator.
 - **copier, not a GitHub template**: a GitHub template is copied once and then drifts; copier
   updates a project as a three-way merge.
 - **The template's files under GPL-3.0-or-later**, as Utl's were; a project picks its own licence.

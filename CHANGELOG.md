@@ -5,6 +5,9 @@ brings it.
 
 ## Unreleased
 
+Three rules of CodingStyle.md that clang-tidy now checks, by checks of our own: bits through one
+class, no `friend`, and one form per operator; and a literal's suffix in lower case.
+
 - **A literal's suffix is `u` and `L`: `192u`, `1000uL`, `1LL`** (CodingStyle T-22).
   `readability-uppercase-literal-suffix` asked for `192U`, which a hexadecimal value reads on as
   a digit; `NewSuffixes` keeps the `L` upper case, as MISRA 5.13.5 asks, and turns the `u` to
@@ -17,8 +20,40 @@ brings it.
 - **`make docs` counts warnings, not lines:** one that goes on over lines of its own was counted
   once per line, and the gaps let pass could come out negative. And with no `NAMESPACE` it no
   longer speaks of `::internal`.
+- **Bits through one class, H-9:** no `&`, `|`, `^`, `~`, `<<` or `>>` on an integer outside the
+  bit class, nor `&=` and its like; `Bit<uint8_t>::SetBits(DDRB, _BV(DDB5))`, not
+  `DDRB |= _BV(DDB5)`. The class holds once what such an expression gets wrong: the promotion to
+  `int`, a shift as wide as the type, the read-modify-write of a register. A mask of named masks
+  may still be or'ed in a `constexpr`. `house-bitwise-in-bit-class` checks it; it takes any class
+  named `Bit` as the bit class, and leaves out the macros of a system header, as avr-libc's
+  `_BV()`, and the body of a type's own bitwise operator, as a `byte`'s.
+- **`Bit` in the skeleton:** Utl's class, in `src/<namespace>/Bit.h` of a library and in
+  `src/Utility/Bit.h` of a firmware, with its tests and its cases of what must not compile; new
+  is `Combine()`, the mask of up to four masks. SelfCheck checks it on the AVR, and SelfCheck and
+  the firmware's `platform/avr/main.cpp` write their registers through it.
+- **No `friend`, C-12:** but an operator defined in the class, a hidden friend.
+  `house-no-friend` checks it.
+- **One form per operator, C-15:** a member where it changes its operand or is unary, as `+=`,
+  `++` or `-x`; a hidden friend where it is binary and leaves its operands, as `+`, `==` or `<`.
+  `house-operator-form` checks it. Misra.md names the two checks at Rules 7.0.4 and 16.6.1.
+- **`tests/tidy_module/system/`:** a folder of system headers for the module's cases, as
+  avr-libc's are to a project.
+- **Misra.md corrected:** Rule 9.5.1 is Advisory and 9.5.2 Required, not the
+  other way round; 16.5.1 is Required. Checks that find only some cases of a rule are marked
+  *in part*; `google-runtime-operator` does not cover 16.5.1, nor the pointer arithmetic check
+  8.9.1, which are now *Review*. New in *Covered by*: `cert-err34-c`, `cert-env33-c`,
+  `cert-err52-cpp`, `bugprone-unused-raii`, `misc-static-assert` and two more, all on already.
+  The deviation from Rule 4.1.1 names `-fno-exceptions -fno-rtti` on the AVR.
 
-On the update: a `U` in a suffix is a finding of `make tidy` now; clang-tidy's `--fix`
+On the update: `make tidy` runs the three new checks, as `.clang-tidy` turns on `house-*`, and
+fails where the code breaks the rules. Move each bitwise operator into the bit class, or to one
+of its functions; a project with a bit class of another name sets
+`house-bitwise-in-bit-class.BitClasses` in `.clang-tidy`. Make each `friend` a public function,
+and each operator a member or a hidden friend as C-15 says. A project not ready yet turns a
+check off in `.clang-tidy`, with the reason, until it is (S-3). `src/` stays as it is: the
+skeleton's `Bit.h` comes only with `copier copy`.
+
+And a `U` in a suffix is a finding of `make tidy` now; clang-tidy's `--fix`
 writes it as `u`, or `sed -E 's/\b(0[xX][0-9a-fA-F]+|[0-9]+)U(L{0,2})\b/\1u\2/g'` over the sources.
 
 ## v0.7.5
