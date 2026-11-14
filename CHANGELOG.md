@@ -28,6 +28,15 @@ before the update merges `.clang-tidy`: where `bugprone-dynamic-static-initializ
 declaration that is right, give the line a NOLINT with its reason, or, for a pattern of the
 project's, add the exception at the end of the list as the project's own, with its reason.
 
+## Unreleased
+
+- **`misc-include-cleaner` takes the headers of any core as what `Arduino.h` provides,** as
+  `make examples` takes their warnings since v0.9.0: it took those of `cores/arduino/` alone, so
+  that a sketch on XMegaForArduino's core was told that no header provides `Serial`, which comes
+  from `cores/xmega/` (XmegaTimer OIL 2).
+
+On the update: nothing; a sketch on a third party's core loses findings it could not fix.
+
 ## v0.9.0
 
 What bringing in XmegaTimer, on a third party's core, found in the template: the warnings of
