@@ -16,10 +16,17 @@ brings it.
   deleted, while the rule allows a reference or a `const` member nowhere. Review covers that
   case. MaxMatrix's `Batch` held its `Matrix` by reference like this, and no check reported it
   (OIL 41).
+- **`bugprone-dynamic-static-initializers` is on:** the template turned it off with Utl's
+  reason, the `extern` declaration in a header of an object identified by its address, whose
+  definition lies in a `.cpp`. A project made from the template has no such object, and
+  MaxMatrix has one, which carries its NOLINT. Utl keeps the exception as its own (Utl #59).
 
-On the update: nothing to do. A project that runs such cases itself can hand them to
+On the update: a project that runs such cases itself can hand them to
 `add_compile_fail_tests()`, its `// Expected: ...` line naming the function. Read the members of
-each class that deletes its copy constructor for a reference or a `const`.
+each class that deletes its copy constructor for a reference or a `const`. Run `make tidy`
+before the update merges `.clang-tidy`: where `bugprone-dynamic-static-initializers` reports a
+declaration that is right, give the line a NOLINT with its reason, or, for a pattern of the
+project's, add the exception at the end of the list as the project's own, with its reason.
 
 ## v0.9.0
 
