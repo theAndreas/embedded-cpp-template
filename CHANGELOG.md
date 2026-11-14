@@ -21,21 +21,18 @@ brings it.
   definition lies in a `.cpp`. A project made from the template has no such object, and
   MaxMatrix has one, which carries its NOLINT. Utl keeps the exception as its own (Utl #59).
 
-On the update: a project that runs such cases itself can hand them to
-`add_compile_fail_tests()`, its `// Expected: ...` line naming the function. Read the members of
-each class that deletes its copy constructor for a reference or a `const`. Run `make tidy`
-before the update merges `.clang-tidy`: where `bugprone-dynamic-static-initializers` reports a
-declaration that is right, give the line a NOLINT with its reason, or, for a pattern of the
-project's, add the exception at the end of the list as the project's own, with its reason.
-
-## Unreleased
-
 - **`misc-include-cleaner` takes the headers of any core as what `Arduino.h` provides,** as
   `make examples` takes their warnings since v0.9.0: it took those of `cores/arduino/` alone, so
   that a sketch on XMegaForArduino's core was told that no header provides `Serial`, which comes
   from `cores/xmega/` (XmegaTimer OIL 2).
 
-On the update: nothing; a sketch on a third party's core loses findings it could not fix.
+On the update: a project that runs such cases itself can hand them to
+`add_compile_fail_tests()`, its `// Expected: ...` line naming the function. Read the members of
+each class that deletes its copy constructor for a reference or a `const`. Run `make tidy`
+before the update merges `.clang-tidy`: where `bugprone-dynamic-static-initializers` reports a
+declaration that is right, give the line a NOLINT with its reason, or, for a pattern of the
+project's, add the exception at the end of the list as the project's own, with its reason. A
+sketch on a third party's core loses findings of `misc-include-cleaner` it could not fix.
 
 ## v0.9.0
 
