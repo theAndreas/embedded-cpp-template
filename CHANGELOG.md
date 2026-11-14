@@ -71,6 +71,8 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   `clamp_test.cpp` and `attributes_test.cpp` of a library, `test/Blinker/BlinkerTest.cpp` and
   `test/Utility/BitTest.cpp` of a firmware; they lay in `test/` itself. A project made before
   keeps its files where they are: `src/` and `test/` come with `copier copy` only.
+- **CodingStyle M-7 is M-6:** the cost of an entity in its block; M-6 had become H-6 and left a
+  gap. A comment or a review that names M-7 means M-6 now.
 - **`house-braced-var-init` fixes `char kName[] = {"font"}` to `= "font"`,** the form T-20 writes
   and `modernize-avoid-c-arrays` accepts; it wrote `{"font"}`, which that check reports.
   `house-bitwise-in-bit-class` names the project's bit class in its message, where
