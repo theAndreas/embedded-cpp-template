@@ -67,6 +67,10 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
   CMake builds beside those PlatformIO builds, as `tests/check.sh --platformio --targets` makes
   one; it had them for a project of CMake alone only. `platformio.ini` no longer speaks of a
   `-Werror` that `tools/lib/platformio.sh` does not pass.
+- **The skeleton's tests mirror `src/`, as TS-5 asks:** `test/<namespace>/BitTest.cpp`,
+  `clamp_test.cpp` and `attributes_test.cpp` of a library, `test/Blinker/BlinkerTest.cpp` and
+  `test/Utility/BitTest.cpp` of a firmware; they lay in `test/` itself. A project made before
+  keeps its files where they are: `src/` and `test/` come with `copier copy` only.
 - **`house-braced-var-init` fixes `char kName[] = {"font"}` to `= "font"`,** the form T-20 writes
   and `modernize-avoid-c-arrays` accepts; it wrote `{"font"}`, which that check reports.
   `house-bitwise-in-bit-class` names the project's bit class in its message, where

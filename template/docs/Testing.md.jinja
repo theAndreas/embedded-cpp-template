@@ -10,7 +10,7 @@ reasons for. Like CodingStyle.md, each rule has an id and says what checks it.
 
 | Kind | Where | Proves | Run by |
 |---|---|---|---|
-| **On the host** | `test/<Class>Test.cpp` and `test/<name>_test.cpp`, GoogleTest{% if arduino %} against the mock in `test/mock/`{% endif %} | What the {% if kind == 'firmware' %}code of `src/`{% else %}library{% endif %} computes: every function, every branch, every edge | `make tests`, `make clang`, `make sanitize`, `make coverage` |
+| **On the host** | `test/<Module>/<Class>Test.cpp` and `test/<Module>/<name>_test.cpp`, GoogleTest{% if arduino %} against the mock in `test/mock/`{% endif %} | What the {% if kind == 'firmware' %}code of `src/`{% else %}library{% endif %} computes: every function, every branch, every edge | `make tests`, `make clang`, `make sanitize`, `make coverage` |
 | **What must not compile** | `test/compile_fail/*.cpp` | That a misuse is stopped by the compiler, with the message it names | `make tests` |
 {%- if kind == 'library' %}
 | **What must warn** | `test/compile_warn/*.cpp` | That a mistake the compiler only warns of, as a dropped result, is reported, with the warning it names, in every standard the library is built in | `make tests` |
