@@ -3,6 +3,17 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`make coverage` takes a function that each variant defines on another line,** as one under
+  an `#if` of the variant: the call that writes the tracefile merged the counts of the variants
+  without `--merge-mode-functions=separate`, which the reports pass, and gcovr stopped with an
+  error. Utl met it with `internal::Check()`, defined in two lines under `UTL_CHECK_ACCESS`
+  (Utl #63). In the template since v0.7.0.
+
+On the update: nothing to do. A project that fixed its copy of `tools/coverage.sh` as Utl did
+meets the same lines.
+
 ## v0.10.1
 
 What came after v0.10.0 was tagged: `make tidy` reads a header that no source includes. It was
