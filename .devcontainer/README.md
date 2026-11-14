@@ -18,11 +18,9 @@ is in `template/.devcontainer/README.md.jinja`.
 
 What differs lies in `shared/`: the names of the volumes, the Jinja extension for the files in
 `template/`, and no `make setup` when the container is made, as the repository has no project
-of its own. And the Ubuntu packages of the repository's own: the build argument `APT_PACKAGES`
-names `template/.devcontainer/apt-packages.repo.txt` in place of a project's `apt-packages.txt`,
-which the repository has only as a template. It holds gcc-avr and avr-libc, which
-`tests/check.sh --no-arduino` and `--firmware` build with; the template's CI installs the same
-list. A site-specific variant passes the argument as well. The first `tests/check.sh` installs the Arduino core into the volume
+of its own. And the Ubuntu packages a project names in `.devcontainer/apt-packages.txt`, which
+the repository has only as a template: `shared/install.sh` installs gcc-avr and avr-libc, which
+`tests/check.sh --no-arduino` and `--firmware` build with, as the template's CI does. The first `tests/check.sh` installs the Arduino core into the volume
 `embedded-cpp-template-arduino15`, where it stays; uv's cache, the Codex, Claude Code and gh logins
 and the shell history have volumes of their own as well.
 

@@ -4,11 +4,7 @@
     // container never differs from theirs. Extensions, settings and volumes live in ../shared.
     "build": {
         "dockerfile": "../../template/.devcontainer/Dockerfile",
-        "context": "../../template/.devcontainer",
-        // The repository's own Ubuntu packages, as it has no project's apt-packages.txt.
-        "args": {
-            "APT_PACKAGES": "apt-packages.repo.txt"
-        }
+        "context": "../../template/.devcontainer"
     },
     // Nothing is mounted: this variant relies on VS Code's own SSH-agent forwarding.
     "features": {

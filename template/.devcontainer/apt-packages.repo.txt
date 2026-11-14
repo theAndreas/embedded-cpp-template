@@ -1,8 +1,0 @@
-# The Ubuntu packages of the template's repository, beside those the Dockerfile installs for every
-# project: its dev container builds the Dockerfile with APT_PACKAGES naming this file, and
-# .github/workflows/template.yml installs the same. A project gets apt-packages.txt instead, from
-# apt-packages.txt.jinja; copier.yml leaves this file out.
-
-# avr-gcc and avr-libc, which tests/check.sh needs for a library of CMake alone and a firmware:
-# cmake/toolchains/avr-gcc.cmake builds their targets with them.
-gcc-avr avr-libc

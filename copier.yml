@@ -36,8 +36,6 @@ _exclude:
   - __pycache__
   - .git
   - .DS_Store
-  # The template repository's own list of Ubuntu packages, for its dev container.
-  - /.devcontainer/apt-packages.repo.txt
   - "{% if _copier_operation == 'update' or not skeleton %}/src{% endif %}"
   - "{% if _copier_operation == 'update' or not skeleton %}/test{% endif %}"
   - "{% if _copier_operation == 'update' or not skeleton %}/examples/Basics{% endif %}"

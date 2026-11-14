@@ -2,7 +2,7 @@
     "id": "shared",
     "version": "1.0.0",
     "name": "embedded-cpp-template shared editor configuration",
-    "description": "Extensions, settings and the volumes for the Arduino data directory, uv's cache and logins shared by every devcontainer.json variant of the template repository.",
+    "description": "Extensions, settings, the volumes for the Arduino data directory, uv's cache and logins, and the repository's own Ubuntu packages, shared by every devcontainer.json variant of the template repository.",
     "customizations": {
         "vscode": {
             "extensions": [
