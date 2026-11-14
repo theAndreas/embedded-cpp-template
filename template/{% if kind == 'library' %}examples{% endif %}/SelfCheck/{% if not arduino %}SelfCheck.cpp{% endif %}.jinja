@@ -84,6 +84,16 @@ void Put(char character) {
 #error "SelfCheck knows no USART of this part."
 #endif
 
+// A register that no peripheral uses, for the checks to write bits into:
+// GPIOR0 of a classic AVR and of the megaAVR 0 series, GPR0 of the Dx series.
+uint8_t volatile& SpareRegister() {
+#ifdef GPIOR0
+  return GPIOR0;
+#else
+  return GPR_GPR0;
+#endif
+}
+
 void Print(char const* text) {
   // A C string, which without a standard library has no other way to be walked.
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -123,11 +133,12 @@ int main() {
   // a uint16_t's top bit must not be shifted in, and a register as a target.
   uint16_t const volatile top{0x8000u};
   Check(Bits16::ReadBit(top, 15), "Bit reads the top bit of 16");
-  GPIOR0 = 0x81;
-  Bits::SetBits(GPIOR0, 0x0C);
-  bool const set{GPIOR0 == 0x8D};
-  Bits::ClearBits(GPIOR0, 0x81);
-  Check(set && GPIOR0 == 0x0C, "Bit sets and clears bits of a register");
+  uint8_t volatile& spare{SpareRegister()};
+  spare = 0x81;
+  Bits::SetBits(spare, 0x0C);
+  bool const set{spare == 0x8D};
+  Bits::ClearBits(spare, 0x81);
+  Check(set && spare == 0x0C, "Bit sets and clears bits of a register");
 
   // Fewer than ten checks, so one digit says how many failed.
   Print("failed: ");
