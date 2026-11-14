@@ -61,8 +61,11 @@ class, no `friend`, and one form per operator; and a literal's suffix in lower c
 - **`make tidy` reads the headers of `platform/`:** `HeaderFilterRegex` of `.clang-tidy` named
   `src/` and `examples/` only, so a header of a firmware's backend was compiled and its findings
   dropped.
-- **arduino-lint in CI as `make arduino-lint` runs it,** `--compliance strict`: `ci.yml` left the
-  action at its default, so `make check` could fail where CI passed.
+- **CI runs `make arduino-lint`,** as a developer does, with arduino-lint installed by the new
+  action `arduino-lint-setup` at the version `.devcontainer/Dockerfile` pins, in place of
+  arduino-lint's own action with flags of its own: it ran without `--compliance strict`, so
+  `make check` could fail where CI passed. `tools/arduino_lint.sh` loses `--copy-only`, which
+  only that action needed.
 - **`apt-packages.txt` of a firmware of PlatformIO names `gcc-avr avr-libc`,** for a target that
   CMake builds beside those PlatformIO builds, as `tests/check.sh --platformio --targets` makes
   one; it had them for a project of CMake alone only. `platformio.ini` no longer speaks of a
