@@ -21,11 +21,16 @@ brings it.
   the other. Utl's three in `internal/fluent.h` carried a NOLINT for it (Utl #63). The friend of
   a type parameter of the class template it lies in passes now; one of an enclosing template's
   is still reported.
+- **H-9 names where a project's `Bit` lies when `copier copy` did not write it:** it named
+  `Bit` of `<namespace>/Bit.h`, which only the skeleton writes, and an update writes nothing into
+  `src/`; a project that came to the template earlier has a `Bit` of its own where its layout
+  puts it, as MaxMatrix in `Utility/Bit.h` (#109). H-9 now names that one, in the place the
+  project's `AGENTS.md` names.
 
 On the update: a project that fixed its copy of `tools/coverage.sh` as Utl did meets the same
 lines. A project that turned `readability/nolint` off for cpplint, as Utl did in `CPPLINT.cfg`,
 can take that line out again, and a NOLINT(house-no-friend) on a CRTP base's `friend Self;` can
-go.
+go. A project with a `Bit` of its own names its place in `AGENTS.md`.
 
 ## v0.10.1
 
