@@ -3,6 +3,17 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **cpplint lets a NOLINT of a check of our own pass:** it reported `// NOLINT(house-...)` as
+  an unknown category, as it knows only the prefixes of clang-tidy's own checks, and T-3 asks
+  for such a NOLINT where a test checks the `=` itself. `tools/lint.sh` runs cpplint through
+  `tools/lib/cpplint_house.py`, which adds `house-` to them; a misspelled category of cpplint's
+  own is still reported. Utl turned `readability/nolint` off for it (Utl #63).
+
+On the update: a project that turned `readability/nolint` off for this, as Utl did in
+`CPPLINT.cfg`, can take that line out again.
+
 ## v0.10.1
 
 What came after v0.10.0 was tagged: `make tidy` reads a header that no source includes. It was
