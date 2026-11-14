@@ -20,6 +20,7 @@ using {{ namespace }}::Clamp;
 
 // The registers' bits, through the library's class (CodingStyle H-9).
 using Bits = {{ namespace }}::Bit<uint8_t>;
+using Bits16 = {{ namespace }}::Bit<uint16_t>;
 
 namespace {
 
@@ -83,6 +84,17 @@ void Put(char character) {
 #error "SelfCheck knows no USART of this part."
 #endif
 
+// Whether Bit sets and clears bits of `target`, a register, and leaves the
+// others as they were. The register is handed in, not bound to a reference
+// variable, which clang's analyzer takes for a dereference of a fixed address.
+bool SetsAndClearsBits(uint8_t volatile& target) {
+  target = 0x81;
+  Bits::SetBits(target, 0x0C);
+  bool const set{target == 0x8D};
+  Bits::ClearBits(target, 0x81);
+  return set && target == 0x0C;
+}
+
 void Print(char const* text) {
   // A C string, which without a standard library has no other way to be walked.
   // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -121,13 +133,15 @@ int main() {
   // Where the AVR differs from the host: an int of 16 bits, which the mask of
   // a uint16_t's top bit must not be shifted in, and a register as a target.
   uint16_t const volatile top{0x8000u};
-  Check({{ namespace }}::Bit<uint16_t>::ReadBit(top, 15),
-        "Bit reads the top bit of 16");
-  GPIOR0 = 0x81;
-  Bits::SetBits(GPIOR0, 0x0C);
-  bool const set{GPIOR0 == 0x8D};
-  Bits::ClearBits(GPIOR0, 0x81);
-  Check(set && GPIOR0 == 0x0C, "Bit sets and clears bits of a register");
+  Check(Bits16::ReadBit(top, 15), "Bit reads the top bit of 16");
+  // A register that no peripheral uses: GPIOR0 of a classic AVR and of the
+  // megaAVR 0 series, GPR0 of the Dx series.
+#ifdef GPIOR0
+  bool const register_bits{SetsAndClearsBits(GPIOR0)};
+#else
+  bool const register_bits{SetsAndClearsBits(GPR_GPR0)};
+#endif
+  Check(register_bits, "Bit sets and clears bits of a register");
 
   // Fewer than ten checks, so one digit says how many failed.
   Print("failed: ");
