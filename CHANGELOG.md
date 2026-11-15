@@ -3,6 +3,15 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`make fuzz` builds the fuzzers alone:** the preset fuzz built the whole project with clang,
+  the tests and every program, only to run the fuzzers, and a project without one, as MaxMatrix,
+  waited 18 to 34 seconds of `make check` for nothing. It builds the target
+  `<namespace>_fuzzers` now, which `cmake/checks.cmake` makes whenever the fuzzers are on and
+  `add_fuzzers()` hangs each fuzzer on: a project that calls `add_fuzzers()` nowhere builds
+  nothing.
+
 ## v0.11.0
 
 What updating Utl and MaxMatrix to v0.10.1 found: `make coverage` with a function each variant
