@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.11.1
+
+A shorter `make check`: the fuzz build builds the fuzzers alone, the host builds go through
+ccache, and `make tidy` skips a file that passed before on the same input. And AVR-3 writes its
+example through `Bit`. A patch version: a project changes nothing of its own.
 
 - **`make fuzz` builds the fuzzers alone:** the preset fuzz built the whole project with clang,
   the tests and every program, only to run the fuzzers, and a project without one, as MaxMatrix,
