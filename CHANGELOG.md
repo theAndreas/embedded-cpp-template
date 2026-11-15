@@ -3,7 +3,12 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.11.0
+
+What updating Utl and MaxMatrix to v0.10.1 found: `make coverage` with a function each variant
+defines on another line, cpplint and a NOLINT of a check of our own, C-12 against a CRTP base,
+what must not compile in several standards, and where a project's `Bit` lies. A minor version: a
+project's `CMakeLists.txt` writes `STANDARDS` for `STANDARD`.
 
 - **`make coverage` takes a function that each variant defines on another line,** as one under
   an `#if` of the variant: the call that writes the tracefile merged the counts of the variants
