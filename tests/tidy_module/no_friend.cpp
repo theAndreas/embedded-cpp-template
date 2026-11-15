@@ -68,6 +68,57 @@ class Holder {
   };
 };
 
+// A derived class befriends its own CRTP base, a direct base whose template
+// argument is the class itself: the base reaches the hooks it calls, which stay
+// private to everyone else.
+template <typename Self>
+class Scaled {
+ public:
+  int Twice() const { return 2 * static_cast<Self const&>(*this).Value(); }
+};
+
+class Meters : public Scaled<Meters> {
+  friend Scaled<Meters>;
+
+  int Value() const { return 3; }
+};
+
+// In a class template: through an alias of the base, and by the injected name.
+template <typename Unit>
+class Length : public Scaled<Length<Unit>> {
+  using Base = Scaled<Length<Unit>>;
+  friend Base;
+
+  int Value() const { return 1; }
+};
+
+template <typename Unit>
+class Width : public Scaled<Width<Unit>> {
+  friend Scaled<Width>;
+
+  int Value() const { return 1; }
+};
+
+int Total() {
+  return Meters{}.Twice() + Length<int>{}.Twice() + Width<int>{}.Twice();
+}
+
+// A base of another class's, or no base at all, is not the class's own.
+class Feet : public Scaled<Meters> {
+  friend Scaled<Meters>;  // house: friend
+};
+
+class Yards {
+  friend Scaled<Yards>;  // house: friend
+};
+
+// A base that is no CRTP base.
+class Plain {};
+
+class Child : public Plain {
+  friend Plain;  // house: friend
+};
+
 }  // namespace crtp
 
 namespace reported {
