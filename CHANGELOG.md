@@ -3,6 +3,15 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **AVR-3 of `docs/targets/avr.md` writes its example through `Bit`:** it set the interrupt
+  bit with `TIMSK1 |= _BV(TOIE1)`, which H-9 forbids and `house-bitwise-in-bit-class` reports;
+  now `Bit<uint8_t>::SetBits(TIMSK1, _BV(TOIE1))`, as H-9 itself writes `DDRB`. Found on
+  AtmegaTimer's update to v0.10.1.
+
+On the update: nothing.
+
 ## v0.11.0
 
 What updating Utl and MaxMatrix to v0.10.1 found: `make coverage` with a function each variant
