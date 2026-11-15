@@ -21,6 +21,13 @@ brings it.
   into the debug information and `__FILE__`, so a debugger finds the sources from the project's
   root. Coverage builds hit only in their own folder, as gcovr needs their absolute paths. A
   build without ccache, as in CI, is unchanged.
+- **`make tidy` skips a file that passed before on the same input:** clang-tidy read every file
+  again on every run, 77 s of MaxMatrix's `make check` without a change. `tools/tidy.sh` calls
+  it through `tools/lib/tidy_cache.py`, which keeps a pass under the hash of the file as
+  preprocessed, comments and headers included, the compile command, the arguments, the
+  configuration clang-tidy reads for it, its version and the module of our own checks. A run
+  without a change takes seconds, also in another worktree; a finding is never kept and shows on
+  every run. The cache lies in `~/.cache/embedded-cpp-template/tidy`, which `make clean` keeps.
 
 On the update: rebuild the dev container for ccache; the build folders configure again on their own.
 

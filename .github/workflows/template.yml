@@ -63,6 +63,10 @@ jobs:
       - name: The checks of our own against their cases
         run: tests/tidy_module.py
 
+      # That the cache of tools/tidy.sh skips clang-tidy only where the result cannot differ.
+      - name: The cache of clang-tidy against its cases
+        run: tests/tidy_cache.py
+
       # A library of CMake alone, arduino=false: every check, and the checks that walk TARGETS for
       # an ATmega328P and an ATmega2560.
       - name: Make a library of CMake alone and check it
