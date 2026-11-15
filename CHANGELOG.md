@@ -5,6 +5,12 @@ brings it.
 
 ## Unreleased
 
+- **`make fuzz` builds the fuzzers alone:** the preset fuzz built the whole project with clang,
+  the tests and every program, only to run the fuzzers, and a project without one, as MaxMatrix,
+  waited 18 to 34 seconds of `make check` for nothing. It builds the target
+  `<namespace>_fuzzers` now, which `cmake/checks.cmake` makes whenever the fuzzers are on and
+  `add_fuzzers()` hangs each fuzzer on: a project that calls `add_fuzzers()` nowhere builds
+  nothing.
 - **AVR-3 of `docs/targets/avr.md` writes its example through `Bit`:** it set the interrupt
   bit with `TIMSK1 |= _BV(TOIE1)`, which H-9 forbids and `house-bitwise-in-bit-class` reports;
   now `Bit<uint8_t>::SetBits(TIMSK1, _BV(TOIE1))`, as H-9 itself writes `DDRB`. Found on
