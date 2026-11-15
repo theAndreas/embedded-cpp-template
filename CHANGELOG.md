@@ -11,6 +11,12 @@ brings it.
   `<namespace>_fuzzers` now, which `cmake/checks.cmake` makes whenever the fuzzers are on and
   `add_fuzzers()` hangs each fuzzer on: a project that calls `add_fuzzers()` nowhere builds
   nothing.
+- **AVR-3 of `docs/targets/avr.md` writes its example through `Bit`:** it set the interrupt
+  bit with `TIMSK1 |= _BV(TOIE1)`, which H-9 forbids and `house-bitwise-in-bit-class` reports;
+  now `Bit<uint8_t>::SetBits(TIMSK1, _BV(TOIE1))`, as H-9 itself writes `DDRB`. Found on
+  AtmegaTimer's update to v0.10.1.
+
+On the update: nothing.
 
 ## v0.11.0
 
