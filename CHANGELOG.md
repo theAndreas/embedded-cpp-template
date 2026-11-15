@@ -31,6 +31,12 @@ brings it.
   `src/`; a project that came to the template earlier has a `Bit` of its own where its layout
   puts it, as MaxMatrix in `Utility/Bit.h` (#109). H-9 now names that one, in the place the
   project's `AGENTS.md` names.
+- **`make fuzz` builds the fuzzers alone:** the preset fuzz built the whole project with clang,
+  the tests and every program, only to run the fuzzers, and a project without one, as MaxMatrix,
+  waited 18 to 34 seconds of `make check` for nothing. It builds the target
+  `<namespace>_fuzzers` now, which `cmake/checks.cmake` makes whenever the fuzzers are on and
+  `add_fuzzers()` hangs each fuzzer on: a project that calls `add_fuzzers()` nowhere builds
+  nothing.
 
 On the update: a project that fixed its copy of `tools/coverage.sh` as Utl did meets the same
 lines. A project that turned `readability/nolint` off for cpplint, as Utl did in `CPPLINT.cfg`,
