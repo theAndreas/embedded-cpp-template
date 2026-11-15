@@ -31,13 +31,20 @@ brings it.
   `src/`; a project that came to the template earlier has a `Bit` of its own where its layout
   puts it, as MaxMatrix in `Utility/Bit.h` (#109). H-9 now names that one, in the place the
   project's `AGENTS.md` names.
+- **The host builds go through ccache where it is installed,** which the dev container now is:
+  a build in a fresh clone or worktree takes from the cache what another one compiled, as long
+  as the sources are the same. For that, paths below the source folder are written relative to it
+  into the debug information and `__FILE__`, so a debugger finds the sources from the project's
+  root. Coverage builds hit only in their own folder, as gcovr needs their absolute paths. A
+  build without ccache, as in CI, is unchanged.
 
 On the update: a project that fixed its copy of `tools/coverage.sh` as Utl did meets the same
 lines. A project that turned `readability/nolint` off for cpplint, as Utl did in `CPPLINT.cfg`,
 can take that line out again, and a NOLINT(house-no-friend) on a CRTP base's `friend Self;` can
 go. `CMakeLists.txt` is the project's: write `STANDARDS` for `STANDARD` in its call of
 `add_compile_fail_tests()`, or the configuration stops and says so; a library adds `c++17`. A
-project with a `Bit` of its own names its place in `AGENTS.md`.
+project with a `Bit` of its own names its place in `AGENTS.md`. Rebuild the dev container for
+ccache; the build folders configure again on their own.
 
 ## v0.10.1
 

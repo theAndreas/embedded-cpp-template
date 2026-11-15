@@ -17,6 +17,21 @@ option({{ macro_prefix }}_COVERAGE "Build with --coverage, for gcovr" OFF)
 option({{ macro_prefix }}_SANITIZE "Build with AddressSanitizer and UBSan" OFF)
 option({{ macro_prefix }}_FUZZ "Build the fuzzers of test/fuzz/, with libFuzzer, ASan and UBSan" OFF)
 
+# ccache where it is installed, as in the dev container, so that a build that compiles what an
+# earlier one compiled, in another clone, worktree or build folder, takes it from the cache. Paths
+# below the source folder are hashed relative to it (base_dir), and written so into the debug
+# information and __FILE__ (-ffile-prefix-map): with -g, ccache otherwise hashes the absolute
+# folder, and no other worktree ever hits. A debugger finds the sources from the project's root.
+# Not under --coverage, whose notes need the absolute paths for gcovr; ccache hits there only in
+# the same folder. A launcher set by the caller wins.
+find_program(CHECK_CCACHE ccache)
+if(CHECK_CCACHE AND NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${CHECK_CCACHE} base_dir=${CMAKE_SOURCE_DIR})
+  if(NOT {{ macro_prefix }}_COVERAGE)
+    add_compile_options(-ffile-prefix-map=${CMAKE_SOURCE_DIR}/=)
+  endif()
+endif()
+
 # -Wconversion and -Wsign-conversion above all: an int has 16 bits on the AVR, and a
 # conversion that is harmless on the host can lose a value there. Braced initialization finds
 # a narrowing only where a variable is initialized, not in the arithmetic after it. -Wshadow,
