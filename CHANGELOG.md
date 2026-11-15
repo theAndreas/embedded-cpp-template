@@ -5,6 +5,22 @@ brings it.
 
 ## Unreleased
 
+- **`make fuzz` builds the fuzzers alone:** the preset fuzz built the whole project with clang,
+  the tests and every program, only to run the fuzzers, and a project without one, as MaxMatrix,
+  waited 18 to 34 seconds of `make check` for nothing. It builds the target
+  `<namespace>_fuzzers` now, which `cmake/checks.cmake` makes whenever the fuzzers are on and
+  `add_fuzzers()` hangs each fuzzer on: a project that calls `add_fuzzers()` nowhere builds
+  nothing.
+- **AVR-3 of `docs/targets/avr.md` writes its example through `Bit`:** it set the interrupt
+  bit with `TIMSK1 |= _BV(TOIE1)`, which H-9 forbids and `house-bitwise-in-bit-class` reports;
+  now `Bit<uint8_t>::SetBits(TIMSK1, _BV(TOIE1))`, as H-9 itself writes `DDRB`. Found on
+  AtmegaTimer's update to v0.10.1.
+- **The host builds go through ccache where it is installed,** which the dev container now is:
+  a build in a fresh clone or worktree takes from the cache what another one compiled, as long
+  as the sources are the same. For that, paths below the source folder are written relative to it
+  into the debug information and `__FILE__`, so a debugger finds the sources from the project's
+  root. Coverage builds hit only in their own folder, as gcovr needs their absolute paths. A
+  build without ccache, as in CI, is unchanged.
 - **`make tidy` skips a file that passed before on the same input:** clang-tidy read every file
   again on every run, 77 s of MaxMatrix's `make check` without a change. `tools/tidy.sh` calls
   it through `tools/lib/tidy_cache.py`, which keeps a pass under the hash of the file as
@@ -12,6 +28,8 @@ brings it.
   configuration clang-tidy reads for it, its version and the module of our own checks. A run
   without a change takes seconds, also in another worktree; a finding is never kept and shows on
   every run. The cache lies in `~/.cache/embedded-cpp-template/tidy`, which `make clean` keeps.
+
+On the update: rebuild the dev container for ccache; the build folders configure again on their own.
 
 ## v0.11.0
 
