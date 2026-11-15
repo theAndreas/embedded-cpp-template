@@ -21,6 +21,11 @@ brings it.
   the other. Utl's three in `internal/fluent.h` carried a NOLINT for it (Utl #63). The friend of
   a type parameter of the class template it lies in passes now; one of an enclosing template's
   is still reported.
+- **`add_compile_fail_tests()` takes `STANDARDS std...`,** as `add_compile_warn_tests()` does,
+  and makes a test per case and standard, `compile_fail/<name>/<standard>`: a project built in
+  gnu++11 and tested in C++17 checked what must not compile in one of them. MaxMatrix ran both
+  with a loop of its own, and lost the C++17 run when it took the template's function (#109). A
+  library made from the template runs both.
 - **H-9 names where a project's `Bit` lies when `copier copy` did not write it:** it named
   `Bit` of `<namespace>/Bit.h`, which only the skeleton writes, and an update writes nothing into
   `src/`; a project that came to the template earlier has a `Bit` of its own where its layout
@@ -30,7 +35,9 @@ brings it.
 On the update: a project that fixed its copy of `tools/coverage.sh` as Utl did meets the same
 lines. A project that turned `readability/nolint` off for cpplint, as Utl did in `CPPLINT.cfg`,
 can take that line out again, and a NOLINT(house-no-friend) on a CRTP base's `friend Self;` can
-go. A project with a `Bit` of its own names its place in `AGENTS.md`.
+go. `CMakeLists.txt` is the project's: write `STANDARDS` for `STANDARD` in its call of
+`add_compile_fail_tests()`, or the configuration stops and says so; a library adds `c++17`. A
+project with a `Bit` of its own names its place in `AGENTS.md`.
 
 ## v0.10.1
 
