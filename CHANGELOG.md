@@ -15,8 +15,14 @@ brings it.
   bit with `TIMSK1 |= _BV(TOIE1)`, which H-9 forbids and `house-bitwise-in-bit-class` reports;
   now `Bit<uint8_t>::SetBits(TIMSK1, _BV(TOIE1))`, as H-9 itself writes `DDRB`. Found on
   AtmegaTimer's update to v0.10.1.
+- **The host builds go through ccache where it is installed,** which the dev container now is:
+  a build in a fresh clone or worktree takes from the cache what another one compiled, as long
+  as the sources are the same. For that, paths below the source folder are written relative to it
+  into the debug information and `__FILE__`, so a debugger finds the sources from the project's
+  root. Coverage builds hit only in their own folder, as gcovr needs their absolute paths. A
+  build without ccache, as in CI, is unchanged.
 
-On the update: nothing.
+On the update: rebuild the dev container for ccache; the build folders configure again on their own.
 
 ## v0.11.0
 
