@@ -122,13 +122,13 @@ add_variant(default)
 # turns {{ macro_prefix }}_FUZZ on.
 add_fuzzers(DIRECTORY ${CMAKE_SOURCE_DIR}/test/fuzz LIBRARY {{ namespace }}_default)
 
-add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARD gnu++11
+# Both in gnu++11, as a sketch is built, and in C++17, as the tests are.
+add_compile_fail_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_fail STANDARDS gnu++11 c++17
 {%- if arduino %}
                        INCLUDES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test/mock)
 {%- else %}
                        INCLUDES ${CMAKE_SOURCE_DIR}/src)
 {%- endif %}
-# In gnu++11, as a sketch is built, and in C++17, as the tests are.
 add_compile_warn_tests(DIRECTORY ${CMAKE_SOURCE_DIR}/test/compile_warn STANDARDS gnu++11 c++17
 {%- if arduino %}
                        INCLUDES ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/test/mock)
