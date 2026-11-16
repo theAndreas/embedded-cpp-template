@@ -3,6 +3,19 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **C-12 lets a class befriend its own CRTP base:** a CRTP base calls hooks of its derived class,
+  which the class keeps private with `friend Base;`, so that a sketch or a test cannot call them;
+  `house-no-friend` reported that friend, and the hooks had to be public to pass. The friend of a
+  direct base whose class template takes the class itself as an argument passes now, written as
+  the base, through an alias or with the injected name; a base of another class, or a class that
+  is no base, is still reported. The derived side of v0.11.0's `friend Self;`. AtmegaTimer's
+  modes befriend their core so, and kept `house-no-friend` off for it (AtmegaTimer A-13).
+
+On the update: a NOLINT(house-no-friend) on a class's `friend` of its own CRTP base can go, and a
+project that turned the check off for it turns it on again.
+
 ## v0.11.1
 
 A shorter `make check`: the fuzz build builds the fuzzers alone, the host builds go through
