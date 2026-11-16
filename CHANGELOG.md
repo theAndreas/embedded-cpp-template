@@ -10,9 +10,14 @@ brings it.
   includes, and include-cleaner asked a file that wrote `SREG` for that header, though
   `<avr/io.h>` is the one to include. Found in MaxMatrix, which saves and restores `SREG` around
   a write to a port.
+- **ccache keeps its cache across a rebuild of the dev container:** it lay in
+  `~/.cache/ccache` on the container's own file system, which a rebuild throws away, so the first
+  `make check` after one compiled every host build again. The volume `<namespace>-ccache` keeps
+  it, as `<namespace>-uv-cache` keeps uv's.
 
-On the update: nothing to do. A project that added `avr/common.h` to `IgnoreHeaders` itself, or
-included it, can drop that.
+On the update: rebuild the dev container; the volume of ccache starts empty and fills with the
+first build. A project that added `avr/common.h` to `IgnoreHeaders` itself, or included it, can
+drop that.
 
 ## v0.12.0
 

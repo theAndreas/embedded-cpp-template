@@ -74,6 +74,11 @@
             "type": "volume"
         },
         {
+            "source": "embedded-cpp-template-ccache",
+            "target": "/home/vscode/.cache/ccache",
+            "type": "volume"
+        },
+        {
             "source": "embedded-cpp-template-codex",
             "target": "/home/vscode/.codex",
             "type": "volume"
