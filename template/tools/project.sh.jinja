@@ -12,8 +12,8 @@
 #   TARGETS              the targets the project is built for, each a name of lower case,
 #                        digits and -, which names its folders of build/; one, board, if not
 #                        set. Each takes the settings below, from BUILD_SYSTEM to
-#                        SELF_CHECK_EXAMPLE, as they are set here, and target_settings()
-#                        changes them for a target
+#                        EXAMPLES, as they are set here, and target_settings() changes them
+#                        for a target
 #   BUILD_SYSTEM         what builds a target: arduino-cli, cmake with a toolchain file, or
 #                        platformio through a platformio.ini
 #   CMAKE_TOOLCHAIN      for cmake: the toolchain file, as cmake/toolchains/avr-gcc.cmake
@@ -31,6 +31,10 @@
 #   SIMAVR_FREQUENCY     its clock, in Hz
 #   DATABASE_EXAMPLE     for arduino-cli: the example whose flags tools/tidy.sh takes for all
 #   SELF_CHECK_EXAMPLE   the example tools/self_check.sh runs
+#   EXAMPLES             for arduino-cli: the examples the target compiles and clang-tidy reads
+#                        with its flags, names of folders of examples/; all of them if not set.
+#                        An example of one board's alone, as of a timer only it has, is left
+#                        out of the others'; one that no target compiles fails make tidy
 #   VARIANTS             the builds every example is compiled in, see variant_flags()
 #   TIDY_VARIANTS        the variants clang-tidy and cppcheck read: those whose defines change
 #                        the code. clangd reads the database of the first, on the first target

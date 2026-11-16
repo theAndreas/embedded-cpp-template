@@ -3,6 +3,21 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`EXAMPLES` in `tools/project.sh`: the examples a target compiles.** An example of one board
+  alone, as one of a timer only the Mega has, stops the compiler for any other board: `make
+  examples` compiled every example for every target, and `make tidy` read every one with each
+  target's flags, so a project of several targets could have none. `target_settings()` sets
+  `EXAMPLES` to the names of the folders of `examples/` a target compiles, all of them if it
+  does not. `make examples`, the table of sizes and clang-tidy take those alone; an example
+  that a target leaves out has empty cells in its columns. A name that is no folder of
+  `examples/` fails, and so does an example that no target compiles, as clang-tidy would never
+  read it. For AtmegaTimer's examples of Timer3 to Timer5 (its ROADMAP A-9).
+
+On the update: nothing to do. A project that sets no `EXAMPLES` compiles every example for
+every target, as before.
+
 ## v0.11.3
 
 The dev container keeps the Python tools in an environment of its own, so that a `.venv` made on
