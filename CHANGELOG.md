@@ -3,6 +3,18 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **The dev container keeps the Python tools in `.venv-devcontainer`:** the workspace is the
+  host's folder, and a `.venv` that uv made on the host names the host's paths in its scripts.
+  uv took it as current, and in the container clang-tidy, cpplint, copier and the others failed
+  to start, `make tidy` with `Failed to spawn: clang-tidy`; found in AtmegaTimer, whose `.venv`
+  came from the host. `UV_PROJECT_ENVIRONMENT` gives the container an environment of its own,
+  relative, so that each worktree has its own as before. `.gitignore` ignores it.
+
+On the update: rebuild the dev container, whose `postCreateCommand` makes `.venv-devcontainer`. A
+`.venv` the container made before can go; one of the host stays the host's.
+
 ## v0.11.2
 
 A class may befriend its own CRTP base (C-12), so that `house-no-friend` passes a `friend Base;`
