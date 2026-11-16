@@ -14,7 +14,8 @@
 # self-check; all of what `make check` runs if none is given. With --keep the project is left in
 # build/Demo for a look, else it is removed. With --targets the project is built for two targets
 # rather than one, an Uno and a Mega, as tools/project.sh describes a second target: the same
-# core, so that it costs no download, and each run in simavr. With --no-arduino the project is
+# core, so that it costs no download, and each run in simavr; and with an example for the Mega
+# alone, which the Uno's EXAMPLES leave out. With --no-arduino the project is
 # a library of CMake alone (arduino=false): built by avr-gcc from apt with the template's
 # toolchain file, its examples programs of their own; with --targets as well, for an ATmega328P
 # and an ATmega2560, both run in simavr, and an AVR128DA48, which takes the other branch of
@@ -48,18 +49,36 @@ run_check() {
 }
 
 # What tools/project.sh of the project gets with --targets, after what the template wrote: the
-# text of a function, expanded by the project's shell, not this one.
+# text of a function, expanded by the project's shell, not this one. The Uno leaves out the
+# example of the Mega, MEGA_EXAMPLE, which does not compile for it.
 # shellcheck disable=SC2016
 readonly TWO_TARGETS='
 TARGETS=(uno mega)
 target_settings() {
   case "$1" in
+    uno)
+      EXAMPLES=(Basics SelfCheck)
+      ;;
     mega)
       FQBN="arduino:avr:mega"
       SIMAVR_MCU="atmega2560"
       ;;
   esac
 }'
+# An example for the Mega alone, which the project gets with --targets: it stops the compiler
+# for any other board, so that make examples and make tidy show that the Uno leaves it out.
+readonly MEGA_EXAMPLE='// Copyright 2026 Andreas Burnickl
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Does nothing, on the Mega alone.
+
+#ifndef __AVR_ATmega2560__
+#error "This example needs the ATmega2560 of the Mega"
+#endif
+
+void setup() {}
+
+void loop() {}'
 # The same for a firmware.
 # shellcheck disable=SC2016
 readonly TWO_FIRMWARE_TARGETS='
@@ -157,6 +176,8 @@ main() {
       echo "${TWO_FIRMWARE_TARGETS}" >> tools/project.sh
     elif [[ "${arduino}" == true ]]; then
       echo "${TWO_TARGETS}" >> tools/project.sh
+      mkdir -p examples/Mega
+      echo "${MEGA_EXAMPLE}" > examples/Mega/Mega.ino
     else
       echo "${TWO_CMAKE_TARGETS}" >> tools/project.sh
     fi
