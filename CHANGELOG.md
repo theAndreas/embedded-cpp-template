@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.11.3
+
+The dev container keeps the Python tools in an environment of its own, so that a `.venv` made on
+the host no longer stops them from starting. A patch version: a project changes nothing of its
+own, and rebuilds its dev container.
 
 - **The dev container keeps the Python tools in `.venv-devcontainer`:** the workspace is the
   host's folder, and a `.venv` that uv made on the host names the host's paths in its scripts.
