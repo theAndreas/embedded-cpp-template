@@ -3,6 +3,17 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`misc-include-cleaner` leaves out `avr/common.h`, as `avr/io*.h`:** avr-libc keeps `SREG`,
+  the stack pointer and the other registers every AVR has in `avr/common.h`, which `<avr/io.h>`
+  includes, and include-cleaner asked a file that wrote `SREG` for that header, though
+  `<avr/io.h>` is the one to include. Found in MaxMatrix, which saves and restores `SREG` around
+  a write to a port.
+
+On the update: nothing to do. A project that added `avr/common.h` to `IgnoreHeaders` itself, or
+included it, can drop that.
+
 ## v0.12.0
 
 A project of several targets can have an example for one board alone: `EXAMPLES` names the
