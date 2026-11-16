@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.11.2
+
+A class may befriend its own CRTP base (C-12), so that `house-no-friend` passes a `friend Base;`
+that kept hooks private. A patch version: a project changes nothing of its own; one that turned
+the check off or wrote a NOLINT for such a friend can undo that.
 
 - **C-12 lets a class befriend its own CRTP base:** a CRTP base calls hooks of its derived class,
   which the class keeps private with `friend Base;`, so that a sketch or a test cannot call them;
