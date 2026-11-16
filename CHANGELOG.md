@@ -14,6 +14,12 @@ brings it.
   `~/.cache/ccache` on the container's own file system, which a rebuild throws away, so the first
   `make check` after one compiled every host build again. The volume `<namespace>-ccache` keeps
   it, as `<namespace>-uv-cache` keeps uv's.
+- **`make setup` tries a download three times:** arduino-cli gives up at once where a server
+  resets the connection, and a single reset of `core update-index` failed the dev container's
+  `postCreateCommand` on a rebuild of MaxMatrix; VS Code then skipped everything after it, the
+  compilation databases, and on that attach the copy of `.gitconfig` and `gh auth setup-git`.
+  `download` in `tools/common.sh` runs a command that downloads again after 10 and 20 seconds;
+  arduino-cli's setup and PlatformIO's go through it, and a third failure still fails.
 
 On the update: rebuild the dev container; the volume of ccache starts empty and fills with the
 first build. A project that added `avr/common.h` to `IgnoreHeaders` itself, or included it, can
