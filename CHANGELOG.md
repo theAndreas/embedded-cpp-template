@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.12.1
+
+A rebuild of the dev container keeps ccache's cache and survives a download that fails once, and
+`misc-include-cleaner` takes `SREG` from `<avr/io.h>`. A patch version: a project changes nothing
+of its own, and rebuilds its dev container.
 
 - **`misc-include-cleaner` leaves out `avr/common.h`, as `avr/io*.h`:** avr-libc keeps `SREG`,
   the stack pointer and the other registers every AVR has in `avr/common.h`, which `<avr/io.h>`
