@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.12.0
+
+A project of several targets can have an example for one board alone: `EXAMPLES` names the
+examples a target compiles. A minor version, for the new setting; a project that sets none
+changes nothing.
 
 - **`EXAMPLES` in `tools/project.sh`: the examples a target compiles.** An example of one board
   alone, as one of a timer only the Mega has, stops the compiler for any other board: `make
