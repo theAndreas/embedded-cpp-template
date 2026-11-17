@@ -3,6 +3,20 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`Misra.md` claims for a check only what the check finds.** Five rows named a tool that misses
+  part of the rule, measured against the tools: `-Wsign-conversion` reports a signed operand
+  that turns unsigned, not the promotion of a `uint8_t` to `int` (7.0.5); `-Wunused-result` only
+  a result marked as FN-10 asks (0.1.2); `-Wcomma` and `readability-isolate-declaration` leave
+  out the head of a `for` loop (8.19.1, 10.0.1); and cpplint's `runtime/explicit` a conversion
+  operator (15.1.3). Each now says *in part* and what review takes. 7.0.5 and 0.1.2 are
+  deviations of the template, with their reasons: a cast at every promotion would hide the
+  computation, which T-19 already widens where it could overflow, and FN-10 marks only what is a
+  mistake to drop. CodingStyle C-4 names the conversion operator beside the constructor.
+
+On the update: nothing to do; a project that keeps its own `Misra.md` takes the rows over.
+
 ## v0.13.0
 
 `house-operator-precedence` holds MISRA C++:2023 Rule 8.0.1 in full: an operand that is an
