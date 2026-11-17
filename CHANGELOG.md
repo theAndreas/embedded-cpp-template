@@ -22,9 +22,14 @@ brings it.
   added later, but the row named T-15 as if it covered the rule. It now says why the template
   departs from it there, and that the rest of the structure of a `switch`, as where its labels
   stand and how many branches it has, is left to review.
+- **`house-else-if-without-else`: an `if … else if` chain ends with `else` (CodingStyle T-24,
+  MISRA C++:2023 9.4.1).** As a `switch` has its `default`, the chain says what happens when no
+  condition holds; an empty `else` says in a comment why nothing does. `Misra.md` left the rule
+  to review, as `hicpp-multiway-paths-covered`, which checked it, is gone in clang-tidy 23.
 
-
-On the update: nothing to do; a project that keeps its own `Misra.md` takes the rows over.
+On the update: `make tidy` reports the `if` of every chain that lacks its `else`, without a
+fix-it, as only the author knows what the `else` does. A project that keeps its own `Misra.md`
+takes the rows over.
 
 ## v0.13.0
 
