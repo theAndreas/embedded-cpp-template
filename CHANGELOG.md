@@ -14,6 +14,9 @@ brings it.
   deviations of the template, with their reasons: a cast at every promotion would hide the
   computation, which T-19 already widens where it could overflow, and FN-10 marks only what is a
   mistake to drop. CodingStyle C-4 names the conversion operator beside the constructor.
+- **The update note of v0.13.0 says how to take out parentheses put in twice:** a run of
+  `clang-tidy --fix` over several files puts the parentheses twice into a header they share. The
+  note now says how to take the second pair out.
 
 On the update: nothing to do; a project that keeps its own `Misra.md` takes the rows over.
 
@@ -34,8 +37,11 @@ check's fix-its to its own code, as below.
 
 On the update: `make tidy` reports every operand that lacks its parentheses, each with a fix-it;
 `clang-tidy --load=build/tidy/module/house.so --checks='-*,house-operator-precedence' --fix
--p <database> <file>` applies them, and `make fmt` lays the result out. A project that wants the
-precedence implicit somewhere suppresses the check for the line, with its reason (S-1).
+-p <database> <file>` applies them, and `make fmt` lays the result out. A run over several files
+that include the same header puts its parentheses in twice, once per file: a second run with
+`--checks='-*,readability-redundant-parentheses' --fix` takes the second pair out. A project
+that wants the precedence implicit somewhere suppresses the check for the line, with its reason
+(S-1).
 
 ## v0.12.1
 
