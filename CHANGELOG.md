@@ -3,6 +3,22 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`house-operator-precedence`: parentheses that make the precedence explicit (CodingStyle T-23,
+  MISRA C++:2023 8.0.1).** An operand that is itself an operation of higher precedence stands in
+  parentheses: `(a == b) && ready`, `(x + 1) < limit`, `ready ? (a + b) : c`, and the operand of
+  `sizeof`. `Misra.md` named `readability-math-missing-parentheses` for the rule, which holds only
+  arithmetic and bits mixed, so that a comparison in `&&` or `||` and the operands of `?:` passed
+  every check. The new check holds the rule in full, for built-in and overloaded operators, with a
+  fix-it, and `readability-math-missing-parentheses` is off, as a part of it. The example of T-18
+  puts its comparisons in parentheses as well.
+
+On the update: `make tidy` reports every operand that lacks its parentheses, each with a fix-it;
+`clang-tidy --load=build/tidy/module/house.so --checks='-*,house-operator-precedence' --fix
+-p <database> <file>` applies them, and `make fmt` lays the result out. A project that wants the
+precedence implicit somewhere suppresses the check for the line, with its reason (S-1).
+
 ## v0.12.1
 
 A rebuild of the dev container keeps ccache's cache and survives a download that fails once, and
