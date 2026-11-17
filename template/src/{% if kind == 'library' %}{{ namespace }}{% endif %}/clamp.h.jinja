@@ -29,7 +29,7 @@ namespace {{ namespace }} {
  */
 template <typename Value>
 {{ macro_prefix }}_NODISCARD constexpr Value Min(Value a, Value b) {
-  return b < a ? b : a;
+  return (b < a) ? b : a;
 }
 
 /*!
@@ -42,7 +42,7 @@ template <typename Value>
  */
 template <typename Value>
 {{ macro_prefix }}_NODISCARD constexpr Value Max(Value a, Value b) {
-  return a < b ? b : a;
+  return (a < b) ? b : a;
 }
 
 /*!

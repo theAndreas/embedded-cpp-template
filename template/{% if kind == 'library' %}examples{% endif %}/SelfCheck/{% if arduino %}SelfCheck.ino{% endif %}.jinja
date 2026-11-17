@@ -47,7 +47,7 @@ void setup() {
   Bit<uint8_t>::SetBits(GPIOR0, 0x0C);
   bool const set{GPIOR0 == 0x8D};
   Bit<uint8_t>::ClearBits(GPIOR0, 0x81);
-  Check(set && GPIOR0 == 0x0C, F("Bit sets and clears bits of a register"));
+  Check(set && (GPIOR0 == 0x0C), F("Bit sets and clears bits of a register"));
 
   Serial.print(F("failed: "));
   Serial.println(failed);

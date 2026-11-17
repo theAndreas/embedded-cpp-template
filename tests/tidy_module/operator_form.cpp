@@ -93,7 +93,7 @@ bool Same(Box<int> a, Box<int> b) { return (a += b) == b; }
 // An enum can have no friend: its operators are free functions.
 enum class Mode : unsigned char { kOff, kOn };
 inline Mode operator~(Mode mode) {
-  return mode == Mode::kOff ? Mode::kOn : Mode::kOff;
+  return (mode == Mode::kOff) ? Mode::kOn : Mode::kOff;
 }
 inline bool operator<(Mode a, Mode b) {
   return static_cast<unsigned char>(a) < static_cast<unsigned char>(b);
