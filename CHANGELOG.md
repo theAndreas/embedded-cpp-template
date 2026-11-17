@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.13.0
+
+`house-operator-precedence` holds MISRA C++:2023 Rule 8.0.1 in full: an operand that is an
+operation of higher precedence stands in parentheses. A minor version: a project applies the
+check's fix-its to its own code, as below.
 
 - **`house-operator-precedence`: parentheses that make the precedence explicit (CodingStyle T-23,
   MISRA C++:2023 8.0.1).** An operand that is itself an operation of higher precedence stands in
