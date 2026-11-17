@@ -14,6 +14,7 @@
 #include "no_friend_check.h"
 #include "operator_form_check.h"
 #include "operator_precedence_check.h"
+#include "unary_minus_unsigned_check.h"
 
 namespace house {
 namespace {
@@ -32,6 +33,8 @@ class HouseModule : public clang::tidy::ClangTidyModule {
     factories.registerCheck<OperatorFormCheck>("house-operator-form");
     factories.registerCheck<OperatorPrecedenceCheck>(
         "house-operator-precedence");
+    factories.registerCheck<UnaryMinusUnsignedCheck>(
+        "house-unary-minus-unsigned");
   }
 };
 
