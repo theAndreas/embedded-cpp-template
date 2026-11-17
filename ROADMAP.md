@@ -84,6 +84,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | C-11 | Bits through one class (CodingStyle H-9): `house-bitwise-in-bit-class` reports a bitwise operator on an integer outside the class, `Bit` by default; but for a `\|` of named masks in a `constexpr`, a macro of a system header as `_BV()`, and the body of a type's own bitwise operator. `Bit` comes into the skeleton from Utl, with `Combine()` for a mask of masks | done |
 | C-12 | No `friend` but a hidden friend (CodingStyle C-12): `house-no-friend` | done |
 | C-13 | One form per operator (CodingStyle C-15): a member where it changes its operand or is unary, a hidden friend where it is binary; `house-operator-form` | done |
+| C-14 | Parentheses that make the precedence explicit (CodingStyle T-23, MISRA C++:2023 8.0.1): `house-operator-precedence`, with a fix-it, for a comparison in a logical operator and the operands of `?:` as well, which `readability-math-missing-parentheses` left out; it holds the rule in full, so that check is off | done |
 
 ### M5 - A generic embedded library on the ETL
 

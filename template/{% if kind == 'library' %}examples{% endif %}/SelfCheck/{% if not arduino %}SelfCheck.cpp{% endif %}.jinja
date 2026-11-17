@@ -92,7 +92,7 @@ bool SetsAndClearsBits(uint8_t volatile& target) {
   Bits::SetBits(target, 0x0C);
   bool const set{target == 0x8D};
   Bits::ClearBits(target, 0x81);
-  return set && target == 0x0C;
+  return set && (target == 0x0C);
 }
 
 void Print(char const* text) {

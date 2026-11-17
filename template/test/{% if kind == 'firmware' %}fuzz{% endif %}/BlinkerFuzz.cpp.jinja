@@ -15,15 +15,15 @@
 extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size) {
   uint16_t period_ms{0};
   uint32_t now_ms{0};
-  if (size < sizeof period_ms + sizeof now_ms) {
+  if (size < (sizeof(period_ms) + sizeof(now_ms))) {
     return 0;
   }
-  std::memcpy(&period_ms, data, sizeof period_ms);
-  std::memcpy(&now_ms, data + sizeof period_ms, sizeof now_ms);
+  std::memcpy(&period_ms, data, sizeof(period_ms));
+  std::memcpy(&now_ms, data + sizeof(period_ms), sizeof(now_ms));
   // An odd period blinks in halves one millisecond short of it: whole periods
   // of the halves, two of them, are what repeats.
   uint32_t const repeat{2u * (period_ms / 2u)};
-  if ((repeat == 0u) || (now_ms > UINT32_MAX - repeat)) {
+  if ((repeat == 0u) || (now_ms > (UINT32_MAX - repeat))) {
     return 0;
   }
   Blinker const blinker{period_ms};
