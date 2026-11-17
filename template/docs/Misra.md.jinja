@@ -149,7 +149,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 | Rule 9.2.1 | Required | No explicit conversion as a statement | `bugprone-unused-raii`, in part |  |
 | Rule 9.3.1 | Required | Bodies are compound statements | `readability-braces-around-statements` |  |
 | Rule 9.4.1 | Required | `if … else if` ends with `else` | Review (ROADMAP C-3) |  |
-| Rule 9.4.2 | Required | Structure of a `switch` | `bugprone-switch-missing-default-case`, `-Wswitch`, `-Wimplicit-fallthrough`, CodingStyle T-15 |  |
+| Rule 9.4.2 | Required | Structure of a `switch` | `bugprone-switch-missing-default-case`, `-Wswitch`, `-Wimplicit-fallthrough`, CodingStyle T-15, in part: the rest of the structure, as where the labels stand and how many branches there are, by review | A `switch` over an `enum class` names every value and has no `default` (T-15): `-Wswitch` then reports a value added to the `enum` later, which a `default` would take in unnoticed. A value the `enum` does not name is handled after the `switch`, so that a way out stays |
 | Rule 9.5.1 | Advisory | Simple counting `for` loops | Review |  |
 | Rule 9.5.2 | Required | Range-for initializer with one call at most | Review |  |
 | Rule 9.6.1 | Advisory | No `goto` | `cppcoreguidelines-avoid-goto` |  |

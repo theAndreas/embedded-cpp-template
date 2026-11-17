@@ -17,6 +17,12 @@ brings it.
 - **The update note of v0.13.0 says how to take out parentheses put in twice:** a run of
   `clang-tidy --fix` over several files puts the parentheses twice into a header they share. The
   note now says how to take the second pair out.
+- **`Misra.md` records the `switch` without `default` as a deviation (9.4.2).** CodingStyle T-15
+  leaves out the `default` of a `switch` over an `enum class`, so that `-Wswitch` reports a value
+  added later, but the row named T-15 as if it covered the rule. It now says why the template
+  departs from it there, and that the rest of the structure of a `switch`, as where its labels
+  stand and how many branches it has, is left to review.
+
 
 On the update: nothing to do; a project that keeps its own `Misra.md` takes the rows over.
 
