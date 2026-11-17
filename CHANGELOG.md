@@ -26,9 +26,14 @@ brings it.
   MISRA C++:2023 9.4.1).** As a `switch` has its `default`, the chain says what happens when no
   condition holds; an empty `else` says in a comment why nothing does. `Misra.md` left the rule
   to review, as `hicpp-multiway-paths-covered`, which checked it, is gone in clang-tidy 23.
+- **`house-unary-minus-unsigned`: unary minus only on a signed operand (CodingStyle T-25,
+  MISRA C++:2023 8.3.1).** On an unsigned operand the result depends on its width: `-count` of a
+  `uint8_t` is a negative `int`, of a `uint32_t` a large positive number. `Misra.md` left the rule
+  to review, as neither clang-tidy nor a compiler reports it.
 
-On the update: `make tidy` reports the `if` of every chain that lacks its `else`, without a
-fix-it, as only the author knows what the `else` does. A project that keeps its own `Misra.md`
+On the update: `make tidy` reports the `if` of every chain that lacks its `else`, and every
+unary minus on an unsigned operand, without a fix-it, as only the author knows what the `else`
+does and which signed type the operand takes. A project that keeps its own `Misra.md`
 takes the rows over.
 
 ## v0.13.0

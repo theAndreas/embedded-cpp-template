@@ -110,6 +110,7 @@ it:
 | T-22 | A literal's suffix with the `u` in lower case and every `L` in upper case: `192u`, `1000uL`, `1LL`, `1.0L`. An `l` is read as a 1; a `U` reads as one more digit of a hexadecimal value, as in `0x04U`, where a `u` stands apart. A float's `f` is written either way. | `readability-uppercase-literal-suffix` |
 | T-23 | An operand that is itself an operation of higher precedence stands in parentheses: `(a == b) && ready`, `(x + 1) < limit`, `ready ? (a + b) : c`, `sizeof(value)`. The reader need not know the table of precedence, and an operand that moves keeps what it binds (MISRA C++:2023 8.0.1). An operand of the same precedence, `a + b + c`, needs none, nor one that is a call, a cast, a unary operator or a name, nor the operands of an assignment. | `house-operator-precedence`, `-Wparentheses`; an `#if` by review |
 | T-24 | An `if … else if` chain ends with `else`, as a `switch` has its `default` (T-15): it says what happens when no condition holds, and an empty one says in a comment why nothing does. An `if` alone needs none (MISRA C++:2023 9.4.1). | `house-else-if-without-else`; the comment by review |
+| T-25 | Unary minus only on a signed operand. On an unsigned one the result is unsigned, or signed after the promotion, by the width of the type: `-count` of a `uint8_t` is a negative `int`, of a `uint32_t` a large positive number. An operand that is to be negated is signed first, by its type or a cast: `-static_cast<int16_t>(count)` (MISRA C++:2023 8.3.1). | `house-unary-minus-unsigned` |
 
 T-18 in an example:
 

@@ -86,6 +86,7 @@ gh, uv, clangd. Every project builds the same image again, and every machine doe
 | C-13 | One form per operator (CodingStyle C-15): a member where it changes its operand or is unary, a hidden friend where it is binary; `house-operator-form` | done |
 | C-14 | Parentheses that make the precedence explicit (CodingStyle T-23, MISRA C++:2023 8.0.1): `house-operator-precedence`, with a fix-it, for a comparison in a logical operator and the operands of `?:` as well, which `readability-math-missing-parentheses` left out; it holds the rule in full, so that check is off | done |
 | C-15 | An `if … else if` chain ends with `else` (CodingStyle T-24, MISRA C++:2023 9.4.1): `house-else-if-without-else`, as `hicpp-multiway-paths-covered`, which checked it, is gone in clang-tidy 23 | done |
+| C-16 | Unary minus only on a signed operand (CodingStyle T-25, MISRA C++:2023 8.3.1): `house-unary-minus-unsigned`, by the type before the promotion, as no check of clang-tidy and no warning of GCC or clang reports it | done |
 
 ### M5 - A generic embedded library on the ETL
 
