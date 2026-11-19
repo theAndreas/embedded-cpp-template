@@ -3,7 +3,13 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.14.0
+
+Two checks of MISRA C++:2023 that review held until now: `house-else-if-without-else` ends an
+`if … else if` chain with `else` (9.4.1), and `house-unary-minus-unsigned` takes unary minus only on
+a signed operand (8.3.1); `Misra.md` claims for a check only what the check finds; and the host
+tests in CI have 30 minutes. A minor version: a project adds the `else` and the casts the checks
+ask for to its own code, as below.
 
 - **`Misra.md` claims for a check only what the check finds.** Five rows named a tool that misses
   part of the rule, measured against the tools: `-Wsign-conversion` reports a signed operand
