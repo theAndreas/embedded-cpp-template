@@ -3,7 +3,12 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.15.0
+
+The functions of the C library that MISRA C++:2023 bans are reported by name; two rules that review
+held are rules of CodingStyle, T-26 and C-16; and `Misra.md` records two more deviations. A minor
+version: a project replaces the calls the check reports, or suppresses one with its reason, and
+brings its loops and getters to the new rules as its review finds them.
 
 - **The functions of the C library that MISRA C++:2023 bans are reported by name:**
   `bugprone-unsafe-functions` gets the list of `.clang-tidy`, a group per rule: the C strings,
