@@ -13,6 +13,14 @@ brings it.
   left the seven rules to review. The fuzzers keep `std::abort()` (TS-29) and `std::memcpy()` for
   their bytes, each with a `NOLINT` and a deviation in `Misra.md`. A project replaces what the
   check reports, or suppresses it for the line with its reason.
+- **Two rules of MISRA C++:2023 that review held are rules of CodingStyle now:** T-26, a `for`
+  loop counts, and one that does more is a `while` (9.5.1); and C-16, a member function that
+  returns a reference into its object is `&`-qualified, its `const` overload `const&` with a
+  `const&&` overload deleted, so that no call on a temporary hands out a reference that dangles
+  (6.8.4). Both stay with review, as no check finds them.
+- **`Misra.md` records two deviations:** the numeric value of a char where it is what the code is
+  for, a digit parsed or printed, a char's code as an index and UTF-8 decoded (7.0.3), and a text
+  declared `extern` by M-4, which leaves its size to its definition (6.0.2).
 
 ## v0.14.0
 
