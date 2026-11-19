@@ -78,7 +78,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
 | Rule 6.0.1 | Required | Block declarations not ambiguous | `-Wvexing-parse`, in part |  |
-| Rule 6.0.2 | Advisory | External arrays with a size | Review |  |
+| Rule 6.0.2 | Advisory | External arrays with a size | Review | A text declared `extern` in a header, as CodingStyle M-4 asks for one whose address is taken, leaves its size to its definition, so that the text is written once |
 | Rule 6.0.3 | Advisory | Few declarations in the global namespace | CodingStyle F-9 |  |
 | Rule 6.0.4 | Required | `main` only as the global function | {% if arduino %}n/a: a sketch has no `main`, the library none either{% else %}Review{% endif %} | {% if kind == 'firmware' %}The one `main` of each target in `platform/<name>/`{% elif not arduino %}The one `main` of an example in its own file; the library has none{% endif %} |
 | Rule 6.2.1 | Required | One definition rule | Review |  |
@@ -95,7 +95,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 | Rule 6.8.1 | Required | No access outside an object's lifetime | `make sanitize`, `clang-analyzer-*` |  |
 | Rule 6.8.2 | Mandatory | No reference or pointer to a local returned | `-Wreturn-stack-address` |  |
 | Rule 6.8.3 | Required | No local address kept longer | `clang-analyzer-core.StackAddressEscape`, in part |  |
-| Rule 6.8.4 | Advisory | Members returning `*this` ref-qualified | Review |  |
+| Rule 6.8.4 | Advisory | Members returning a reference into their object ref-qualified | CodingStyle C-16, Review |  |
 | Rule 6.9.1 | Required | Same type aliases in all declarations | Review |  |
 | Rule 6.9.2 | Advisory | No standard integer type names | CodingStyle T-1, Review |  |
 
@@ -105,7 +105,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 |---|---|---|---|---|
 | Rule 7.0.1 | Required | No conversion from `bool` | `readability-implicit-bool-conversion`, in part |  |
 | Rule 7.0.2 | Required | No conversion to `bool` | `readability-implicit-bool-conversion` |  |
-| Rule 7.0.3 | Required | No numeric value of a character | Review |  |
+| Rule 7.0.3 | Required | No numeric value of a character | Review | Where a char's numeric value is what the code is for: a digit parsed or printed, `c - '0'` and `'0' + value`, a char's code as an index, as of its glyph in a font, and the bytes of UTF-8 decoded. T-21 widens a char through `unsigned char` |
 | Rule 7.0.4 | Required | Operands of bitwise and shift operators | CodingStyle H-8 and H-9: only in the bit class, `house-bitwise-in-bit-class`; there by review |  |
 | Rule 7.0.5 | Required | Promotions keep signedness | `-Wsign-conversion`, in part: not the promotion of a type narrower than `int`; CodingStyle T-19 | The promotion of an unsigned type narrower than `int`, as `uint8_t`, to `int` in arithmetic: it keeps every value, and a cast at each operand would hide the computation it is part of. T-19 widens an operand where the result could overflow |
 | Rule 7.0.6 | Required | Numeric assignments appropriate | `-Wconversion`, `bugprone-narrowing-conversions` |  |
@@ -150,7 +150,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 | Rule 9.3.1 | Required | Bodies are compound statements | `readability-braces-around-statements` |  |
 | Rule 9.4.1 | Required | `if … else if` ends with `else` | `house-else-if-without-else`, CodingStyle T-24 |  |
 | Rule 9.4.2 | Required | Structure of a `switch` | `bugprone-switch-missing-default-case`, `-Wswitch`, `-Wimplicit-fallthrough`, CodingStyle T-15, in part: the rest of the structure, as where the labels stand and how many branches there are, by review | A `switch` over an `enum class` names every value and has no `default` (T-15): `-Wswitch` then reports a value added to the `enum` later, which a `default` would take in unnoticed. A value the `enum` does not name is handled after the `switch`, so that a way out stays |
-| Rule 9.5.1 | Advisory | Simple counting `for` loops | Review |  |
+| Rule 9.5.1 | Advisory | Simple counting `for` loops | CodingStyle T-26, Review |  |
 | Rule 9.5.2 | Required | Range-for initializer with one call at most | Review |  |
 | Rule 9.6.1 | Advisory | No `goto` | `cppcoreguidelines-avoid-goto` |  |
 | Rule 9.6.2 | Required | `goto` to a label in an enclosing block | n/a: no `goto` (9.6.1) |  |
