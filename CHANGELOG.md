@@ -30,6 +30,10 @@ brings it.
   MISRA C++:2023 8.3.1).** On an unsigned operand the result depends on its width: `-count` of a
   `uint8_t` is a negative `int`, of a `uint32_t` a large positive number. `Misra.md` left the rule
   to review, as neither clang-tidy nor a compiler reports it.
+- **The host tests in CI have 30 minutes rather than 15.** The job builds and runs every test
+  three times, by GCC, under the sanitizers and with coverage, and grows with the tests a project
+  has: a project whose tests had been split into one behaviour each took 10 to 11 minutes, and a
+  slower runner reached the 15.
 
 On the update: `make tidy` reports the `if` of every chain that lacks its `else`, and every
 unary minus on an unsigned operand, without a fix-it, as only the author knows what the `else`
