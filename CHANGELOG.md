@@ -3,6 +3,17 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **The functions of the C library that MISRA C++:2023 bans are reported by name:**
+  `bugprone-unsafe-functions` gets the list of `.clang-tidy`, a group per rule: the C strings,
+  as `strcpy()` and `strtoul()` (21.2.2), `<cctype>` (24.5.1), `memcpy()` and its kin (24.5.2),
+  the streams of `<cstdio>` (30.0.1), what ends the program (18.5.2), `<csignal>` (21.10.3) and
+  `setlocale()` (25.5.1), and avr-libc's variants that read flash, as `strcmp_P()`. `Misra.md`
+  left the seven rules to review. The fuzzers keep `std::abort()` (TS-29) and `std::memcpy()` for
+  their bytes, each with a `NOLINT` and a deviation in `Misra.md`. A project replaces what the
+  check reports, or suppresses it for the line with its reason.
+
 ## v0.14.0
 
 Two checks of MISRA C++:2023 that review held until now: `house-else-if-without-else` ends an
