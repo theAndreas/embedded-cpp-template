@@ -18,7 +18,11 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size) {
   if (size < (sizeof(period_ms) + sizeof(now_ms))) {
     return 0;
   }
+  // MISRA 24.5.2: memcpy() takes a value out of bytes without the undefined
+  // behaviour of a cast, which C++20's bit_cast would do instead.
+  // NOLINTNEXTLINE(bugprone-unsafe-functions)
   std::memcpy(&period_ms, data, sizeof(period_ms));
+  // NOLINTNEXTLINE(bugprone-unsafe-functions): as above
   std::memcpy(&now_ms, data + sizeof(period_ms), sizeof(now_ms));
   // An odd period blinks in halves one millisecond short of it: whole periods
   // of the halves, two of them, are what repeats.
@@ -28,7 +32,8 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t const* data, size_t size) {
   }
   Blinker const blinker{period_ms};
   if (blinker.IsOnAt(now_ms) != blinker.IsOnAt(now_ms + repeat)) {
-    std::abort();
+    // MISRA 18.5.2: how a fuzzer reports what does not hold (Testing TS-29)
+    std::abort();  // NOLINT(bugprone-unsafe-functions)
   }
   return 0;
 }
