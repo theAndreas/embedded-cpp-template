@@ -1,17 +1,19 @@
 # The template's development container
 
 The container to work on the template in: every tool `tests/check.sh` needs, as it makes a
-project from the template and runs all of that project's checks. VS Code offers two
+project from the template and runs all of that project's checks. VS Code offers three
 configurations when running **Dev Containers: Reopen in Container**:
 
 - **embedded-cpp-template (Linux)** for native Linux and remote environments. It mounts the
   host's SSH agent.
 - **embedded-cpp-template (WSL2)** when VS Code runs in WSL2. It relies on VS Code's own
   SSH-agent forwarding and mounts nothing.
+- **embedded-cpp-template (macOS)** with Docker Desktop or OrbStack. It mounts nothing either,
+  for the reasons `template/.devcontainer/README.md.jinja` gives for a project's.
 
 ## The same image as every project
 
-Both build `template/.devcontainer/Dockerfile`, the Dockerfile every project made from the
+All three build `template/.devcontainer/Dockerfile`, the Dockerfile every project made from the
 template gets; there is no second one. A change to it is a change to this container as well,
 and `tests/check.sh` checks it as a project would. What the projects' containers are and carry
 is in `template/.devcontainer/README.md.jinja`.
@@ -26,6 +28,6 @@ gh logins and the shell history have volumes of their own as well.
 
 ## Site-specific variants
 
-Another directory beside `linux/` and `wsl2/` shows up as another entry in the same picker: the
+Another directory beside `linux/`, `wsl2/` and `macos/` shows up as another entry in the same picker: the
 place for what must not be committed, such as an internal base image through the `BASE_IMAGE`
 build argument. `/.devcontainer/vector/` is listed in `.gitignore` for that.

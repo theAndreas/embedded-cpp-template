@@ -3,6 +3,15 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **A dev container for macOS:** `.devcontainer/macos/`, for Docker Desktop and OrbStack, which
+  mounts nothing, as the Linux variant's X11 socket and SSH agent do not exist there in a form a
+  container can bind; it takes the agent from VS Code's forwarding, as the WSL2 variant does. The
+  image is the same, built for arm64 on Apple silicon. The README says how to get a key from the
+  keychain into the agent. Nothing to do on the update; a Mac picks the new entry in **Dev
+  Containers: Reopen in Container**.
+
 ## v0.15.0
 
 The functions of the C library that MISRA C++:2023 bans are reported by name; two rules that review
