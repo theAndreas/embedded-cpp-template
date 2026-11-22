@@ -19,9 +19,63 @@ defaults:
 
 jobs:
   check:
-    name: A project made from the template
+    name: ${{ matrix.name }}
     runs-on: ubuntu-26.04
     timeout-minutes: 30
+    # A job per check, side by side: one after the other they took 14 minutes, none of them more
+    # than two. Each makes its project from scratch, so none needs another.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The template's own scripts, with the checks template/.shellcheckrc turns on and the
+          # rules of template/pyproject.toml; the indent of the Doxygen blocks; the checks of our
+          # own, which tidy builds in the project as well; and that the cache of tools/tidy.sh
+          # skips clang-tidy only where the result cannot differ. Each against its cases.
+          - name: The template's own scripts and their cases
+            run: |
+              uvx --from shellcheck-py==0.11.0.1 shellcheck --enable=check-extra-masked-returns \
+                tests/check.sh
+              uvx --from ruff==0.17.3 ruff check --select F,E9 tests
+              tests/doc_indent.py
+              tests/tidy_module.py
+              tests/tidy_cache.py
+
+          # A library of CMake alone, arduino=false: every check, and the checks that walk TARGETS
+          # for an ATmega328P and an ATmega2560.
+          - name: A library of CMake alone
+            run: tests/check.sh --no-arduino
+          - name: A library of CMake alone for two targets
+            run: >-
+              tests/check.sh --no-arduino --targets
+              tidy cppcheck headers examples self-check stack
+
+          # A firmware, kind=firmware: every check, and the checks that walk TARGETS for an
+          # ATmega328P and an AVR128DA48, which takes the other branch of platform/avr/main.cpp.
+          - name: A firmware
+            run: tests/check.sh --firmware
+          - name: A firmware for two targets
+            run: >-
+              tests/check.sh --firmware --targets
+              tidy cppcheck headers examples self-check stack
+
+          # A firmware built by PlatformIO, platformio=true: every check, and with a second target
+          # built by CMake, two build systems in one project.
+          - name: A firmware of PlatformIO
+            run: tests/check.sh --platformio
+          - name: A firmware of PlatformIO and CMake
+            run: >-
+              tests/check.sh --platformio --targets
+              tidy cppcheck headers examples self-check stack
+
+          # The Arduino library built for two targets, an Uno and a Mega: the checks that walk
+          # TARGETS.
+          - name: A project of two targets
+            run: tests/check.sh --targets tidy cppcheck headers examples self-check
+
+          # Every target of `make check`, with warnings as errors.
+          - name: A project
+            run: tests/check.sh
     steps:
       - uses: actions/checkout@v7
         with:
@@ -45,56 +99,10 @@ jobs:
             cmake ninja-build libgtest-dev clang libclang-rt-dev simavr jq doxygen cppcheck gcc-avr
             avr-libc
 
-      # With the checks template/.shellcheckrc turns on, and the rules of template/pyproject.toml.
-      - name: The template's own scripts
-        run: |
-          uvx --from shellcheck-py==0.11.0.1 shellcheck --enable=check-extra-masked-returns \
-            tests/check.sh
-          uvx --from ruff==0.17.3 ruff check --select F,E9 tests
-
-      - name: The indent of the Doxygen blocks against its cases
-        run: tests/doc_indent.py
-
       # For the clang-tidy module of the template, which tidy builds in the project as well.
       - uses: ./template/.github/actions/llvm-headers
         with:
           root: template
-
-      - name: The checks of our own against their cases
-        run: tests/tidy_module.py
-
-      # That the cache of tools/tidy.sh skips clang-tidy only where the result cannot differ.
-      - name: The cache of clang-tidy against its cases
-        run: tests/tidy_cache.py
-
-      # A library of CMake alone, arduino=false: every check, and the checks that walk TARGETS for
-      # an ATmega328P and an ATmega2560.
-      - name: Make a library of CMake alone and check it
-        run: tests/check.sh --no-arduino
-
-      - name: Make a library of CMake alone for two targets and check it
-        run: tests/check.sh --no-arduino --targets tidy cppcheck headers examples self-check stack
-
-      # A firmware, kind=firmware: every check, and the checks that walk TARGETS for an
-      # ATmega328P and an AVR128DA48, which takes the other branch of platform/avr/main.cpp.
-      - name: Make a firmware and check it
-        run: tests/check.sh --firmware
-
-      - name: Make a firmware for two targets and check it
-        run: tests/check.sh --firmware --targets tidy cppcheck headers examples self-check stack
-
-      # A firmware built by PlatformIO, platformio=true: every check, and with a second target
-      # built by CMake, two build systems in one project.
-      - name: Make a firmware of PlatformIO and check it
-        run: tests/check.sh --platformio
-
-      - name: Make a firmware of PlatformIO and CMake and check it
-        run: tests/check.sh --platformio --targets tidy cppcheck headers examples self-check stack
-
-      # The Arduino library built for two targets, an Uno and a Mega: the checks that walk
-      # TARGETS.
-      - name: Make a project of two targets and check it
-        run: tests/check.sh --targets tidy cppcheck headers examples self-check
 
       # For `make arduino-lint` of the project, at the version the template's Dockerfile pins,
       # through the action a project's CI installs with.
@@ -102,6 +110,5 @@ jobs:
         with:
           root: template
 
-      # Every target of `make check`, with warnings as errors.
-      - name: Make a project and check it
-        run: tests/check.sh
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.run }}
