@@ -3,7 +3,10 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.15.1
+
+A dev container for macOS, with Docker Desktop or OrbStack. A patch version: a project changes
+nothing of its own; on a Mac, **Dev Containers: Reopen in Container** offers the new entry.
 
 - **A dev container for macOS:** `.devcontainer/macos/`, for Docker Desktop and OrbStack, which
   mounts nothing, as the Linux variant's X11 socket and SSH agent do not exist there in a form a
