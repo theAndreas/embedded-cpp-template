@@ -17,6 +17,9 @@ another container is lost with that container.
 |---|---|
 {%- if arduino %}
 | `arduino-cli` with the core of `tools/project.sh` | the library and its examples with the real toolchain, pinned as in CI |
+{%- if platformio %}
+| PlatformIO, from `uv.lock`, its platform pinned in `extras/platformio/platformio.ini` | the examples a second time, as a project of PlatformIO's registry builds the library |
+{%- endif %}
 {%- else %}
 | `avr-gcc`, `avr-libc`, from `apt-packages.txt` | {% if kind == 'firmware' %}the image{% else %}the library and its examples{% endif %} with the real toolchain, by CMake{% if platformio %} or PlatformIO, which brings a toolchain of its own{% endif %} |
 {%- endif %}

@@ -1,0 +1,30 @@
+; Copyright {{ copyright_year }} {{ author }}
+; SPDX-License-Identifier: {{ license }}
+;
+; The examples of {{ project_name }}, built by PlatformIO against the library as a project of its
+; registry takes it: lib_deps names the repository, whose library.json PlatformIO reads, and the
+; sketch is the sources. The second target of tools/project.sh, beside arduino-cli; tools/ build
+; each example as its environment PIO_ENV:
+;
+;   uv run --frozen pio run -d extras/platformio -e {{ platformio_board }}
+;
+; and give it the example in PLATFORMIO_SRC_DIR, PLATFORMIO_BUILD_DIR and the variant's flags in
+; PLATFORMIO_BUILD_FLAGS; not -Werror, which a header of the Arduino core would fail as well: the
+; log is read for warnings in the project's own files instead, see tools/lib/platformio.sh.
+
+[platformio]
+; The example a developer builds with the line above; the tools build each.
+src_dir = ../../examples/Basics
+
+[env:{{ platformio_board }}]
+; Pinned, as the platform brings the toolchain and the core: avr-gcc 7.3, and the Arduino core
+; that atmelavr 5 ships, which may be older than the one arduino-cli installs.
+platform = platformio/atmelavr@5.3.0
+board = {{ platformio_board }}
+framework = arduino
+; The repository, whose library.json says what of it is the library.
+lib_deps = symlink://../..
+; The warnings of cmake/checks.cmake, on every file: lib_deps are no sources of the project's, so
+; build_src_flags would leave the library out. Those of the core are not the project's, and the
+; tools leave them out of what fails a build.
+build_flags = -Wall -Wextra -Wconversion -Wsign-conversion -Wshadow

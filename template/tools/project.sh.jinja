@@ -19,7 +19,8 @@
 #   CMAKE_TOOLCHAIN      for cmake: the toolchain file, as cmake/toolchains/avr-gcc.cmake
 #   CMAKE_DEFINES        for cmake: what the toolchain file is told, as the part and its clock,
 #                        an array of -D options
-#   PIO_DIR              for platformio: the folder of the platformio.ini, as platform/avr
+#   PIO_DIR              for platformio: the folder of the platformio.ini, as platform/avr of
+#                        a firmware or extras/platformio of a library
 #   PIO_ENV              for platformio: its environment the target is
 #   FQBN                 for arduino-cli: the board the examples are compiled for
 #   ARDUINO_CORE         for arduino-cli: the cores, pinned, as arduino-cli installs them, an
@@ -82,9 +83,12 @@
 #     esac
 #   }
 {%- elif arduino %}
-#   TARGETS=(uno mega)
+#   TARGETS=({% if platformio %}board platformio{% else %}uno{% endif %} mega)
 #   target_settings() {
-#     case "$1" in
+#     case "$1" in{% if platformio %}
+#       platformio)
+#         ...
+#         ;;{% endif %}
 #       mega)
 #         FQBN="arduino:avr:mega"
 #         SIMAVR_MCU="atmega2560"
@@ -108,6 +112,20 @@ NAMESPACE="{{ namespace }}"
 FQBN="{{ fqbn }}"
 ARDUINO_CORE=({{ arduino_core }})
 ARDUINO_BOARD_URLS=""
+{%- if platformio %}
+# The examples a second time, built by PlatformIO through extras/platformio/platformio.ini against
+# library.json, as a project of its registry takes the library, on the same board.
+TARGETS=(board platformio)
+target_settings() {
+  case "$1" in
+    platformio)
+      BUILD_SYSTEM="platformio"
+      PIO_DIR="extras/platformio"
+      PIO_ENV="{{ platformio_board }}"
+      ;;
+  esac
+}
+{%- endif %}
 {%- elif platformio %}
 TARGETS=({{ mcu }})
 BUILD_SYSTEM="platformio"

@@ -24,6 +24,16 @@ git clone {{ url }} ~/Arduino/libraries/{{ project_name }}
 ```
 
 It is built and checked for `{{ fqbn }}`.
+{%- if platformio %}
+
+Or with PlatformIO, which reads its `library.json`, in the `platformio.ini` of a project:
+
+```ini
+lib_deps = {{ url }}
+```
+
+The examples are built by PlatformIO as well, for its board `{{ platformio_board }}`.
+{%- endif %}
 
 ## Using it
 

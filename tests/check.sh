@@ -8,7 +8,7 @@
 # only if a project made from it passes; this is that check, for a person and for CI alike.
 #
 # Usage:
-#   tests/check.sh [--keep] [--targets] [--no-arduino | --firmware | --platformio] [CHECK...]
+#   tests/check.sh [--keep] [--targets] [--no-arduino | --firmware] [--platformio] [CHECK...]
 #
 # CHECK is a target of the project's Makefile, as lint, tests, clang, tidy, headers or
 # self-check; all of what `make check` runs if none is given. With --keep the project is left in
@@ -21,9 +21,11 @@
 # and an ATmega2560, both run in simavr, and an AVR128DA48, which takes the other branch of
 # SelfCheck and is compiled and read but not run. With --firmware the project is a firmware (kind=firmware): src/, test/ and
 # platform/avr/, its image built by CMake as well; with --targets for an ATmega328P and an
-# AVR128DA48, which simavr does not run and a firmware does not need it to. With --platformio the
-# firmware is built by PlatformIO (platformio=true), through platform/avr/platformio.ini; with
-# --targets as well, its AVR128DA48 by CMake, two build systems in one project. The folder is named after the project, as cpplint
+# AVR128DA48, which simavr does not run and a firmware does not need it to. With --platformio
+# (platformio=true) an Arduino library gets library.json and its examples built by PlatformIO a
+# second time, through extras/platformio/platformio.ini, a second target beside arduino-cli; and
+# with --firmware the image is built by PlatformIO, through platform/avr/platformio.ini, with
+# --targets as well its AVR128DA48 by CMake, two build systems in one project. The folder is named after the project, as cpplint
 # takes the header guards from it. The url is the template's, as arduino-lint checks that it
 # answers.
 
@@ -136,18 +138,24 @@ main() {
         kind=firmware
         arduino=false
         ;;
-      --platformio)
-        kind=firmware
-        arduino=false
-        platformio=true
-        ;;
+      --platformio) platformio=true ;;
       *)
-        err "Usage: $0 [--keep] [--targets] [--no-arduino | --firmware | --platformio] [CHECK...]"
+        err "Usage: $0 [--keep] [--targets] [--no-arduino | --firmware] [--platformio] [CHECK...]"
         exit 2
         ;;
     esac
     shift
   done
+  if [[ "${platformio}" == true && "${kind}" == library ]]; then
+    if [[ "${arduino}" != true ]]; then
+      err "--platformio is for an Arduino library or, with --firmware, a firmware."
+      exit 2
+    fi
+    if ((targets)); then
+      err "--platformio --targets is for a firmware: an Arduino library of PlatformIO has two."
+      exit 2
+    fi
+  fi
   local checks=("$@")
   if ((${#checks[@]} == 0)); then
     checks=("${ALL_CHECKS[@]}")
@@ -170,7 +178,7 @@ main() {
   # A project is a repository: the tools list its files with git.
   cd "${PROJECT_DIR}"
   if ((targets)); then
-    if [[ "${platformio}" == true ]]; then
+    if [[ "${platformio}" == true && "${kind}" == firmware ]]; then
       echo "${MIXED_TARGETS}" >> tools/project.sh
     elif [[ "${kind}" == firmware ]]; then
       echo "${TWO_FIRMWARE_TARGETS}" >> tools/project.sh
