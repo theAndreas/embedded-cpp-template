@@ -3,6 +3,19 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`Misra.md` names what review takes where a check covers a rule in part:** each such row
+  says after `in part:` which cases the check does not find, as the rule's text is not in the
+  file and an unnamed rest is checked by no one; that is how the `&` of 15.0.2 went unseen.
+  Each check was run on cases of its rule under the template's flags: 13.3.2 is covered in full
+  by `google-default-arguments`, which forbids a default on a virtual function at all;
+  `clang-analyzer-*` is no longer named for 0.0.2, as it reported none of its cases; and checks
+  that were on but unnamed are named, as `misc-use-anonymous-namespace` for 6.5.2 and
+  `bugprone-derived-method-shadowing-base-method` for 6.4.2. The legend asks the same of a row
+  to come, and that a check be named only for what it reports under the project's flags. Nothing
+  to do on the update.
+
 ## v0.16.0
 
 The signatures of copy and move functions are a rule of CodingStyle, C-17, and a check of the
