@@ -3,6 +3,19 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **The signatures of copy and move functions are a rule and a check:** CodingStyle C-17 and
+  `house-copy-move-signature` (MISRA C++:2023 15.0.2). A copy or move function written by hand
+  has the signature the rule gives, `X& operator=(X const&) &` and `X& operator=(X&&) & noexcept`
+  among them: an assignment to a temporary no longer compiles, and a move is `noexcept`.
+  `Misra.md` had named two checks for the rule that leave this out:
+  `misc-unconventional-assign-operator` checks the return type only, and
+  `performance-noexcept-move-constructor` reports nothing under `-fno-exceptions`, as a small
+  target builds. A project adds the `&` and the `noexcept` where the check reports them, most by
+  its fix-it; a proxy that is assigned as a temporary keeps its assignments, with a `NOLINT` and
+  its reason.
+
 ## v0.15.1
 
 A dev container for macOS, with Docker Desktop or OrbStack. A patch version: a project changes
