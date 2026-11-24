@@ -3,7 +3,12 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.16.0
+
+The signatures of copy and move functions are a rule of CodingStyle, C-17, and a check of the
+house module, `house-copy-move-signature`. A minor version: a project adds the `&` and the
+`noexcept` that the check reports, most by its fix-it, and keeps a proxy's assignments with a
+`NOLINT` and its reason.
 
 - **The signatures of copy and move functions are a rule and a check:** CodingStyle C-17 and
   `house-copy-move-signature` (MISRA C++:2023 15.0.2). A copy or move function written by hand
