@@ -3,6 +3,21 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **`make stack` follows a call through a pointer:** `tools/avr_stack.py` refused every program
+  that calls through one, and so every program with a virtual function, as the Arduino core's
+  `Print`, or a `function_ref`. It now takes such a call to reach every function whose address
+  the program takes, and counts the deepest: more than any one call reaches, never less. Which
+  addresses those are the relocations of the program say, which
+  `cmake/toolchains/avr-gcc.cmake` keeps with `-Wl,--emit-relocs`; the image is byte for byte
+  the same. Where a function that calls through a pointer has its own address taken, as a
+  trampoline does, that reads as a recursion and is refused, naming the call; a rule in
+  `tools/stack.toml` of the project then says which functions a caller never reaches through a
+  pointer, with its reason, and `tools/stack.sh` hands the file over. A project has nothing to
+  do on the update: a program that passed before passes as it did, and one with a call through a
+  pointer, which `make stack` refused, is now added up, with a rule where it names one.
+
 ## v0.17.0
 
 An Arduino library may have a `library.json` for PlatformIO's registry, its examples then built

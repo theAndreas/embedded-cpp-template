@@ -30,8 +30,9 @@ jobs:
         include:
           # The template's own scripts, with the checks template/.shellcheckrc turns on and the
           # rules of template/pyproject.toml; the indent of the Doxygen blocks; the checks of our
-          # own, which tidy builds in the project as well; and that the cache of tools/tidy.sh
-          # skips clang-tidy only where the result cannot differ. Each against its cases.
+          # own, which tidy builds in the project as well; that the cache of tools/tidy.sh
+          # skips clang-tidy only where the result cannot differ; and how tools/avr_stack.py
+          # follows a call through a pointer. Each against its cases.
           - name: The template's own scripts and their cases
             run: |
               uvx --from shellcheck-py==0.11.0.1 shellcheck --enable=check-extra-masked-returns \
@@ -40,6 +41,7 @@ jobs:
               tests/doc_indent.py
               tests/tidy_module.py
               tests/tidy_cache.py
+              tests/avr_stack.py
 
           # A library of CMake alone, arduino=false: every check, and the checks that walk TARGETS
           # for an ATmega328P and an ATmega2560.
