@@ -3,6 +3,24 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **An Arduino library for PlatformIO as well:** the copier question `platformio`, so far a
+  firmware's, is asked of an Arduino library too. Answered yes, the library gets a `library.json`
+  for PlatformIO's registry, and its examples are built by PlatformIO a second time, through
+  `extras/platformio/platformio.ini`, which names the repository in `lib_deps`, so that PlatformIO
+  reads the `library.json` as a project of its registry does: `tools/project.sh` gets a second
+  target, `platformio`, beside the first of arduino-cli, which `make examples`, `make
+  self-check`, `make tidy` and `make headers` walk as any other. `tools/lib/platformio.sh` builds
+  each example of a library with the sketch as the sources, and `tools/lib/sketch_database.py`
+  writes the flags of one for every source, for clang-tidy, with the core's headers as
+  `-isystem`. The release checks the version of `library.json` against the tag and packs it.
+  PlatformIO declares the functions a sketch lacks before its first one: where that lies in an
+  unnamed namespace, the sketch declares `setup()` and `loop()` itself, as the skeleton's
+  SelfCheck does. A project made before has nothing to do; one that wants it answers
+  `uv run copier update --data platformio=true`, which writes `library.json` and the
+  `platformio.ini`, and adds the target to its `tools/project.sh` as the template's says.
+
 ## v0.16.1
 
 `Misra.md` names, in each row a check covers in part, what review takes, and the rows are read

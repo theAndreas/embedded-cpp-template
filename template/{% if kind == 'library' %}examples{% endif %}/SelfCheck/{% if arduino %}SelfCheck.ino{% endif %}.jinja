@@ -11,6 +11,15 @@
 #include <avr/io.h>
 #include <avr/sleep.h>
 #include <stdint.h>
+{%- if platformio %}
+
+// Declared here, though Arduino.h declares them: PlatformIO writes the
+// declarations a sketch lacks before its first function, here in the unnamed
+// namespace below, and would declare setup() and loop() in it (CodingStyle
+// S-1).
+void setup();  // NOLINT(readability-redundant-declaration)
+void loop();   // NOLINT(readability-redundant-declaration)
+{%- endif %}
 
 using {{ namespace }}::Bit;
 using {{ namespace }}::Clamp;

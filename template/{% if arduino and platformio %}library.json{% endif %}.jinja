@@ -1,0 +1,29 @@
+{
+  "name": {{ project_name | tojson }},
+  "version": "0.1.0",
+  "description": {{ description | tojson }},
+  "repository": {
+    "type": "git",
+    "url": {{ url | tojson }}
+  },
+  "authors": [
+    {
+      "name": {{ author | tojson }},
+      "maintainer": true
+    }
+  ],
+  "license": {{ license | tojson }},
+  "frameworks": "arduino",
+  "platforms": "atmelavr",
+  "headers": {{ (project_name ~ '.h') | tojson }},
+  "export": {
+    "include": [
+      "src",
+      "examples",
+      "library.json",
+      "library.properties",
+      "LICENSE",
+      "README.md"
+    ]
+  }
+}

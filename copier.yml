@@ -19,6 +19,8 @@ _skip_if_exists:
   - /README.md
   - /CMakeLists.txt
   - /library.properties
+  - /library.json
+  - /extras/platformio/platformio.ini
   - /tools/project.sh
   - /.devcontainer/apt-packages.txt
   - /Doxyfile.project
@@ -98,14 +100,6 @@ kind:
     - firmware
   default: library
 
-platformio:
-  type: bool
-  help: >-
-    Build the image with PlatformIO, through platform/avr/platformio.ini, rather than with CMake
-    and the toolchain file; its platform, board and framework are then the platformio.ini's
-  default: false
-  when: "{{ kind == 'firmware' }}"
-
 arduino:
   type: bool
   help: >-
@@ -118,6 +112,17 @@ arduino:
     {% if arduino and kind != 'library' %}
     A firmware is built by CMake, not as an Arduino library: arduino=false.
     {% endif %}
+
+platformio:
+  type: bool
+  help: >-
+    PlatformIO: of a firmware, build the image with it, through platform/avr/platformio.ini,
+    rather than with CMake and the toolchain file, its platform, board and framework then the
+    platformio.ini's; of an Arduino library, a library.json for PlatformIO's registry, and the
+    examples built by it a second time, through extras/platformio/platformio.ini, a second target
+    beside arduino-cli
+  default: false
+  when: "{{ kind == 'firmware' or arduino }}"
 
 description:
   type: str
@@ -163,6 +168,14 @@ arduino_core:
   help: The Arduino core, pinned, as arduino-cli installs it
   default: arduino:avr@1.8.8
   when: "{{ arduino }}"
+
+platformio_board:
+  type: str
+  help: The same board as PlatformIO names it, which builds the examples the second time
+  default: >-
+    {{ {'uno': 'uno', 'mega': 'megaatmega2560', 'nano': 'nanoatmega328', 'leonardo': 'leonardo',
+    'micro': 'micro'}.get(fqbn.split(':')[-1], fqbn.split(':')[-1]) }}
+  when: "{{ arduino and platformio }}"
 
 mcu:
   type: str
