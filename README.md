@@ -11,7 +11,8 @@ other compiler. Today the template checks it on the host, by GCC and by clang, a
 its targets, AVRs built by arduino-cli against an Arduino core or by CMake and avr-gcc alone, in
 simavr where simavr runs the part. A firmware is built by CMake, an image for each target from
 its portable `src/` and its `platform/<name>/`, or by PlatformIO through a `platformio.ini`
-there. A library for PlatformIO's registry and targets beyond the AVR are next, see
+there. An Arduino library may have a `library.json` for PlatformIO's registry as well, its
+examples then built by PlatformIO a second time. Targets beyond the AVR are next, see
 [ROADMAP.md](ROADMAP.md).
 
 ## What a project gets
@@ -65,7 +66,7 @@ one. Commit before an update, review the diff after it, and run `make check`.
   change one: add its own exceptions at the end of a list in `.clang-tidy`, with the reason, and
   the merge keeps them. A job of its own goes into a workflow of its own.
 - **The project's**, never touched by an update: `README.md`, `CMakeLists.txt`,
-  `library.properties`, `Doxyfile.project`, `.devcontainer/apt-packages.txt`, `tools/project.sh`
+  `library.properties`, `library.json` and `extras/platformio/platformio.ini`, `Doxyfile.project`, `.devcontainer/apt-packages.txt`, `tools/project.sh`
   and `tools/project.mk`, written where they do not exist yet; and the starting point of a new
   project, `src/` and `test/`, the examples `Basics` and `SelfCheck` of a library or
   `platform/avr/` of a firmware, written only by `copier copy` with the answer `skeleton`. An
