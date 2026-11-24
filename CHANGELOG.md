@@ -3,7 +3,11 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.16.1
+
+`Misra.md` names, in each row a check covers in part, what review takes, and the rows are read
+against the text of MISRA C++:2023. A patch version: only the documentation changes, and a
+project has nothing to do on the update.
 
 - **`Misra.md` names what review takes where a check covers a rule in part:** each such row
   says after `in part:` which cases the check does not find, as the rule's text is not in the
