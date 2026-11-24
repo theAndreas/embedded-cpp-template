@@ -12,7 +12,9 @@ brings it.
   by `google-default-arguments`, which forbids a default on a virtual function at all;
   `clang-analyzer-*` is no longer named for 0.0.2, as it reported none of its cases; and checks
   that were on but unnamed are named, as `misc-use-anonymous-namespace` for 6.5.2 and
-  `bugprone-derived-method-shadowing-base-method` for 6.4.2. The legend asks the same of a row
+  `bugprone-derived-method-shadowing-base-method` for 6.4.2. Read against the text of the
+  standard, 7.0.2 is covered in part, as no check finds an explicit cast to `bool`, and 8.2.7
+  in full, as a pointer cast to `bool` is a matter of 7.0.2. The legend asks the same of a row
   to come, and that a check be named only for what it reports under the project's flags. Nothing
   to do on the update.
 

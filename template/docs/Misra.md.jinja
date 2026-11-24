@@ -99,7 +99,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 | Rule 6.7.2 | Required | No global variables | `cppcoreguidelines-avoid-non-const-global-variables` |  |
 | Rule 6.8.1 | Required | No access outside an object's lifetime | `make sanitize`, `clang-analyzer-*` |  |
 | Rule 6.8.2 | Mandatory | No reference or pointer to a local returned | `-Wreturn-stack-address` |  |
-| Rule 6.8.3 | Required | No local address kept longer | `clang-analyzer-core.StackAddressEscape`, in part: not an address that is reset, or never used, before its object ends |  |
+| Rule 6.8.3 | Required | No local address kept longer | `clang-analyzer-core.StackAddressEscape`, in part: not an address kept in a local of an outer block, nor one kept in a global and reset before the function returns |  |
 | Rule 6.8.4 | Advisory | Members returning a reference into their object ref-qualified | CodingStyle C-16, Review |  |
 | Rule 6.9.1 | Required | Same type aliases in all declarations | Review |  |
 | Rule 6.9.2 | Advisory | No standard integer type names | CodingStyle T-1, Review |  |
@@ -108,8 +108,8 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
-| Rule 7.0.1 | Required | No conversion from `bool` | `readability-implicit-bool-conversion`, in part: not an explicit cast from `bool`, nor a conversion in a macro or in an instance of a template |  |
-| Rule 7.0.2 | Required | No conversion to `bool` | `readability-implicit-bool-conversion` |  |
+| Rule 7.0.1 | Required | No conversion from `bool` | `readability-implicit-bool-conversion`, in part: not an explicit cast from `bool`, `static_cast<int8_t>(b)`, nor `^` of two `bool`, nor a conversion in a macro or in an instance of a template |  |
+| Rule 7.0.2 | Required | No conversion to `bool` | `readability-implicit-bool-conversion`, in part: not an explicit cast to `bool`, `static_cast<bool>(n)` or `static_cast<bool>(p)` |  |
 | Rule 7.0.3 | Required | No numeric value of a character | Review | Where a char's numeric value is what the code is for: a digit parsed or printed, `c - '0'` and `'0' + value`, a char's code as an index, as of its glyph in a font, and the bytes of UTF-8 decoded. T-21 widens a char through `unsigned char` |
 | Rule 7.0.4 | Required | Operands of bitwise and shift operators | CodingStyle H-8 and H-9: only in the bit class, `house-bitwise-in-bit-class`; there by review |  |
 | Rule 7.0.5 | Required | Promotions keep signedness | `-Wsign-conversion`, in part: not the promotion of a type narrower than `int`; CodingStyle T-19 | The promotion of an unsigned type narrower than `int`, as `uint8_t`, to `int` in arithmetic: it keeps every value, and a cast at each operand would hide the computation it is part of. T-19 widens an operand where the result could overflow |
@@ -131,7 +131,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 | Rule 8.2.4 | Required | No cast of function pointers | Review |  |
 | Rule 8.2.5 | Required | No `reinterpret_cast` | `cppcoreguidelines-pro-type-reinterpret-cast` |  |
 | Rule 8.2.6 | Required | No integer or `void*` cast to a pointer | `cppcoreguidelines-pro-type-reinterpret-cast`, `cppcoreguidelines-pro-type-cstyle-cast`, `performance-no-int-to-ptr`, in part: not a `static_cast` from a `void*` |  |
-| Rule 8.2.7 | Advisory | No pointer cast to an integer | `cppcoreguidelines-pro-type-reinterpret-cast`, `cppcoreguidelines-pro-type-cstyle-cast`, `google-readability-casting`, in part: not a `static_cast` of a pointer to `bool` |  |
+| Rule 8.2.7 | Advisory | No pointer cast to an integer | `cppcoreguidelines-pro-type-reinterpret-cast`, `cppcoreguidelines-pro-type-cstyle-cast`, `google-readability-casting` |  |
 | Rule 8.2.8 | Required | Pointer to integer via `intptr_t` only | CodingStyle T-9, Review |  |
 | Rule 8.2.9 | Required | No polymorphic operand of `typeid` | n/a: no RTTI (CodingStyle M-2) |  |
 | Rule 8.2.10 | Required | No recursion | `misc-no-recursion` |  |
@@ -293,7 +293,7 @@ PVS-Studio or Cppcheck Premium, fills the rows marked *Review* (ROADMAP I-4).
 
 | Id | Category | Topic | Covered by | Deviation |
 |---|---|---|---|---|
-| Rule 22.3.1 | Required | `assert` not of a constant | `misc-static-assert`, in part: not `assert(0)`, `0 && "text"` or `!"text"`, a `const` value that is not `constexpr`, or a constant of a template |  |
+| Rule 22.3.1 | Required | `assert` not of a constant | `misc-static-assert`, `-Wconversion` for `assert(!"text")`, in part: not `assert(0)` or `assert(0 && "text")`, a `const` value that is not `constexpr`, or a constant of a template |  |
 | Rule 22.4.1 | Required | Only zero assigned to `errno` | Review |  |
 
 ### Rules of chapter 23
