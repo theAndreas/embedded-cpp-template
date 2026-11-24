@@ -3,7 +3,12 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.17.0
+
+An Arduino library may have a `library.json` for PlatformIO's registry, its examples then built
+by PlatformIO a second time, as a target beside arduino-cli. A minor version: a new option of
+`copier`, which a project made before takes only if it answers it, and has nothing to do
+otherwise.
 
 - **An Arduino library for PlatformIO as well:** the copier question `platformio`, so far a
   firmware's, is asked of an Arduino library too. Answered yes, the library gets a `library.json`
