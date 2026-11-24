@@ -3,7 +3,12 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.17.1
+
+`make stack` follows a call through a pointer, which it refused, so that a program with a virtual
+function or a `function_ref` is added up as well. A patch version: a program that passed passes
+as it did, and a project has nothing to do on the update; one whose programs call through a
+pointer adds a rule to `tools/stack.toml` where `make stack` names one.
 
 - **`make stack` follows a call through a pointer:** `tools/avr_stack.py` refused every program
   that calls through one, and so every program with a virtual function, as the Arduino core's
