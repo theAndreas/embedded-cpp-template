@@ -3,7 +3,12 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.18.0
+
+A project can leave a target out of the README's table of flash and RAM, and `make stack` fails
+where what a rule of `tools/stack.toml` cuts changes. A minor version: a project with a
+`tools/stack.toml` runs `make stack FIX=1` once on the update, reads what it lists, and commits
+`tools/stack_cuts.txt`; one without has nothing to do.
 
 - **The table of flash and RAM shows the targets a project names:** `SIZES_TARGETS` in
   `tools/project.sh` names the targets whose columns `make examples` writes into the table that
