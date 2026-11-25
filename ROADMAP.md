@@ -43,7 +43,7 @@ mechanism carries.
 | W-8 | The host tests a second time with clang, as a preset | done, v0.2.0 |
 | W-9 | Every header compiled as the only include of an empty file (`self-contained-headers.py`), per target | done, v0.2.0 |
 | W-10 | The sizes the README states checked against the build (`documented-sizes.py`); Utl's table of flash and RAM | done, v0.3.0: `make sizes`, the table between `<!-- sizes -->` markers, exact; Utl's table gets the markers with its next `copier update` |
-| W-11 | The AVR's deepest stack against the RAM it has (`avr-stack.py`), for an Arduino sketch | done for a target CMake builds (`make stack`, E-1 step 3b); not for arduino-cli, whose arduino:avr brings avr-gcc 7.3, and `-fcallgraph-info` came with GCC 10. A call through a pointer reaches every function whose address the program takes, as `-Wl,--emit-relocs` keeps them, narrowed by the rules of the project's `tools/stack.toml` |
+| W-11 | The AVR's deepest stack against the RAM it has (`avr-stack.py`), for an Arduino sketch | done for a target CMake builds (`make stack`, E-1 step 3b); not for arduino-cli, whose arduino:avr brings avr-gcc 7.3, and `-fcallgraph-info` came with GCC 10. A call through a pointer reaches every function whose address the program takes, as `-Wl,--emit-relocs` keeps them, narrowed by the rules of the project's `tools/stack.toml`; what each rule cuts is kept in `tools/stack_cuts.txt` and checked, so that a change of the programs that changes it fails |
 | W-12 | ruff over the Python scripts, with the checks that answer "is this wrong" | done, v0.2.0 |
 | W-13 | A CLAUDE.md of the conventions every project shares, from Wordclock's and Utl's: `AGENTS.md`, `docs/CodingStyle.md` | done, v0.3.0 |
 

@@ -67,7 +67,7 @@ one. Commit before an update, review the diff after it, and run `make check`.
   the merge keeps them. A job of its own goes into a workflow of its own.
 - **The project's**, never touched by an update: `README.md`, `CMakeLists.txt`,
   `library.properties`, `library.json` and `extras/platformio/platformio.ini`, `Doxyfile.project`, `.devcontainer/apt-packages.txt`, `tools/project.sh`
-  and `tools/project.mk`, written where they do not exist yet, and `tools/stack.toml`, which the template does not write; and the starting point of a new
+  and `tools/project.mk`, written where they do not exist yet, and `tools/stack.toml` with its `tools/stack_cuts.txt`, which the template does not write; and the starting point of a new
   project, `src/` and `test/`, the examples `Basics` and `SelfCheck` of a library or
   `platform/avr/` of a firmware, written only by `copier copy` with the answer `skeleton`. An
   update neither brings back what a project deleted of it nor merges into what it changed.

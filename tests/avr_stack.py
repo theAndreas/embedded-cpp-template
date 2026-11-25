@@ -8,8 +8,8 @@ Each case is a program of one file, built for an ATmega328P by avr-gcc from apt,
 cmake/toolchains/avr-gcc.cmake builds one: with the call graphs and, unless the case says not,
 with its relocations kept. A call through a pointer is taken to reach every function whose address
 the program takes, the deepest of them counted; a file of rules says which of those a caller
-never reaches through a pointer, each with its reason. A case passes where the script ends as
-the case wants and prints what it wants.
+never reaches through a pointer, each with its reason, and --cuts writes which calls each rule
+cut. A case passes where the script ends as the case wants and prints what it wants.
 
 Usage:
   tests/avr_stack.py
@@ -98,16 +98,24 @@ def build(source: str, work: Path, relocations: bool) -> Path:
     return work / "main.elf"
 
 
-def run(elf: Path, rules: str | None = None) -> tuple[int, str]:
-    """The script on `elf`, with the rules given in a file of their own; its status and output."""
+def run(elf: Path, rules: str | None = None, cuts: bool = False) -> tuple[int, str]:
+    """The script on `elf`, with the rules given in a file of their own; its status and output,
+    followed by what --cuts wrote where `cuts` asks for it."""
     command = [sys.executable, str(SCRIPT), "--mcu", MCU, "--paths"]
     if rules is not None:
         path = elf.with_name("stack.toml")
         path.write_text(rules)
         command += ["--never", str(path)]
+    cut = elf.with_name("cuts.tsv")
+    if cuts:
+        cut.unlink(missing_ok=True)
+        command += ["--cuts", str(cut), "--name", "main (default)"]
     command += [str(elf), str(elf.parent)]
     done = subprocess.run(command, capture_output=True, text=True, check=False)
-    return done.returncode, done.stdout + done.stderr
+    output = done.stdout + done.stderr
+    if cuts and cut.is_file():
+        output += cut.read_text()
+    return done.returncode, output
 
 
 def expect(name: str, result: tuple[int, str], status: int, *wanted: str) -> list[str]:
@@ -136,6 +144,9 @@ def main() -> int:
         errors += expect("a trampoline with its rule", run(trampoline, APPLY_NEVER_APPLY), 0,
                          "demo::Twice(unsigned char)")
         errors += expect("a rule without a reason", run(trampoline, NO_REASON), 1, "reason")
+        apply = "demo::Apply(unsigned char (*)(unsigned char), unsigned char)"
+        errors += expect("what a rule cuts", run(trampoline, APPLY_NEVER_APPLY, cuts=True), 0,
+                         f"main (default)\t1\t{apply}\t{apply}\n")
     for error in errors:
         print(error, file=sys.stderr)
     if not errors:
