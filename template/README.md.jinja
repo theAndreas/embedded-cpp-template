@@ -87,7 +87,9 @@ make check    # all of it, warnings as errors, as CI
 
 A table of the {% if kind == 'firmware' %}image's{% else %}examples'{% endif %} flash and RAM in this README, between the lines `<!-- sizes -->` and
 `<!-- /sizes -->`, is checked against the build: `make check` fails where it differs from what
-`make examples` measures, and `make sizes FIX=1` writes the measured table in.
+`make examples` measures, and `make sizes FIX=1` writes the measured table in. A target that is
+built for a check alone, not for those who use the project, is left out of the table by
+`SIZES_TARGETS` in `tools/project.sh`.
 
 The checks, the CI and the dev container come from the
 [template](https://github.com/theAndreas/embedded-cpp-template); `uv run copier update` brings

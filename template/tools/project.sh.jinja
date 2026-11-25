@@ -14,7 +14,11 @@
 #                        set. Each takes the settings below, from BUILD_SYSTEM to
 #                        EXAMPLES, as they are set here, and target_settings() changes them
 #                        for a target
-#   BUILD_SYSTEM         what builds a target: arduino-cli, cmake with a toolchain file, or
+#   SIZES_TARGETS        the targets the table of flash and RAM shows, names of TARGETS; all of
+#                        them if not set. One left out is built, checked and run in simavr as
+#                        any other, as a target that exists for a check alone, not for those
+#                        who use the project, whose sizes they never get
+#   BUILD_SYSTEM        what builds a target: arduino-cli, cmake with a toolchain file, or
 #                        platformio through a platformio.ini
 #   CMAKE_TOOLCHAIN      for cmake: the toolchain file, as cmake/toolchains/avr-gcc.cmake
 #   CMAKE_DEFINES        for cmake: what the toolchain file is told, as the part and its clock,

@@ -3,6 +3,18 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **The table of flash and RAM shows the targets a project names:** `SIZES_TARGETS` in
+  `tools/project.sh` names the targets whose columns `make examples` writes into the table that
+  `make sizes` checks against the README, all of `TARGETS` if it names none. A target left out is
+  built, checked and run in simavr as before; it only has no columns, as one that exists for a
+  check alone, as a second build of the examples by CMake for `make stack`, whose sizes no user
+  of the project gets. Where the table shows one target, its columns are named by the variant
+  alone, as in a project of one target. A name that is no target of `TARGETS` fails `make
+  examples`. A project has nothing to do on the update: without `SIZES_TARGETS` the table is as
+  it was.
+
 ## v0.17.1
 
 `make stack` follows a call through a pointer, which it refused, so that a program with a virtual
