@@ -15,7 +15,9 @@
 # build/Demo for a look, else it is removed. With --targets the project is built for two targets
 # rather than one, an Uno and a Mega, as tools/project.sh describes a second target: the same
 # core, so that it costs no download, and each run in simavr; and with an example for the Mega
-# alone, which the Uno's EXAMPLES leave out. With --no-arduino the project is
+# alone, which the Uno's EXAMPLES leave out. The table of flash and RAM shows the Uno alone, as
+# SIZES_TARGETS has it, so that the Mega is built and run but has no columns, and its example no
+# row. With --no-arduino the project is
 # a library of CMake alone (arduino=false): built by avr-gcc from apt with the template's
 # toolchain file, its examples programs of their own; with --targets as well, for an ATmega328P
 # and an ATmega2560, both run in simavr, and an AVR128DA48, which takes the other branch of
@@ -52,10 +54,12 @@ run_check() {
 
 # What tools/project.sh of the project gets with --targets, after what the template wrote: the
 # text of a function, expanded by the project's shell, not this one. The Uno leaves out the
-# example of the Mega, MEGA_EXAMPLE, which does not compile for it.
+# example of the Mega, MEGA_EXAMPLE, which does not compile for it; the table of flash and RAM
+# leaves out the Mega.
 # shellcheck disable=SC2016
 readonly TWO_TARGETS='
 TARGETS=(uno mega)
+SIZES_TARGETS=(uno)
 target_settings() {
   case "$1" in
     uno)
