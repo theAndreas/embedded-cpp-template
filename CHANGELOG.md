@@ -14,6 +14,18 @@ brings it.
   alone, as in a project of one target. A name that is no target of `TARGETS` fails `make
   examples`. A project has nothing to do on the update: without `SIZES_TARGETS` the table is as
   it was.
+- **`make stack` notices when what a rule of `tools/stack.toml` cuts changes:** a rule is a fact
+  of the project's programs as they are, and a change of them can make it false without a word:
+  it then cuts a call that happens, and `make stack` reports a bound that is too low, and passes.
+  `tools/avr_stack.py --cuts` now writes which calls through a pointer each rule cut, and
+  `tools/stack_cuts.py` checks them, once every program passed, against `tools/stack_cuts.txt`,
+  which the project keeps beside its `tools/stack.toml`: each cut call, caller and callee, with
+  the programs it is cut in, as `make sizes` checks the README's table. Where they differ, `make
+  stack` fails with the difference, so that the reason of each rule whose cuts changed is read
+  again; `make stack FIX=1` then writes what it found. A rule that cuts nothing in any program is
+  listed as such, as it is stale or covered by an earlier one. A project with a
+  `tools/stack.toml` runs `make stack FIX=1` once on the update and commits
+  `tools/stack_cuts.txt`; one without has nothing to do.
 
 ## v0.17.1
 
