@@ -3,10 +3,16 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
+## Unreleased
+
+- **The update note of v0.18.1 says that a project takes the mock over by hand:** it said a
+  project had nothing to do, but `copier update` leaves `test/` alone, the mock with it.
+
 ## v0.18.1
 
 The mock of `avr/pgmspace.h` passes `make tidy` in a project whose tests include it. A patch
-version: a project has nothing to do on the update.
+version: a project whose tests include the mock takes it over by hand, as `copier update` leaves
+`test/` alone; any other has nothing to do.
 
 - **The mock of `avr/pgmspace.h` passes `make tidy`:** since v0.15.0, `bugprone-unsafe-functions`
   reported the `memcpy()`, `memcmp()` and `strlen()` through which the mock reads flash, in every
@@ -14,8 +20,10 @@ version: a project has nothing to do on the update.
   of the template included it, so its own checks did not see it. Each call now has its `NOLINT`
   and reason, as the mock stands in for avr-libc's functions of the same names, and `Misra.md`
   records the deviation under 21.2.2 and 24.5.2. `tests/check.sh` gives every project it makes
-  with the mock a test of it, so that `make tidy` reads it. A project has nothing to do on the
-  update; one that suppressed the findings itself takes the template's file.
+  with the mock a test of it, so that `make tidy` reads it. On the update, a project whose tests
+  include the mock copies `test/mock/avr/pgmspace.h` from a project made anew, or puts the
+  `NOLINT`s and their comments into its own, as `copier update` leaves `test/` alone; one whose
+  `make tidy` passes has nothing to do.
 
 ## v0.18.0
 
