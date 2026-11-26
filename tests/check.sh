@@ -85,6 +85,64 @@ readonly MEGA_EXAMPLE='// Copyright 2026 Andreas Burnickl
 void setup() {}
 
 void loop() {}'
+# A test of the mock's access to flash, which every project with the mock gets: no test of the
+# template includes avr/pgmspace.h, whose headers make tidy reads only through a test that does,
+# as a library of its own reads its texts and tables through it.
+readonly PGMSPACE_TEST='// Copyright 2026 Andreas Burnickl
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// The mock of avr/pgmspace.h: each function reads flash as avr-libc does.
+
+#include <avr/pgmspace.h>
+#include <gtest/gtest.h>
+#include <stdint.h>
+
+namespace {
+
+uint8_t const kByte PROGMEM{0x12u};
+uint16_t const kWord PROGMEM{0x1234u};
+uint32_t const kDoubleWord PROGMEM{0x12345678u};
+uint8_t const* const kPointer PROGMEM{&kByte};
+char const kText[] PROGMEM = "flash";
+
+TEST(PgmspaceTest, ReadsAByte) { EXPECT_EQ(pgm_read_byte(&kByte), 0x12u); }
+
+TEST(PgmspaceTest, ReadsAWord) { EXPECT_EQ(pgm_read_word(&kWord), 0x1234u); }
+
+TEST(PgmspaceTest, ReadsADoubleWord) {
+  EXPECT_EQ(pgm_read_dword(&kDoubleWord), 0x12345678u);
+}
+
+TEST(PgmspaceTest, ReadsAPointer) {
+  EXPECT_EQ(pgm_read_ptr(static_cast<void const*>(&kPointer)), &kByte);
+}
+
+TEST(PgmspaceTest, CopiesBytesIntoRam) {
+  uint32_t copy{0u};
+
+  // NOLINTNEXTLINE(bugprone-unsafe-functions): MISRA 24.5.2, the mock itself
+  void const* const result{memcpy_P(&copy, &kDoubleWord, sizeof(copy))};
+
+  EXPECT_EQ(result, &copy);
+  EXPECT_EQ(copy, 0x12345678u);
+}
+
+TEST(PgmspaceTest, ComparesBytesOfRamWithFlash) {
+  uint32_t const same{0x12345678u};
+  uint32_t const other{0x12345679u};
+
+  // NOLINTNEXTLINE(bugprone-unsafe-functions): MISRA 24.5.2, the mock itself
+  EXPECT_EQ(memcmp_P(&same, &kDoubleWord, sizeof(same)), 0);
+  // NOLINTNEXTLINE(bugprone-unsafe-functions): as above
+  EXPECT_NE(memcmp_P(&other, &kDoubleWord, sizeof(other)), 0);
+}
+
+TEST(PgmspaceTest, CountsTheCharactersOfAText) {
+  // NOLINTNEXTLINE(bugprone-unsafe-functions): MISRA 21.2.2, the mock itself
+  EXPECT_EQ(strlen_P(kText), 5u);
+}
+
+}  // namespace'
 # The same for a firmware.
 # shellcheck disable=SC2016
 readonly TWO_FIRMWARE_TARGETS='
@@ -181,6 +239,9 @@ main() {
 
   # A project is a repository: the tools list its files with git.
   cd "${PROJECT_DIR}"
+  if [[ -f test/mock/avr/pgmspace.h ]]; then
+    echo "${PGMSPACE_TEST}" > test/pgmspace_test.cpp
+  fi
   if ((targets)); then
     if [[ "${platformio}" == true && "${kind}" == firmware ]]; then
       echo "${MIXED_TARGETS}" >> tools/project.sh
