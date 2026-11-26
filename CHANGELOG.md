@@ -3,7 +3,10 @@
 What changed in each version of the template, and what a project has to do when `copier update`
 brings it.
 
-## Unreleased
+## v0.18.1
+
+The mock of `avr/pgmspace.h` passes `make tidy` in a project whose tests include it. A patch
+version: a project has nothing to do on the update.
 
 - **The mock of `avr/pgmspace.h` passes `make tidy`:** since v0.15.0, `bugprone-unsafe-functions`
   reported the `memcpy()`, `memcmp()` and `strlen()` through which the mock reads flash, in every
